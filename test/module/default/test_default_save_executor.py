@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from folker.model import StageData
+from folker.model.data import StageData
 from folker.model.error.variables import VariableReferenceResolutionException
 from folker.module.default.save_executor import DefaultSaveExecutor
 
@@ -60,6 +60,7 @@ class TestDefaultSaveExecutor(TestCase):
 
         try:
             executor.execute(stage_data, {'referenced_value_to_save': 'value_to_save'}, {})
+            raise AssertionError('Should not get here')
         except VariableReferenceResolutionException as ex:
             self.assertEqual('VariableResolver', ex.source)
             self.assertEqual('Missing reference in context', ex.error)

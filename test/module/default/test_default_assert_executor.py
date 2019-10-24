@@ -59,6 +59,7 @@ class TestDefaultAssertExecutor(TestCase):
 
         try:
             executor.execute(stage_data, {}, {})
+            raise AssertionError('Should not get here')
         except TestFailException as test_fail_exception:
             self.assertEqual('AssertExecutor', test_fail_exception.source)
             self.assertEqual('Assertions failed', test_fail_exception.error)
@@ -76,6 +77,7 @@ class TestDefaultAssertExecutor(TestCase):
 
         try:
             executor.execute(stage_data, {'value': 1}, {})
+            raise AssertionError('Should not get here')
         except TestFailException as test_fail_exception:
             self.assertEqual('AssertExecutor', test_fail_exception.source)
             self.assertEqual('Assertions failed', test_fail_exception.error)
@@ -93,6 +95,7 @@ class TestDefaultAssertExecutor(TestCase):
 
         try:
             executor.execute(stage_data, {}, {})
+            raise AssertionError('Should not get here')
         except MalformedAssertionException as test_fail_exception:
             self.assertEqual('AssertExecutor', test_fail_exception.source)
             self.assertEqual('Malformed assertion', test_fail_exception.error)
@@ -110,6 +113,7 @@ class TestDefaultAssertExecutor(TestCase):
 
         try:
             executor.execute(stage_data, {}, {})
+            raise AssertionError('Should not get here')
         except UnresolvableAssertionException as test_fail_exception:
             self.assertEqual('AssertExecutor', test_fail_exception.source)
             self.assertEqual('Malformed assertion', test_fail_exception.error)

@@ -24,7 +24,7 @@ class DefaultAssertExecutor(AssertExecutor):
             else:
                 failures.append(assertion_definition)
 
-        self.wrap_up_test(executed, failures, stage_data, success)
+        self.wrap_up_test(executed, success, failures)
 
         return test_context, stage_context
 
@@ -47,7 +47,7 @@ class DefaultAssertExecutor(AssertExecutor):
 
         return result
 
-    def wrap_up_test(self, executed, failures, stage_data, success):
+    def wrap_up_test(self, executed, success, failures):
         logger.assert_test_result(executed, success, executed - success)
         if success is not executed:
-            raise TestFailException(stage_data, failures)
+            raise TestFailException(failure_messages=failures)

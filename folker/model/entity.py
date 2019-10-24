@@ -1,4 +1,4 @@
-from folker.model import StageData
+from folker.model.data import StageData
 from folker.model.task import ActionExecutor, AssertExecutor, SaveExecutor, LogExecutor
 
 

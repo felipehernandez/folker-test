@@ -1,9 +1,8 @@
-from folker.model import StageData
 from folker.model.error.error import SourceException
 
 
 class TestFailException(SourceException):
-    def __init__(self, stage: StageData, failure_messages: [str], *args: object) -> None:
+    def __init__(self, failure_messages: [str], *args: object) -> None:
         super().__init__(source='AssertExecutor',
                          error='Assertions failed',
                          cause='Assertions failed',

@@ -1,7 +1,7 @@
 from unittest import TestCase
 from unittest.mock import patch
 
-from folker.model import StageData
+from folker.model.data import StageData
 from folker.module.default.log_executor import DefaultLogExecutor
 
 
