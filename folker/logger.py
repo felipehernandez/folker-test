@@ -46,19 +46,27 @@ class Logger:
         self._print_color(self.COLOR_HIGH_WHITE, 'COLOR_HIGH_WHITE')
 
     # Assertions
-    def assertion_success(self, assertion_definition: str):
-        self._print_color(self.COLOR_GREEN, '\t{}'.format(assertion_definition))
+    def assertion_success(self, assertion: str):
+        self._print_color(self.COLOR_GREEN, '\t{}'.format(assertion))
 
-    def assertion_fail(self, assertion_definition: str, ):
-        pass
-
-    def assertion_error(self, assertion_definition: str, exception: Exception = None):
-        self._print_color(self.COLOR_RED, '\t{} - {}'.format(assertion_definition, exception))
-
-    def assertion_execution_error(self, assertion_definition: str, variables: dict, exception: Exception = None):
-        self.assertion_error(assertion_definition, exception)
+    def assertion_fail(self, assertion: str, variables: dict):
+        self._print_color(self.COLOR_RED, '\t{}'.format(assertion))
         self._print_color(self.COLOR_RED, json.dumps(variables))
 
+    def assertion_error(self, assertion: str, exception: Exception = None):
+        self._print_color(self.COLOR_RED, '\t{} - {}'.format(assertion, exception))
+
+    def assertion_execution_error(self, assertion: str, variables: dict, exception: Exception = None):
+        self.assertion_error(assertion, exception)
+        self._print_color(self.COLOR_RED, json.dumps(variables))
+
+    def assert_test_result(self, total, success, failures):
+        if success is not total:
+            self._print_color(self.COLOR_HIGH_RED, '\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success, failures, total))
+        else:
+            self._print_color(self.COLOR_CYAN, '\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success, failures, total))
+
+    #
     def _print_color(self, color, text, end=None):
         if end is not None:
             print('{}{}{}'.format(color, text, self.COLOR_DEFAULT), end=end)

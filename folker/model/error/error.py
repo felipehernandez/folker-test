@@ -1,9 +1,5 @@
-from folker.model import StageData
-
-
 class SourceException(Exception):
     source: str
-    stage: StageData
     error: str
     cause: str
     details: dict
