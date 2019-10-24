@@ -15,3 +15,7 @@ class ActionExecutor(TaskExecutor, ABC):
 
 class AssertExecutor(TaskExecutor, ABC):
     pass
+
+
+class SaveExecutor(TaskExecutor, ABC):
+    pass
