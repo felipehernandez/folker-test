@@ -1,12 +1,12 @@
 from folker.model.error.error import SourceException
 
 
-class MalformedAssertionException(SourceException):
-    def __init__(self, assertion=None, *args: object) -> None:
-        super().__init__(source='Assertion Executor',
-                         error='Assertion does not resolve to a True/False value',
-                         cause='Malformed assertion',
+class VariableReferenceResolutionException(SourceException):
+    def __init__(self, variable_reference=None, *args: object) -> None:
+        super().__init__(source='Variable reference resolution',
+                         error='Variable reference cannot be resolved',
+                         cause='Missing reference in context',
                          details={
-                             'assertion': assertion
+                             'reference': variable_reference
                          },
                          *args)
