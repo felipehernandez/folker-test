@@ -1,0 +1,28 @@
+# Exclude files for git
+
+# Folders
+.settings/
+venv/
+__pycache__
+build/
+dist/
+jarvis.egg-info
+credentials/*
+
+# File extensions
+*.class
+*.jar
+*.pyc
+
+#Specific files
+.project
+.classpath
+kubernetes.yaml
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+*.iml
+

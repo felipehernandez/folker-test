@@ -1,0 +1,24 @@
+kind: pipeline
+name: default
+
+steps:
+  - name: test
+    image: python:3.7-slim
+    commands:
+      - pip install -r requirements.txt
+      - python3 -m unittest -v
+
+  - name: bake
+    image: plugins/docker
+    settings:
+      username:
+        from_secret: DOCKERHUB.USER
+      password:
+        from_secret: DOCKERHUB.PASSWORD
+      repo: folkertest/folkertest
+      tags:
+        - latest
+        - "0.0.${DRONE_BUILD_NUMBER}"
+    when:
+      branch:
+        - master
