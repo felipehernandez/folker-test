@@ -66,6 +66,10 @@ class Logger:
         else:
             self._print_color(self.COLOR_CYAN, '\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success, failures, total))
 
+    # Log
+    def log_text(self, log: str):
+        self._print_color(self.COLOR_WHITE, log)
+
     #
     def _print_color(self, color, text, end=None):
         if end is not None:

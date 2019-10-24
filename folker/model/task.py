@@ -19,3 +19,7 @@ class AssertExecutor(TaskExecutor, ABC):
 
 class SaveExecutor(TaskExecutor, ABC):
     pass
+
+
+class LogExecutor(TaskExecutor, ABC):
+    pass
