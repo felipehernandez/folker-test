@@ -1,0 +1,7 @@
+test_name: void_test
+test_description: Void test
+
+stages:
+  - id: 1
+    name: void_stage
+    type: VOID

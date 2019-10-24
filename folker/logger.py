@@ -1,5 +1,7 @@
 import json
 
+from folker.model.data import StageData
+
 
 class Logger:
     COLOR_DEFAULT = '\033[0m'
@@ -44,6 +46,35 @@ class Logger:
         self._print_color(self.COLOR_HIGH_PINK, 'COLOR_HIGH_PINK')
         self._print_color(self.COLOR_HIGH_CYAN, 'COLOR_HIGH_CYAN')
         self._print_color(self.COLOR_HIGH_WHITE, 'COLOR_HIGH_WHITE')
+
+    # Load
+    def loading_files(self):
+        self._print_color(self.COLOR_HIGH_CYAN, 'Loading test files')
+
+    def loading_file(self, filename):
+        self._print_color(self.COLOR_HIGH_YELLOW, 'File: {filename}'.format(filename=filename))
+
+    def loading_file_error(self, exception: Exception):
+        self._print_color(self.COLOR_HIGH_RED, exception)
+
+    def loading_files_completed(self, files):
+        self._print_color(self.COLOR_WHITE, 'Loaded test files: [')
+        for file in files:
+            self._print_color(self.COLOR_WHITE, '\t{}'.format(file))
+        self._print_color(self.COLOR_WHITE, ']'.format(files))
+
+    # Test
+    def test_start(self, name, description=None):
+        self._print_color(self.COLOR_HIGH_CYAN, 'TEST: ', '\t')
+        self._print_color(self.COLOR_HIGH_CYAN, name)
+
+        if description:
+            self._print_color(self.COLOR_BLUE, description)
+
+    def stage_start(self, stage: StageData):
+        self._print_color(self.COLOR_HIGH_YELLOW, 'Stage: {id} - {name}'.format(id=stage.id, name=stage.name))
+
+        if stage.description: self._print_color(self.COLOR_HIGH_BLUE, stage.description)
 
     # Assertions
     def assertion_success(self, assertion: str):
