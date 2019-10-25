@@ -1,0 +1,9 @@
+test_name: Print Test
+test_description: Dummy Test for Print Stage
+
+stages:
+  - id: 1
+    name: print_stage
+    type: PRINT
+    action:
+      message: Hello world!

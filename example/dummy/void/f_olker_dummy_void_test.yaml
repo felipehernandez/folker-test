@@ -1,5 +1,5 @@
-test_name: void_test
-test_description: Void test
+test_name: Void Test
+test_description: Dummy Test for Void Stage
 
 stages:
   - id: 1

@@ -11,3 +11,15 @@ class UnrecognisedSchemaException(SourceException):
                              'stage_definition': stage_definition
                          },
                          *args)
+
+
+class InvalidSchemaDefinitionException(SourceException):
+
+    def __init__(self, missing_fields: [str], *args: object) -> None:
+        super().__init__(source='Schema loader',
+                         error='Schema definition error',
+                         cause='Missing mandatory fields',
+                         details={
+                             'missing_fields': missing_fields
+                         },
+                         *args)

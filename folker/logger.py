@@ -76,6 +76,10 @@ class Logger:
 
         if stage.description: self._print_color(self.COLOR_HIGH_BLUE, stage.description)
 
+    # Stage
+    def message(self, message):
+        self._print_color(self.COLOR_GREEN, message)
+
     # Assertions
     def assertion_success(self, assertion: str):
         self._print_color(self.COLOR_GREEN, '\t{}'.format(assertion))
