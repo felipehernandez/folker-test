@@ -1,25 +1,25 @@
 from unittest import TestCase
 
 from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.module.printt.action_executor import PrintActionExecutor
-from folker.module.printt.builder import PrintStageBuilder
+from folker.module.wait.action_executor import WaitActionExecutor
+from folker.module.wait.builder import WaitStageBuilder
 
 
-class TestVoidStageBuilder(TestCase):
+class TestWaitStageBuilder(TestCase):
 
-    def test_given_print_stage_then_recognise(self):
-        builder = PrintStageBuilder()
+    def test_given_wait_stage_then_recognise(self):
+        builder = WaitStageBuilder()
 
         stage_definition = {
-            'type': 'PRINT'
+            'type': 'WAIT'
         }
 
         recognises = builder.recognises(stage_definition)
 
         self.assertTrue(recognises)
 
-    def test_given_not_print_stage_then_recognise(self):
-        builder = PrintStageBuilder()
+    def test_given_not_wait_stage_then_recognise(self):
+        builder = WaitStageBuilder()
 
         stage_definition = {
             'type': 'OTHER'
@@ -29,15 +29,15 @@ class TestVoidStageBuilder(TestCase):
 
         self.assertFalse(recognises)
 
-    def test_given_valid_print_stage_then_build(self):
-        builder = PrintStageBuilder()
+    def test_given_valid_wait_stage_then_build(self):
+        builder = WaitStageBuilder()
 
         stage_definition = {
             'id': '1',
-            'name': 'print_stage',
-            'type': 'PRINT',
+            'name': 'wait_stage',
+            'type': 'WAIT',
             'action':
-                {'message': 'Hello world'}
+                {'time': '3'}
         }
 
         stage = builder.build(stage_definition)
@@ -46,18 +46,18 @@ class TestVoidStageBuilder(TestCase):
         self.assertIsNotNone(stage.data)
         self.assertIsNotNone(stage.executors)
         self.assertIsNotNone(stage.executors.action)
-        self.assertEqual(PrintActionExecutor, type(stage.executors.action))
+        self.assertEqual(WaitActionExecutor, type(stage.executors.action))
         self.assertIsNotNone(stage.executors.assertion)
         self.assertIsNotNone(stage.executors.save)
         self.assertIsNotNone(stage.executors.log)
 
-    def test_given_valid_print_stage_with_missing_action_then_exception(self):
-        builder = PrintStageBuilder()
+    def test_given_valid_wait_stage_with_missing_action_then_exception(self):
+        builder = WaitStageBuilder()
 
         stage_definition = {
             'id': '1',
-            'name': 'print_stage',
-            'type': 'PRINT'
+            'name': 'wait_stage',
+            'type': 'WAIT'
         }
 
         try:
@@ -65,17 +65,17 @@ class TestVoidStageBuilder(TestCase):
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action'], e.details['missing_fields'])
 
-    def test_given_valid_print_stage_with_missing_message_in_action__then_exception(self):
-        builder = PrintStageBuilder()
+    def test_given_valid_wait_stage_with_missing_message_in_action__then_exception(self):
+        builder = WaitStageBuilder()
 
         stage_definition = {
             'id': '1',
-            'name': 'print_stage',
-            'type': 'PRINT',
+            'name': 'wait_stage',
+            'type': 'WAIT',
             'action': {}
         }
 
         try:
             builder.build(stage_definition)
         except InvalidSchemaDefinitionException as e:
-            self.assertEqual(['action.message'], e.details['missing_fields'])
+            self.assertEqual(['action.time'], e.details['missing_fields'])

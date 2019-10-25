@@ -80,6 +80,9 @@ class Logger:
     def message(self, message):
         self._print_color(self.COLOR_GREEN, message)
 
+    def action_completed(self, message):
+        pass
+
     # Assertions
     def assertion_success(self, assertion: str):
         self._print_color(self.COLOR_GREEN, '\t{}'.format(assertion))

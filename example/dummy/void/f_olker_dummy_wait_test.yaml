@@ -1,0 +1,9 @@
+test_name: Wait Test
+test_description: Dummy Test for Wait Stage
+
+stages:
+  - id: 1
+    name: wait_stage
+    type: WAIT
+    action:
+      time: 3
