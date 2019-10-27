@@ -65,7 +65,7 @@ class TestVoidStageBuilder(TestCase):
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action'], e.details['missing_fields'])
 
-    def test_given_valid_print_stage_with_missing_message_in_action__then_exception(self):
+    def test_given_valid_print_stage_with_missing_message_in_action_then_exception(self):
         builder = PrintStageBuilder()
 
         stage_definition = {

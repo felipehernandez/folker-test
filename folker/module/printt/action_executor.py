@@ -1,14 +1,14 @@
 import time
 
 from folker import logger
-from folker.model.data import StageData
 from folker.model.task import ActionExecutor
+from folker.module.printt.data import PrintStageData
 from folker.util.variable import replace_variables
 
 
 class PrintActionExecutor(ActionExecutor):
 
-    def execute(self, stage_data: StageData, test_context: dict, stage_context: dict) -> (dict, dict):
+    def execute(self, stage_data: PrintStageData, test_context: dict, stage_context: dict) -> (dict, dict):
         start = time.time()
 
         message = replace_variables(test_context, stage_context, stage_data.action.message)

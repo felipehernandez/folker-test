@@ -1,0 +1,29 @@
+test_name: Rest Test
+test_description: Dummy Test for Rest Stage
+
+stages:
+  - id: Do_GET
+    name: Get all posts
+    type: REST
+    action:
+      method: GET
+      host: https://jsonplaceholder.typicode.com
+      uri: posts
+    assert:
+      - '${status_code} is 200'
+
+  - id: Do_POST
+    name: Create a post
+    type: REST
+    action:
+      method: POST
+      host: https://jsonplaceholder.typicode.com
+      uri: posts
+      headers:
+        Content-Type: application/json
+      json:
+        title: 'foo'
+        body: 'bar'
+        userId: 1
+    assert:
+      - '${status_code} is 201'

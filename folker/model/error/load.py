@@ -15,11 +15,18 @@ class UnrecognisedSchemaException(SourceException):
 
 class InvalidSchemaDefinitionException(SourceException):
 
-    def __init__(self, missing_fields: [str], *args: object) -> None:
+    def __init__(self,
+                 missing_fields: [str] = None,
+                 wrong_fields: [str] = None,
+                 *args: object) -> None:
+        details = {}
+        if missing_fields:
+            details['missing_fields'] = missing_fields
+        if wrong_fields:
+            details['wrong_fields'] = wrong_fields
+
         super().__init__(source='Schema loader',
                          error='Schema definition error',
                          cause='Missing mandatory fields',
-                         details={
-                             'missing_fields': missing_fields
-                         },
+                         details=details,
                          *args)

@@ -1,5 +1,9 @@
 import importlib
 import os
+import sys
+
+debug = 'debug' in sys.argv
+trace = 'trace' in sys.argv
 
 from folker.logger import Logger
 

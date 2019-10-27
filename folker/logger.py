@@ -1,5 +1,6 @@
 import json
 
+from folker import debug, trace
 from folker.model.data import StageData
 
 
@@ -49,19 +50,22 @@ class Logger:
 
     # Load
     def loading_files(self):
-        self._print_color(self.COLOR_HIGH_CYAN, 'Loading test files')
+        if debug or trace:
+            self._print_color(self.COLOR_HIGH_CYAN, 'Loading test files')
 
     def loading_file(self, filename):
-        self._print_color(self.COLOR_HIGH_YELLOW, 'File: {filename}'.format(filename=filename))
+        if trace:
+            self._print_color(self.COLOR_HIGH_YELLOW, 'File: {filename}'.format(filename=filename))
 
     def loading_file_error(self, exception: Exception):
         self._print_color(self.COLOR_HIGH_RED, exception)
 
     def loading_files_completed(self, files):
-        self._print_color(self.COLOR_WHITE, 'Loaded test files: [')
-        for file in files:
-            self._print_color(self.COLOR_WHITE, '\t{}'.format(file))
-        self._print_color(self.COLOR_WHITE, ']'.format(files))
+        if trace:
+            self._print_color(self.COLOR_WHITE, 'Loaded test files: [')
+            for file in files:
+                self._print_color(self.COLOR_WHITE, '\t{}'.format(file))
+            self._print_color(self.COLOR_WHITE, ']'.format(files))
 
     # Test
     def test_start(self, name, description=None):
@@ -83,9 +87,14 @@ class Logger:
     def action_completed(self, message):
         pass
 
+    def action_debug(self, message):
+        if trace:
+            self._print_color(self.COLOR_GREY, message)
+
     # Assertions
     def assertion_success(self, assertion: str):
-        self._print_color(self.COLOR_GREEN, '\t{}'.format(assertion))
+        if debug:
+            self._print_color(self.COLOR_GREEN, '\t{}'.format(assertion))
 
     def assertion_fail(self, assertion: str, variables: dict):
         self._print_color(self.COLOR_RED, '\t{}'.format(assertion))
@@ -101,7 +110,7 @@ class Logger:
     def assert_test_result(self, total, success, failures):
         if success is not total:
             self._print_color(self.COLOR_HIGH_RED, '\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success, failures, total))
-        else:
+        elif debug:
             self._print_color(self.COLOR_CYAN, '\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success, failures, total))
 
     # Log
