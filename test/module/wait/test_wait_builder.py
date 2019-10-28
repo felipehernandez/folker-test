@@ -62,6 +62,7 @@ class TestWaitStageBuilder(TestCase):
 
         try:
             builder.build(stage_definition)
+            raise AssertionError('Should not get here')
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action'], e.details['missing_fields'])
 
@@ -77,5 +78,6 @@ class TestWaitStageBuilder(TestCase):
 
         try:
             builder.build(stage_definition)
+            raise AssertionError('Should not get here')
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action.time'], e.details['missing_fields'])

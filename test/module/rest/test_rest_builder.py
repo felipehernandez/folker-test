@@ -65,6 +65,7 @@ class TestRestStageBuilder(TestCase):
 
         try:
             builder.build(stage_definition)
+            raise AssertionError('Should not get here')
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action'], e.details['missing_fields'])
 
@@ -83,6 +84,7 @@ class TestRestStageBuilder(TestCase):
 
         try:
             builder.build(stage_definition)
+            raise AssertionError('Should not get here')
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action.host'], e.details['missing_fields'])
 
@@ -101,6 +103,7 @@ class TestRestStageBuilder(TestCase):
 
         try:
             builder.build(stage_definition)
+            raise AssertionError('Should not get here')
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action.method'], e.details['missing_fields'])
 
@@ -120,5 +123,6 @@ class TestRestStageBuilder(TestCase):
 
         try:
             builder.build(stage_definition)
+            raise AssertionError('Should not get here')
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action.method'], e.details['wrong_fields'])
