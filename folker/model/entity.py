@@ -38,14 +38,17 @@ class Stage:
 
         try:
             test_ctxt, stage_ctxt = self.executors.action.execute(stage_data=self.data, test_context=test_ctxt, stage_context=stage_ctxt)
-            test_ctxt, stage_ctxt = self.executors.assertion.execute(stage_data=self.data, test_context=test_ctxt, stage_context=stage_ctxt)
-            test_ctxt, stage_ctxt = self.executors.save.execute(stage_data=self.data, test_context=test_ctxt, stage_context=stage_ctxt)
             test_ctxt, stage_ctxt = self.executors.log.execute(stage_data=self.data, test_context=test_ctxt, stage_context=stage_ctxt)
+            test_ctxt, stage_ctxt = self.executors.save.execute(stage_data=self.data, test_context=test_ctxt, stage_context=stage_ctxt)
+            test_ctxt, stage_ctxt = self.executors.assertion.execute(stage_data=self.data, test_context=test_ctxt, stage_context=stage_ctxt)
         except SourceException as e:
             e.details['stage'] = self.data
             raise e
 
         return test_ctxt
+
+    def enrich(self, args: dict):
+        return Stage(data=self.data.enrich(args), executors=self.executors)
 
 
 class Test:
@@ -54,15 +57,15 @@ class Test:
     stages: [Stage]
 
     def __init__(self,
-                 test_name='UNDEFINED',
-                 test_description='None',
+                 name='UNDEFINED',
+                 description='None',
                  stages: [Stage] = None) -> None:
         super().__init__()
-        self.name = test_name
-        self.description = test_description
+        self.name = name
+        self.description = description
         self.stages = stages
 
-    def execute(self):
+    def execute(self) -> bool:
         logger.test_start(self.name, self.description)
         test_context = dict()
         try:
@@ -70,3 +73,21 @@ class Test:
                 test_context = stage.execute(test_context)
         except SourceException as e:
             logger.stage_exception(e)
+            return False
+
+        return True
+
+
+class Template:
+    id: str
+    description: str
+    stages: [Stage]
+
+    def __init__(self,
+                 id='UNDEFINED',
+                 description='None',
+                 stages: [Stage] = None) -> None:
+        super().__init__()
+        self.id = id
+        self.description = description
+        self.stages = stages

@@ -49,8 +49,12 @@ class Logger:
         self._print_color(self.COLOR_HIGH_WHITE, 'COLOR_HIGH_WHITE')
 
     # Load
-    def loading_files(self):
-        if debug or trace:
+    def loading_template_files(self):
+        if trace:
+            self._print_color(self.COLOR_HIGH_CYAN, 'Loading template files')
+
+    def loading_test_files(self):
+        if trace:
             self._print_color(self.COLOR_HIGH_CYAN, 'Loading test files')
 
     def loading_file(self, filename):
@@ -61,8 +65,8 @@ class Logger:
         self._print_color(self.COLOR_HIGH_RED, exception)
 
     def loading_files_completed(self, files):
-        if trace:
-            self._print_color(self.COLOR_WHITE, 'Loaded test files: [')
+        if debug or trace:
+            self._print_color(self.COLOR_WHITE, 'Files loaded: [')
             for file in files:
                 self._print_color(self.COLOR_WHITE, '\t{}'.format(file))
             self._print_color(self.COLOR_WHITE, ']'.format(files))
@@ -76,7 +80,7 @@ class Logger:
             self._print_color(self.COLOR_BLUE, description)
 
     def stage_start(self, stage: StageData):
-        self._print_color(self.COLOR_HIGH_YELLOW, 'Stage: {id} - {name}'.format(id=stage.id, name=stage.name))
+        self._print_color(self.COLOR_HIGH_YELLOW, 'Stage: {name}'.format(id=stage.id, name=stage.name))
 
         if stage.description: self._print_color(self.COLOR_HIGH_BLUE, stage.description)
 
@@ -93,7 +97,7 @@ class Logger:
 
     # Assertions
     def assertion_success(self, assertion: str):
-        if debug:
+        if debug or trace:
             self._print_color(self.COLOR_GREEN, '\t{}'.format(assertion))
 
     def assertion_fail(self, assertion: str, variables: dict):
@@ -110,12 +114,27 @@ class Logger:
     def assert_test_result(self, total, success, failures):
         if success is not total:
             self._print_color(self.COLOR_HIGH_RED, '\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success, failures, total))
-        elif debug:
+        elif debug or trace:
             self._print_color(self.COLOR_CYAN, '\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success, failures, total))
 
     # Log
     def log_text(self, log: str):
         self._print_color(self.COLOR_WHITE, log)
+
+    def stage_exception(self, exception: Exception):
+        self._print_color(self.COLOR_HIGH_RED, exception)
+
+    # Results
+    def assert_folker_result(self, total, success, failures):
+        self._print_color(self.COLOR_HIGH_CYAN, '\n#################################################################################################')
+        self._print_color(self.COLOR_HIGH_CYAN, 'RESULTS:')
+        print_color = self.COLOR_HIGH_GREEN if len(success) is total else self.COLOR_HIGH_RED
+        self._print_color(print_color, 'Tests: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(len(success), len(failures), total))
+
+        for passed in success:
+            self._print_color(self.COLOR_HIGH_GREEN, '\t{}'.format(passed))
+        for fail in failures:
+            self._print_color(self.COLOR_HIGH_RED, '\t{}'.format(fail))
 
     #
     def _print_color(self, color, text, end=None):

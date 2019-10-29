@@ -1,7 +1,0 @@
-test_name: Void Test
-test_description: Dummy Test for Void Stage
-
-stages:
-  - id: 1
-    name: void_stage
-    type: VOID

@@ -20,8 +20,12 @@ class PrintStageBuilder(StageBuilderStrategy):
                                         log=DefaultLogExecutor())
 
     def recognises(self, args: dict) -> bool:
-        return args['type'] == 'PRINT'
+        return 'PRINT' == args['type']
 
-    def build(self, args: dict) -> Stage:
+    def build_stage(self, args: dict) -> Stage:
         return Stage(data=PrintStageData(**args),
+                     executors=self.executors)
+
+    def build_template(self, args: dict) -> Stage:
+        return Stage(data=PrintStageData(**args, template=True),
                      executors=self.executors)

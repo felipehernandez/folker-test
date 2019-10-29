@@ -1,3 +1,4 @@
+from copy import deepcopy
 from enum import Enum, auto
 
 from folker.model.data import ActionData, StageData
@@ -27,24 +28,19 @@ class RestActionData(ActionData):
                  query_parameters: dict = None,
                  headers: dict = None,
                  body=None,
+                 template: bool = False,
                  **kargs
                  ) -> None:
         super().__init__()
-        missing_fields = []
-        wrong_fields = []
 
         if method:
             try:
                 self.method = RestMethod[method]
             except:
-                wrong_fields.append('action.method')
-        else:
-            missing_fields.append('action.method')
+                raise InvalidSchemaDefinitionException(wrong_fields=['action.method'])
 
         if host:
             self.host = host
-        else:
-            missing_fields.append('action.host')
 
         self.uri = uri
         self.query_parameters = query_parameters if query_parameters else {}
@@ -52,17 +48,66 @@ class RestActionData(ActionData):
         self.body = body
         self.body_json = kargs['json'] if kargs.__contains__('json') else None
 
-        if len(missing_fields) > 0 or len(wrong_fields) > 0:
-            raise InvalidSchemaDefinitionException(missing_fields=missing_fields, wrong_fields=wrong_fields)
+        if not template:
+            self._validate_values()
+
+    def __copy__(self):
+        return deepcopy(self)
+
+    def _validate_values(self):
+        missing_fields = []
+
+        if not hasattr(self, 'method') or not self.method:
+            missing_fields.append('action.method')
+        if not hasattr(self, 'host') or not self.host:
+            missing_fields.append('action.host')
+
+        if len(missing_fields) > 0:
+            raise InvalidSchemaDefinitionException(missing_fields=missing_fields)
+
+    def enrich(self,
+               method: str = None,
+               host: str = None,
+               uri: str = None,
+               query_parameters: dict = None,
+               headers: dict = None,
+               body=None,
+               **kargs):
+        new_data = self.__copy__()
+
+        if method:
+            try:
+                new_data.method = RestMethod[method]
+            except:
+                raise InvalidSchemaDefinitionException(wrong_fields=['action.method'])
+        if host:
+            new_data.host = host
+
+        if uri:
+            new_data.uri = uri
+        if query_parameters:
+            new_data.query_parameters = query_parameters if query_parameters else {}
+        if headers:
+            new_data.headers = headers if headers else {}
+        if body:
+            new_data.body = body
+        if kargs.__contains__('json'):
+            new_data.body_json = kargs['json'] if kargs.__contains__('json') else None
+
+        new_data._validate_values()
+        return new_data
 
 
 class RestStageData(StageData):
     action: RestActionData
 
-    def __init__(self, id, name, description=None, type=str, **kargs) -> None:
+    def __init__(self, name: str = None, description: str = None, type: str = None, id: str = None, **kargs) -> None:
         super().__init__(id, name, description, type, **kargs)
 
         if 'action' not in kargs:
             raise InvalidSchemaDefinitionException(missing_fields=['action'])
 
         self.action = RestActionData(**kargs['action'])
+
+    def __copy__(self):
+        return deepcopy(self)

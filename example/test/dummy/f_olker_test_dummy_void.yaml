@@ -1,0 +1,6 @@
+name: Void Test
+description: Dummy Test for Void Stage
+
+stages:
+  - name: void_stage
+    type: VOID

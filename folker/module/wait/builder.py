@@ -22,6 +22,10 @@ class WaitStageBuilder(StageBuilderStrategy):
     def recognises(self, args: dict) -> bool:
         return args['type'] == 'WAIT'
 
-    def build(self, args: dict) -> Stage:
+    def build_stage(self, args: dict) -> Stage:
         return Stage(data=WaitStageData(**args),
+                     executors=self.executors)
+
+    def build_template(self, args: dict) -> Stage:
+        return Stage(data=WaitStageData(**args, template=True),
                      executors=self.executors)

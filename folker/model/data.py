@@ -1,3 +1,6 @@
+from copy import copy, deepcopy
+
+
 class ActionData:
     pass
 
@@ -9,6 +12,12 @@ class LogData:
         super().__init__()
         self.logs = logs if logs else []
 
+    def enrich(self, logs: [str] = []):
+        new_data = LogData()
+        new_data.logs = []
+        new_data.logs.extend(self.logs + logs)
+        return new_data
+
 
 class SaveData:
     save: dict
@@ -17,6 +26,15 @@ class SaveData:
         super().__init__()
         self.save = save if save else {}
 
+    def enrich(self, save: dict = {}):
+        new_data = SaveData()
+        new_data.save = {}
+        new_data.save = {**(self.save), **save}
+        return new_data
+
+    def __copy__(self):
+        return copy(self)
+
 
 class AssertData:
     assertions: [str]
@@ -24,6 +42,15 @@ class AssertData:
     def __init__(self, assertions: [str] = []) -> None:
         super().__init__()
         self.assertions = assertions
+
+    def enrich(self, assertions: [str] = []):
+        new_data = AssertData()
+        new_data.assertions = []
+        new_data.assertions.extend(self.assertions + assertions)
+        return new_data
+
+    def __copy__(self):
+        return copy(self)
 
 
 class StageData:
@@ -54,4 +81,21 @@ class StageData:
         self.log = LogData(kargs['log']) if 'log' in kargs.keys() else LogData()
 
     def __str__(self):
-        return '{} - {}'.format(self.id, self.name)
+        return '{}'.format(self.name)
+
+    def __copy__(self):
+        return deepcopy(self)
+
+    def enrich(self, args):
+        new_stage_data = self.__copy__()
+
+        if 'action' in args:
+            new_stage_data.action = new_stage_data.action.enrich(**args['action'])
+        if 'save' in args:
+            new_stage_data.save = new_stage_data.save.enrich(args['save'])
+        if 'assertions' in args:
+            new_stage_data.assertions = new_stage_data.assertions.enrich(args['assertions'])
+        if 'log' in args:
+            new_stage_data.log = new_stage_data.log.enrich(args['log'])
+
+        return new_stage_data

@@ -12,7 +12,7 @@ class TestStageBuilder(TestCase):
         stage_builder: StageBuilder = StageBuilder()
 
         try:
-            stage_builder.build({})
+            stage_builder.build_stage({})
             raise AssertionError('Should not get here')
         except UnrecognisedSchemaException as e:
             self.assertEqual({}, e.details['stage_definition'])
@@ -22,11 +22,11 @@ class TestStageBuilder(TestCase):
         stage_builder: StageBuilder = StageBuilder()
 
         Builder.return_value.recognises.return_value = True
-        Builder.return_value.build.return_value = Stage()
+        Builder.return_value.build_stage.return_value = Stage()
 
         stage_builder.register_builder(Builder())
 
-        stage = stage_builder.build({})
+        stage = stage_builder.build_stage({})
 
         self.assertIsNotNone(stage)
 
@@ -39,7 +39,7 @@ class TestStageBuilder(TestCase):
         stage_builder.register_builder(Builder())
 
         try:
-            stage_builder.build({})
+            stage_builder.build_stage({})
             raise AssertionError('Should not get here')
         except UnrecognisedSchemaException as e:
             self.assertEqual({}, e.details['stage_definition'])

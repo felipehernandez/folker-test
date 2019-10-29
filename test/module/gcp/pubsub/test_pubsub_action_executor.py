@@ -87,4 +87,4 @@ class TestPubSubActionExecutor(TestCase):
         self.assertTrue('elapsed_time' in stage_context)
         self.assertEqual('ack-id', stage_context['message_id'])
         self.assertEqual('a-message', stage_context['message_content'])
-        MockSubscriber.return_value.acknowledge.assert_never_called()
+        self.assertFalse(MockSubscriber.return_value.acknowledge.assert_called())

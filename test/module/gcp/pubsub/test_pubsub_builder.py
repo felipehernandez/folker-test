@@ -33,7 +33,6 @@ class TestPubSubStageBuilder(TestCase):
         builder = PubSubStageBuilder()
 
         stage_definition = {
-            'id': '1',
             'name': 'pubsub_stage',
             'type': 'PUBSUB',
             'action':
@@ -45,7 +44,7 @@ class TestPubSubStageBuilder(TestCase):
                 }
         }
 
-        stage = builder.build(stage_definition)
+        stage = builder.build_stage(stage_definition)
 
         self.assertIsNotNone(stage)
         self.assertIsNotNone(stage.data)
@@ -60,7 +59,6 @@ class TestPubSubStageBuilder(TestCase):
         builder = PubSubStageBuilder()
 
         stage_definition = {
-            'id': '1',
             'name': 'pubsub_stage',
             'type': 'PUBSUB',
             'action':
@@ -71,7 +69,7 @@ class TestPubSubStageBuilder(TestCase):
                 }
         }
 
-        stage = builder.build(stage_definition)
+        stage = builder.build_stage(stage_definition)
 
         self.assertIsNotNone(stage)
         self.assertIsNotNone(stage.data)
@@ -86,13 +84,12 @@ class TestPubSubStageBuilder(TestCase):
         builder = PubSubStageBuilder()
 
         stage_definition = {
-            'id': '1',
             'name': 'pubsub_stage',
             'type': 'PUBSUB'
         }
 
         try:
-            builder.build(stage_definition)
+            builder.build_stage(stage_definition)
             raise AssertionError('Should not get here')
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action'], e.details['missing_fields'])
@@ -101,7 +98,6 @@ class TestPubSubStageBuilder(TestCase):
         builder = PubSubStageBuilder()
 
         stage_definition = {
-            'id': '1',
             'name': 'pubsub_stage',
             'type': 'PUBSUB',
             'action': {
@@ -110,7 +106,7 @@ class TestPubSubStageBuilder(TestCase):
         }
 
         try:
-            builder.build(stage_definition)
+            builder.build_stage(stage_definition)
             raise AssertionError('Should not get here')
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action.method'], e.details['missing_fields'])
@@ -119,7 +115,6 @@ class TestPubSubStageBuilder(TestCase):
         builder = PubSubStageBuilder()
 
         stage_definition = {
-            'id': '1',
             'name': 'pubsub_stage',
             'type': 'PUBSUB',
             'action':
@@ -129,17 +124,15 @@ class TestPubSubStageBuilder(TestCase):
         }
 
         try:
-            builder.build(stage_definition)
+            builder.build_stage(stage_definition)
             raise AssertionError('Should not get here')
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action.method'], e.details['wrong_fields'])
-            self.assertEqual(['action.project'], e.details['missing_fields'])
 
     def test_given_valid_publish_pubsub_stage_with_missing_topic_in_action_then_exception(self):
         builder = PubSubStageBuilder()
 
         stage_definition = {
-            'id': '1',
             'name': 'pubsub_stage',
             'type': 'PUBSUB',
             'action':
@@ -151,7 +144,7 @@ class TestPubSubStageBuilder(TestCase):
         }
 
         try:
-            builder.build(stage_definition)
+            builder.build_stage(stage_definition)
             raise AssertionError('Should not get here')
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action.topic'], e.details['missing_fields'])
@@ -160,7 +153,6 @@ class TestPubSubStageBuilder(TestCase):
         builder = PubSubStageBuilder()
 
         stage_definition = {
-            'id': '1',
             'name': 'pubsub_stage',
             'type': 'PUBSUB',
             'action':
@@ -172,7 +164,7 @@ class TestPubSubStageBuilder(TestCase):
         }
 
         try:
-            builder.build(stage_definition)
+            builder.build_stage(stage_definition)
             raise AssertionError('Should not get here')
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action.message'], e.details['missing_fields'])
@@ -181,7 +173,6 @@ class TestPubSubStageBuilder(TestCase):
         builder = PubSubStageBuilder()
 
         stage_definition = {
-            'id': '1',
             'name': 'pubsub_stage',
             'type': 'PUBSUB',
             'action':
@@ -192,7 +183,7 @@ class TestPubSubStageBuilder(TestCase):
         }
 
         try:
-            builder.build(stage_definition)
+            builder.build_stage(stage_definition)
             raise AssertionError('Should not get here')
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action.subscription'], e.details['missing_fields'])

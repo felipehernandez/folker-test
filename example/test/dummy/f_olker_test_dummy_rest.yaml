@@ -1,9 +1,8 @@
-test_name: Rest Test
-test_description: Dummy Test for Rest Stage
+name: Rest Test
+description: Dummy Test for Rest Stage
 
 stages:
-  - id: Do_GET
-    name: Get all posts
+  - name: Get all posts
     type: REST
     action:
       method: GET
@@ -12,8 +11,7 @@ stages:
     assert:
       - '${status_code} is 200'
 
-  - id: Do_POST
-    name: Create a post
+  - name: Create a post
     type: REST
     action:
       method: POST

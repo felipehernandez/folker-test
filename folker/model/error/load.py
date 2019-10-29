@@ -30,3 +30,15 @@ class InvalidSchemaDefinitionException(SourceException):
                          cause='Missing mandatory fields',
                          details=details,
                          *args)
+
+
+class SchemaReferenceNotFoundException(SourceException):
+
+    def __init__(self,
+                 reference_id,
+                 *args: object) -> None:
+        super().__init__(source='Schema loader',
+                         error='Reference not found error',
+                         cause='Stage reference not found in the preloaded ones',
+                         details={'reference_id': reference_id},
+                         *args)

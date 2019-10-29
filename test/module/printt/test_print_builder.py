@@ -33,14 +33,13 @@ class TestVoidStageBuilder(TestCase):
         builder = PrintStageBuilder()
 
         stage_definition = {
-            'id': '1',
             'name': 'print_stage',
             'type': 'PRINT',
             'action':
                 {'message': 'Hello world'}
         }
 
-        stage = builder.build(stage_definition)
+        stage = builder.build_stage(stage_definition)
 
         self.assertIsNotNone(stage)
         self.assertIsNotNone(stage.data)
@@ -55,13 +54,12 @@ class TestVoidStageBuilder(TestCase):
         builder = PrintStageBuilder()
 
         stage_definition = {
-            'id': '1',
             'name': 'print_stage',
             'type': 'PRINT'
         }
 
         try:
-            builder.build(stage_definition)
+            builder.build_stage(stage_definition)
             raise AssertionError('Should not get here')
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action'], e.details['missing_fields'])
@@ -70,14 +68,13 @@ class TestVoidStageBuilder(TestCase):
         builder = PrintStageBuilder()
 
         stage_definition = {
-            'id': '1',
             'name': 'print_stage',
             'type': 'PRINT',
             'action': {}
         }
 
         try:
-            builder.build(stage_definition)
+            builder.build_stage(stage_definition)
             raise AssertionError('Should not get here')
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action.message'], e.details['missing_fields'])

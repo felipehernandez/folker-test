@@ -31,12 +31,11 @@ class TestVoidStageBuilder(TestCase):
         builder = VoidStageBuilder()
 
         stage_definition = {
-            'id': '1',
             'name': 'void_stage',
             'type': 'VOID'
         }
 
-        stage = builder.build(stage_definition)
+        stage = builder.build_stage(stage_definition)
 
         self.assertIsNotNone(stage)
         self.assertIsNotNone(stage.data)

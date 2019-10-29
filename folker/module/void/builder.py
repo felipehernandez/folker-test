@@ -20,6 +20,10 @@ class VoidStageBuilder(StageBuilderStrategy):
     def recognises(self, args: dict) -> bool:
         return args['type'] == 'VOID'
 
-    def build(self, args: dict) -> Stage:
+    def build_stage(self, args: dict) -> Stage:
         return Stage(data=VoidStageData(**args),
+                     executors=self.executors)
+
+    def build_template(self, args: dict) -> Stage:
+        return Stage(data=VoidStageData(**args, template=True),
                      executors=self.executors)

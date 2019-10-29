@@ -33,14 +33,13 @@ class TestWaitStageBuilder(TestCase):
         builder = WaitStageBuilder()
 
         stage_definition = {
-            'id': '1',
             'name': 'wait_stage',
             'type': 'WAIT',
             'action':
                 {'time': '3'}
         }
 
-        stage = builder.build(stage_definition)
+        stage = builder.build_stage(stage_definition)
 
         self.assertIsNotNone(stage)
         self.assertIsNotNone(stage.data)
@@ -55,13 +54,12 @@ class TestWaitStageBuilder(TestCase):
         builder = WaitStageBuilder()
 
         stage_definition = {
-            'id': '1',
             'name': 'wait_stage',
             'type': 'WAIT'
         }
 
         try:
-            builder.build(stage_definition)
+            builder.build_stage(stage_definition)
             raise AssertionError('Should not get here')
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action'], e.details['missing_fields'])
@@ -70,14 +68,13 @@ class TestWaitStageBuilder(TestCase):
         builder = WaitStageBuilder()
 
         stage_definition = {
-            'id': '1',
             'name': 'wait_stage',
             'type': 'WAIT',
             'action': {}
         }
 
         try:
-            builder.build(stage_definition)
+            builder.build_stage(stage_definition)
             raise AssertionError('Should not get here')
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action.time'], e.details['missing_fields'])

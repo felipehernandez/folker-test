@@ -1,5 +1,5 @@
-test_name: Rest Test
-test_description: Dummy Test for Rest Stage
+name: Rest Test
+description: Dummy Test for Rest Stage
 
 stages:
   - id: 1

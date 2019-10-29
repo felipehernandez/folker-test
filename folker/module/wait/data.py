@@ -1,3 +1,5 @@
+from copy import copy
+
 from folker.model.data import StageData, ActionData
 from folker.model.error.load import InvalidSchemaDefinitionException
 
@@ -5,23 +7,41 @@ from folker.model.error.load import InvalidSchemaDefinitionException
 class WaitActionData(ActionData):
     time: int
 
-    def __init__(self, time=None, **kargs) -> None:
+    def __init__(self, time=None, template: bool = False, **kargs) -> None:
         super().__init__()
-        missing_fields = []
 
         if time:
             self.time = time
-        else:
+
+        if not template:
+            self._validate_values()
+
+    def __copy__(self):
+        return copy(self)
+
+    def _validate_values(self):
+        missing_fields = []
+
+        if not hasattr(self, 'time') or not self.time:
             missing_fields.append('action.time')
 
         if len(missing_fields) > 0:
             raise InvalidSchemaDefinitionException(missing_fields=missing_fields)
 
+    def enrich(self, time=None, **kargs):
+        new_data = self.__copy__()
+
+        if time:
+            new_data.time = time
+
+        new_data._validate_values()
+        return new_data
+
 
 class WaitStageData(StageData):
     action: WaitActionData
 
-    def __init__(self, id, name, description=None, type=str, **kargs) -> None:
+    def __init__(self, name: str, description: str = None, type: str = None, id=None, **kargs) -> None:
         super().__init__(id, name, description, type, **kargs)
 
         if 'action' not in kargs:
