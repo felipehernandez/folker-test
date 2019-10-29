@@ -18,7 +18,8 @@ steps:
       repo: folkertest/folkertest
       tags:
         - latest
-        - "0.0.${DRONE_BUILD_NUMBER}"
+        - "0.1.${DRONE_BUILD_NUMBER}"
     when:
       branch:
         - master
+        - release
