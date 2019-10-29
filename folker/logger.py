@@ -50,11 +50,11 @@ class Logger:
 
     # Load
     def loading_template_files(self):
-        if trace:
+        if debug or trace:
             self._print_color(self.COLOR_HIGH_CYAN, 'Loading template files')
 
     def loading_test_files(self):
-        if trace:
+        if debug or trace:
             self._print_color(self.COLOR_HIGH_CYAN, 'Loading test files')
 
     def loading_file(self, filename):
