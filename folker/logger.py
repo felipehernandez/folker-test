@@ -66,7 +66,7 @@ class Logger:
 
     def loading_files_completed(self, files):
         if debug or trace:
-            self._print_color(self.COLOR_WHITE, 'Files loaded: [')
+            self._print_color(self.COLOR_WHITE, 'Loaded files: [')
             for file in files:
                 self._print_color(self.COLOR_WHITE, '\t{}'.format(file))
             self._print_color(self.COLOR_WHITE, ']'.format(files))
