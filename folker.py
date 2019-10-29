@@ -14,5 +14,5 @@ for test in tests:
 
 logger.assert_folker_result(executed, success, failures)
 
-if success is not executed:
+if len(success) is not executed:
     raise TestSuiteResultException(failures)
