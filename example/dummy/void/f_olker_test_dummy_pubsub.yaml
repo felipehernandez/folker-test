@@ -1,0 +1,25 @@
+test_name: Rest Test
+test_description: Dummy Test for Rest Stage
+
+stages:
+  - id: 1
+    name: publish
+    type: PUBSUB
+    action:
+      method: PUBLISH
+      project: a-project
+      topic: a-topic
+      message: hello world
+    log:
+      - 'Message id: ${message_id}'
+
+  - id: 2
+    name: subscribe
+    type: PUBSUB
+    action:
+      method: SUBSCRIBE
+      project: a-project
+      subscription: a-topic-subscription
+      ack: True
+    log:
+      - 'Message id: ${message_content}'
