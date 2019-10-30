@@ -95,6 +95,9 @@ class Logger:
         if trace:
             self._print_color(self.COLOR_GREY, message)
 
+    def action_error(self, message):
+        self._print_color(self.COLOR_HIGH_RED, message)
+
     # Assertions
     def assertion_success(self, assertion: str):
         if debug or trace:

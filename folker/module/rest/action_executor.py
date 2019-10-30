@@ -32,6 +32,7 @@ class RestActionExecutor(ActionExecutor):
                 pass
 
         except Exception as e:
+            logger.action_error(str(e))
             stage_context['error'] = e
 
         end = time.time()
@@ -50,42 +51,61 @@ class RestActionExecutor(ActionExecutor):
     def _do_get(self, rest_action: RestActionData, test_context: dict, stage_context: dict):
         url = self._build_url(rest_action, test_context, stage_context)
 
-        headers = rest_action.headers
+        headers = recursive_replace_variables(test_context, stage_context, rest_action.headers)
 
         self._log_debug(method=rest_action.method.name,
                         url=url,
                         headers=headers,
-                        json=None)
+                        body=None)
         logger.action_debug('url:{url}\nheaders{headers}'.format(url=url,
                                                                  headers=headers))
         return requests.get(url=url, headers=headers)
 
     def _do_post(self, rest_action: RestActionData, test_context: dict, stage_context: dict):
         url = self._build_url(rest_action, test_context, stage_context)
-        headers = rest_action.headers
+        headers = recursive_replace_variables(test_context, stage_context, rest_action.headers)
 
-        resolved_json = recursive_replace_variables(test_context, stage_context, rest_action.body_json)
+        if rest_action.body:
+            self._log_debug(method=rest_action.method.name,
+                            url=url,
+                            headers=headers,
+                            body=rest_action.body)
+            return requests.post(url=url, headers=headers, data=rest_action.body)
+        elif rest_action.body_json:
+            resolved_json = recursive_replace_variables(test_context, stage_context, rest_action.body_json)
+            self._log_debug(method=rest_action.method.name,
+                            url=url,
+                            headers=headers,
+                            body=resolved_json)
+            return requests.post(url=url, headers=headers, json=resolved_json)
+        else:
+            return requests.post(url=url, headers=headers)
 
-        self._log_debug(method=rest_action.method.name,
-                        url=url,
-                        headers=headers,
-                        json=resolved_json)
-        return requests.post(url=url, headers=headers, json=resolved_json)
+    def _do_json_post(self, rest_action: RestActionData, test_context: dict, stage_context: dict):
+        pass
 
     def _do_put(self, rest_action: RestActionData, test_context: dict, stage_context: dict):
         url = self._build_url(rest_action, test_context, stage_context)
-        headers = rest_action.headers
+        headers = recursive_replace_variables(test_context, stage_context, rest_action.headers)
 
-        resolved_json = recursive_replace_variables(test_context, stage_context, rest_action.body_json)
+        if rest_action.body:
+            self._log_debug(method=rest_action.method.name,
+                            url=url,
+                            headers=headers,
+                            body=rest_action.body)
+            return requests.put(url=url, headers=headers, data=rest_action.body)
+        elif rest_action.body_json:
+            resolved_json = recursive_replace_variables(test_context, stage_context, rest_action.body_json)
+            self._log_debug(method=rest_action.method.name,
+                            url=url,
+                            headers=headers,
+                            body=resolved_json)
+            return requests.put(url=url, headers=headers, json=resolved_json)
+        else:
+            return requests.put(url=url, headers=headers)
 
-        self._log_debug(method=rest_action.method.name,
-                        url=url,
-                        headers=headers,
-                        json=resolved_json)
-        return requests.put(url=url, headers=headers, json=resolved_json)
-
-    def _log_debug(self, method: str, url: str, headers: dict, json=None):
+    def _log_debug(self, method: str, url: str, headers: dict, body=None):
         logger.action_debug('[{method}]\turl:{url}\n\theaders:{headers}\n\tbody:{body}'.format(method=method,
                                                                                                url=url,
                                                                                                headers=headers,
-                                                                                               body=json))
+                                                                                               body=body))
