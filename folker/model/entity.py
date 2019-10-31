@@ -67,17 +67,20 @@ class Stage:
 class Test:
     name: str
     description: str
+    parallel: bool
     stages: [Stage]
 
     logger: Logger
 
     def __init__(self,
-                 name='UNDEFINED',
-                 description='None',
+                 name: str = 'UNDEFINED',
+                 description: str = None,
+                 parallel: bool = False,
                  stages: [Stage] = None) -> None:
         super().__init__()
         self.name = name
         self.description = description
+        self.parallel = parallel
         self.stages = stages
 
     def set_logger(self, logger: Logger):
@@ -94,6 +97,8 @@ class Test:
         except SourceException as e:
             self.logger.stage_exception(e)
             return False
+
+        self.logger.test_finish()
 
         return True
 

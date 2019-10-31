@@ -66,6 +66,7 @@ class TestSchema(Schema):
     name = fields.String(required=True)
     description = fields.String()
     stages = fields.Nested(StageSchema, required=True, many=True)
+    parallel = fields.Boolean(default=False)
 
     @post_load
     def make_test(self, data, **kwargs):

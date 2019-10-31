@@ -10,6 +10,7 @@ class Logger:
     COLOR_BLACK = '\033[0;30m'
     COLOR_RED = '\033[0;31m'
     COLOR_GREEN = '\033[0;32m'
+    COLOR_GREEN = '\033[0;32m'
     COLOR_YELLOW = '\033[0;33m'
     COLOR_BLUE = '\033[0;34m'
     COLOR_PINK = '\033[0;35m'
@@ -26,27 +27,33 @@ class Logger:
     COLOR_HIGH_CYAN = '\033[0;96m'
     COLOR_HIGH_WHITE = '\033[0;99m'
 
+    report: str
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.report = ''
+
     def _test(self):
-        self._print_color(self.COLOR_DEFAULT, 'COLOR_DEFAULT')
+        self._log_color(self.COLOR_DEFAULT, 'COLOR_DEFAULT')
 
-        self._print_color(self.COLOR_BLACK, 'COLOR_BLACK')
-        self._print_color(self.COLOR_RED, 'COLOR_RED')
-        self._print_color(self.COLOR_GREEN, 'COLOR_GREEN')
-        self._print_color(self.COLOR_YELLOW, 'COLOR_YELLOW')
-        self._print_color(self.COLOR_BLUE, 'COLOR_BLUE')
-        self._print_color(self.COLOR_PINK, 'COLOR_PINK')
-        self._print_color(self.COLOR_CYAN, 'COLOR_CYAN')
-        self._print_color(self.COLOR_WHITE, 'COLOR_WHITE')
-        self._print_color(self.COLOR_GREY, 'COLOR_GREY')
+        self._log_color(self.COLOR_BLACK, 'COLOR_BLACK')
+        self._log_color(self.COLOR_RED, 'COLOR_RED')
+        self._log_color(self.COLOR_GREEN, 'COLOR_GREEN')
+        self._log_color(self.COLOR_YELLOW, 'COLOR_YELLOW')
+        self._log_color(self.COLOR_BLUE, 'COLOR_BLUE')
+        self._log_color(self.COLOR_PINK, 'COLOR_PINK')
+        self._log_color(self.COLOR_CYAN, 'COLOR_CYAN')
+        self._log_color(self.COLOR_WHITE, 'COLOR_WHITE')
+        self._log_color(self.COLOR_GREY, 'COLOR_GREY')
 
-        self._print_color(self.COLOR_HIGH_BLACK, 'COLOR_HIGH_BLACK')
-        self._print_color(self.COLOR_HIGH_RED, 'COLOR_HIGH_RED')
-        self._print_color(self.COLOR_HIGH_GREEN, 'COLOR_HIGH_GREEN')
-        self._print_color(self.COLOR_HIGH_YELLOW, 'COLOR_HIGH_YELLOW')
-        self._print_color(self.COLOR_HIGH_BLUE, 'COLOR_HIGH_BLUE')
-        self._print_color(self.COLOR_HIGH_PINK, 'COLOR_HIGH_PINK')
-        self._print_color(self.COLOR_HIGH_CYAN, 'COLOR_HIGH_CYAN')
-        self._print_color(self.COLOR_HIGH_WHITE, 'COLOR_HIGH_WHITE')
+        self._log_color(self.COLOR_HIGH_BLACK, 'COLOR_HIGH_BLACK')
+        self._log_color(self.COLOR_HIGH_RED, 'COLOR_HIGH_RED')
+        self._log_color(self.COLOR_HIGH_GREEN, 'COLOR_HIGH_GREEN')
+        self._log_color(self.COLOR_HIGH_YELLOW, 'COLOR_HIGH_YELLOW')
+        self._log_color(self.COLOR_HIGH_BLUE, 'COLOR_HIGH_BLUE')
+        self._log_color(self.COLOR_HIGH_PINK, 'COLOR_HIGH_PINK')
+        self._log_color(self.COLOR_HIGH_CYAN, 'COLOR_HIGH_CYAN')
+        self._log_color(self.COLOR_HIGH_WHITE, 'COLOR_HIGH_WHITE')
 
     # Load
     def loading_template_files(self):
@@ -73,63 +80,66 @@ class Logger:
 
     # Test
     def test_start(self, name, description=None):
-        self._print_color(self.COLOR_HIGH_CYAN, 'TEST: ', '\t')
-        self._print_color(self.COLOR_HIGH_CYAN, name)
+        self._log_color(self.COLOR_HIGH_CYAN, 'TEST: ', '\t')
+        self._log_color(self.COLOR_HIGH_CYAN, name)
 
         if description:
-            self._print_color(self.COLOR_BLUE, description)
+            self._log_color(self.COLOR_BLUE, description)
+
+    def test_finish(self):
+        print(self.report)
 
     # Stage
     def stage_start(self, stage: StageData, test_context: dict):
-        self._print_color(self.COLOR_HIGH_YELLOW, 'Stage: {name}'.format(id=stage.id, name=stage.name))
+        self._log_color(self.COLOR_HIGH_YELLOW, 'Stage: {name}'.format(id=stage.id, name=stage.name))
 
         if trace:
-            self._print_color(self.COLOR_GREY, 'CONTEXT: {}'.format(test_context))
+            self._log_color(self.COLOR_GREY, 'CONTEXT: {}'.format(test_context))
 
-        if stage.description: self._print_color(self.COLOR_HIGH_BLUE, stage.description)
+        if stage.description: self._log_color(self.COLOR_HIGH_BLUE, stage.description)
 
     def action_executed(self, stage_context: dict):
         if trace:
-            self._print_color(self.COLOR_GREY, 'STAGE CONTEXT: {}'.format(stage_context))
+            self._log_color(self.COLOR_GREY, 'STAGE CONTEXT: {}'.format(stage_context))
 
     def message(self, message):
-        self._print_color(self.COLOR_GREEN, message)
+        self._log_color(self.COLOR_GREEN, message)
 
     def action_debug(self, message):
         if trace:
-            self._print_color(self.COLOR_GREY, message)
+            self._log_color(self.COLOR_GREY, message)
 
     def action_error(self, message):
-        self._print_color(self.COLOR_HIGH_RED, message)
+        self._log_color(self.COLOR_HIGH_RED, message)
 
     # Assertions
     def assertion_success(self, assertion: str):
         if debug or trace:
-            self._print_color(self.COLOR_GREEN, '\t{}'.format(assertion))
+            self._log_color(self.COLOR_GREEN, '\t{}'.format(assertion))
 
     def assertion_fail(self, assertion: str, variables: dict):
-        self._print_color(self.COLOR_RED, '\t{}'.format(assertion))
-        self._print_color(self.COLOR_RED, json.dumps(variables))
+        self._log_color(self.COLOR_RED, '\t{}'.format(assertion))
+        self._log_color(self.COLOR_RED, json.dumps(variables))
 
     def assertion_error(self, assertion: str, exception: Exception = None):
-        self._print_color(self.COLOR_RED, '\t{} - {}'.format(assertion, exception))
+        self._log_color(self.COLOR_RED, '\t{} - {}'.format(assertion, exception))
 
     def assertion_execution_error(self, assertion: str, variables: dict, exception: Exception = None):
         self.assertion_error(assertion, exception)
-        self._print_color(self.COLOR_RED, json.dumps(variables))
+        self._log_color(self.COLOR_RED, json.dumps(variables))
 
     def assert_test_result(self, total, success, failures):
         if success is not total:
-            self._print_color(self.COLOR_HIGH_RED, '\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success, failures, total))
+            self._log_color(self.COLOR_HIGH_RED, '\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success, failures, total))
         elif debug or trace:
-            self._print_color(self.COLOR_CYAN, '\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success, failures, total))
+            self._log_color(self.COLOR_CYAN, '\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success, failures, total))
 
     # Log
     def log_text(self, log: str):
-        self._print_color(self.COLOR_WHITE, log)
+        self._log_color(self.COLOR_WHITE, log)
 
     def stage_exception(self, exception: Exception):
-        self._print_color(self.COLOR_HIGH_RED, exception)
+        self._log_color(self.COLOR_HIGH_RED, exception)
 
     # Results
     def assert_folker_result(self, total, success, failures):
@@ -139,11 +149,17 @@ class Logger:
         self._print_color(print_color, 'Tests: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(len(success), len(failures), total))
 
         for passed in success:
-            self._print_color(self.COLOR_HIGH_GREEN, '\t{}'.format(passed))
+            self._log_color(self.COLOR_HIGH_GREEN, '\t{}'.format(passed))
         for fail in failures:
-            self._print_color(self.COLOR_HIGH_RED, '\t{}'.format(fail))
+            self._log_color(self.COLOR_HIGH_RED, '\t{}'.format(fail))
 
     #
+    def _log_color(self, color, text, end=None):
+        if end is not None:
+            self.report += '{}{}{}'.format(color, text, self.COLOR_DEFAULT) + end
+        else:
+            self.report += '{}{}{}'.format(color, text, self.COLOR_DEFAULT) + '\n'
+
     def _print_color(self, color, text, end=None):
         if end is not None:
             print('{}{}{}'.format(color, text, self.COLOR_DEFAULT), end=end)
