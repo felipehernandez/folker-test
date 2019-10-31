@@ -1,5 +1,4 @@
 from unittest import TestCase
-from unittest.mock import patch
 
 from folker.module.wait.action_executor import WaitActionExecutor
 from folker.module.wait.data import WaitStageData
@@ -7,8 +6,7 @@ from folker.module.wait.data import WaitStageData
 
 class TestWaitActionExecutor(TestCase):
 
-    @patch('folker.module.wait.action_executor.logger')
-    def test_execution(self, logger):
+    def test_execution(self):
         executor = WaitActionExecutor()
 
         stage_data = WaitStageData(id='1',
