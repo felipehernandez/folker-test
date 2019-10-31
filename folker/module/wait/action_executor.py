@@ -1,6 +1,5 @@
 import time
 
-from folker import logger
 from folker.model.task import ActionExecutor
 from folker.module.wait.data import WaitStageData
 
@@ -11,7 +10,6 @@ class WaitActionExecutor(ActionExecutor):
         start = time.time()
 
         time.sleep(stage_data.action.time)
-        logger.action_completed('Waited for {} secs'.format(stage_data.action.time))
 
         end = time.time()
         stage_context['elapsed_time'] = int((end - start) * 1000)

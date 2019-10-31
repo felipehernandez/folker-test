@@ -34,10 +34,11 @@ class Stage:
 
     def execute(self, test_ctxt: dict):
         stage_ctxt = {}
-        logger.stage_start(self.data)
+        logger.stage_start(self.data, test_ctxt)
 
         try:
             test_ctxt, stage_ctxt = self.executors.action.execute(stage_data=self.data, test_context=test_ctxt, stage_context=stage_ctxt)
+            logger.action_executed(stage_ctxt)
             test_ctxt, stage_ctxt = self.executors.log.execute(stage_data=self.data, test_context=test_ctxt, stage_context=stage_ctxt)
             test_ctxt, stage_ctxt = self.executors.save.execute(stage_data=self.data, test_context=test_ctxt, stage_context=stage_ctxt)
             test_ctxt, stage_ctxt = self.executors.assertion.execute(stage_data=self.data, test_context=test_ctxt, stage_context=stage_ctxt)

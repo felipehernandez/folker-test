@@ -21,4 +21,3 @@ class TestWaitActionExecutor(TestCase):
         self.assertEqual({}, test_context)
         self.assertTrue('elapsed_time' in stage_context)
         self.assertTrue(stage_context['elapsed_time'] > 0.5)
-        logger.action_completed.assert_called()

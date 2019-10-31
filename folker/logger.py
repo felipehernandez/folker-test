@@ -79,17 +79,21 @@ class Logger:
         if description:
             self._print_color(self.COLOR_BLUE, description)
 
-    def stage_start(self, stage: StageData):
+    # Stage
+    def stage_start(self, stage: StageData, test_context: dict):
         self._print_color(self.COLOR_HIGH_YELLOW, 'Stage: {name}'.format(id=stage.id, name=stage.name))
+
+        if trace:
+            self._print_color(self.COLOR_GREY, 'CONTEXT: {}'.format(test_context))
 
         if stage.description: self._print_color(self.COLOR_HIGH_BLUE, stage.description)
 
-    # Stage
+    def action_executed(self, stage_context: dict):
+        if trace:
+            self._print_color(self.COLOR_GREY, 'STAGE CONTEXT: {}'.format(stage_context))
+
     def message(self, message):
         self._print_color(self.COLOR_GREEN, message)
-
-    def action_completed(self, message):
-        pass
 
     def action_debug(self, message):
         if trace:
