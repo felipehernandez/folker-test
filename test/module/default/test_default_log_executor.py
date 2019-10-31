@@ -1,5 +1,5 @@
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import Mock
 
 from folker.model.data import StageData
 from folker.module.default.log_executor import DefaultLogExecutor
@@ -7,9 +7,10 @@ from folker.module.default.log_executor import DefaultLogExecutor
 
 class TestDefaultSaveExecutor(TestCase):
 
-    @patch('folker.module.default.log_executor.logger')
-    def test_given_no_log_then_nothing(self, logger):
+    def test_given_no_log_then_nothing(self):
+        logger = Mock()
         executor = DefaultLogExecutor()
+        executor.set_logger(logger)
 
         stage_data = StageData(
             id='default',
@@ -22,9 +23,10 @@ class TestDefaultSaveExecutor(TestCase):
         self.assertEqual({}, stage_context)
         logger.return_value.log_text.assert_not_called()
 
-    @patch('folker.module.default.log_executor.logger')
-    def test_given_plain_logs_then_print(self, logger):
+    def test_given_plain_logs_then_print(self):
+        logger = Mock()
         executor = DefaultLogExecutor()
+        executor.set_logger(logger)
 
         stage_data = StageData(
             id='default',
@@ -36,9 +38,10 @@ class TestDefaultSaveExecutor(TestCase):
 
         logger.log_text.assert_called_with('text')
 
-    @patch('folker.module.default.log_executor.logger')
-    def test_given_referenced_logs_from_stage_context_then_print(self, logger):
+    def test_given_referenced_logs_from_stage_context_then_print(self):
+        logger = Mock()
         executor = DefaultLogExecutor()
+        executor.set_logger(logger)
 
         stage_data = StageData(
             id='default',
@@ -50,9 +53,10 @@ class TestDefaultSaveExecutor(TestCase):
 
         logger.log_text.assert_called_with('text')
 
-    @patch('folker.module.default.log_executor.logger')
-    def test_given_referenced_logs_from_test_context_then_print(self, logger):
+    def test_given_referenced_logs_from_test_context_then_print(self):
+        logger = Mock()
         executor = DefaultLogExecutor()
+        executor.set_logger(logger)
 
         stage_data = StageData(
             id='default',

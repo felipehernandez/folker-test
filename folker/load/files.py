@@ -4,12 +4,13 @@ import yaml
 
 from folker import logger, templates, stage_templates
 from folker.load.schemas import TestSchema, TemplateSchema
+from folker.logger import Logger
 from folker.model.entity import Test
 
 
 def load_template_files() -> [Test]:
     schema = TemplateSchema()
-    logger.loading_template_files()
+    Logger().loading_template_files()
     schemas = load_schemas('**/folker_template*.yaml', schema)
 
     for schema in schemas:
@@ -22,7 +23,7 @@ def load_template_files() -> [Test]:
 
 def load_test_files() -> [Test]:
     schema = TestSchema()
-    logger.loading_test_files()
+    Logger().loading_test_files()
     schemas = load_schemas('**/folker_test*.yaml', schema)
 
     return schemas
@@ -35,13 +36,13 @@ def load_schemas(file_naming, schema):
     for filename in Path('./').absolute().glob(file_naming):
         schemas.append(load_schema(filename, schema, valid_files))
 
-    logger.loading_files_completed(valid_files)
+    Logger().loading_files_completed(valid_files)
     return schemas
 
 
 def load_schema(filename, schema, valid_test_files):
     file_path = filename.resolve().as_uri()[7:]
-    logger.loading_file(filename)
+    Logger().loading_file(filename)
     try:
         test_definition = load_definition(file_path, schema)
         valid_test_files.append(file_path)

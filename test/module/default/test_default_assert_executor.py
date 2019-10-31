@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+from folker.logger import Logger
 from folker.model.data import StageData
 from folker.model.error.assertions import TestFailException, MalformedAssertionException, UnresolvableAssertionException
 from folker.module.default.assert_executor import DefaultAssertExecutor
@@ -9,6 +10,7 @@ class TestDefaultAssertExecutor(TestCase):
 
     def test_given_no_assertions_then_no_execution(self):
         executor = DefaultAssertExecutor()
+        executor.set_logger(Logger())
 
         stage_data = StageData(
             id='default',
@@ -22,6 +24,7 @@ class TestDefaultAssertExecutor(TestCase):
 
     def test_given_correct_passing_assertion_then_success(self):
         executor = DefaultAssertExecutor()
+        executor.set_logger(Logger())
 
         stage_data = StageData(
             id='default',
@@ -36,6 +39,7 @@ class TestDefaultAssertExecutor(TestCase):
 
     def test_given_correct_passing_assertion_with_variables_then_success(self):
         executor = DefaultAssertExecutor()
+        executor.set_logger(Logger())
 
         stage_data = StageData(
             id='default',
@@ -50,6 +54,7 @@ class TestDefaultAssertExecutor(TestCase):
 
     def test_given_correct_failing_assertion_then_failure(self):
         executor = DefaultAssertExecutor()
+        executor.set_logger(Logger())
 
         stage_data = StageData(
             id='default',
@@ -68,6 +73,7 @@ class TestDefaultAssertExecutor(TestCase):
 
     def test_given_correct_failing_assertion_with_variables_then_failure(self):
         executor = DefaultAssertExecutor()
+        executor.set_logger(Logger())
 
         stage_data = StageData(
             id='default',
@@ -86,6 +92,7 @@ class TestDefaultAssertExecutor(TestCase):
 
     def test_given_incorrect_assertion_then_malformed(self):
         executor = DefaultAssertExecutor()
+        executor.set_logger(Logger())
 
         stage_data = StageData(
             id='default',
@@ -104,6 +111,7 @@ class TestDefaultAssertExecutor(TestCase):
 
     def test_given_malformed_assertion_then_malformed(self):
         executor = DefaultAssertExecutor()
+        executor.set_logger(Logger())
 
         stage_data = StageData(
             id='default',

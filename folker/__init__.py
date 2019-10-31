@@ -6,9 +6,9 @@ debug = 'debug' in sys.argv
 trace = 'trace' in sys.argv
 templates, stage_templates = {}, {}
 
-from folker.logger import Logger
+# from folker.logger import Logger
 
-logger = Logger()
+# logger = Logger()
 
 from folker.load.stage import StageBuilder
 

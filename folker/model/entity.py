@@ -1,4 +1,4 @@
-from folker import logger
+from folker.logger import Logger
 from folker.model.data import StageData
 from folker.model.error.error import SourceException
 from folker.model.task import ActionExecutor, AssertExecutor, SaveExecutor, LogExecutor
@@ -22,23 +22,35 @@ class StageExecutors:
         self.save = save
         self.log = log
 
+    def set_logger(self, logger: Logger):
+        self.action.set_logger(logger)
+        self.assertion.set_logger(logger)
+        self.save.set_logger(logger)
+        self.log.set_logger(logger)
+
 
 class Stage:
     data: StageData
     executors: StageExecutors
+
+    logger: Logger
 
     def __init__(self, data: StageData = None, executors: StageExecutors = None) -> None:
         super().__init__()
         self.data = data
         self.executors = executors
 
+    def set_logger(self, logger: Logger):
+        self.logger = logger
+        self.executors.set_logger(logger)
+
     def execute(self, test_ctxt: dict):
         stage_ctxt = {}
-        logger.stage_start(self.data, test_ctxt)
+        self.logger.stage_start(self.data, test_ctxt)
 
         try:
             test_ctxt, stage_ctxt = self.executors.action.execute(stage_data=self.data, test_context=test_ctxt, stage_context=stage_ctxt)
-            logger.action_executed(stage_ctxt)
+            self.logger.action_executed(stage_ctxt)
             test_ctxt, stage_ctxt = self.executors.log.execute(stage_data=self.data, test_context=test_ctxt, stage_context=stage_ctxt)
             test_ctxt, stage_ctxt = self.executors.save.execute(stage_data=self.data, test_context=test_ctxt, stage_context=stage_ctxt)
             test_ctxt, stage_ctxt = self.executors.assertion.execute(stage_data=self.data, test_context=test_ctxt, stage_context=stage_ctxt)
@@ -57,6 +69,8 @@ class Test:
     description: str
     stages: [Stage]
 
+    logger: Logger
+
     def __init__(self,
                  name='UNDEFINED',
                  description='None',
@@ -66,14 +80,19 @@ class Test:
         self.description = description
         self.stages = stages
 
+    def set_logger(self, logger: Logger):
+        self.logger = logger
+        for stage in self.stages:
+            stage.set_logger(logger)
+
     def execute(self) -> bool:
-        logger.test_start(self.name, self.description)
+        self.logger.test_start(self.name, self.description)
         test_context = dict()
         try:
             for stage in self.stages:
                 test_context = stage.execute(test_context)
         except SourceException as e:
-            logger.stage_exception(e)
+            self.logger.stage_exception(e)
             return False
 
         return True

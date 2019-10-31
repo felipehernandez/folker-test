@@ -13,6 +13,7 @@ class TestRestActionExecutor(TestCase):
     @patch('folker.module.rest.action_executor.replace_variables')
     def test_simple_get_execution(self, replace_variables, requests_get):
         executor = RestActionExecutor()
+        executor.set_logger(Mock())
 
         stage_data = RestStageData(id='1',
                                    name='rest_stage',

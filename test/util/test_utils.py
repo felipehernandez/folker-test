@@ -8,7 +8,7 @@ class TestStringMethods(TestCase):
 
     def test_missing_simple_variable(self):
         try:
-            result = resolve_variable_reference({}, {}, 'variable')
+            return resolve_variable_reference({}, {}, 'variable')
         except VariableReferenceResolutionException as e:
             self.assertEqual('variable', e.details['reference'])
 

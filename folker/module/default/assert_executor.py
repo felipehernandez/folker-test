@@ -1,4 +1,3 @@
-from folker import logger
 from folker.model.data import StageData
 from folker.model.error.assertions import TestFailException, MalformedAssertionException, UnresolvableAssertionException
 from folker.model.task import AssertExecutor
@@ -34,20 +33,20 @@ class DefaultAssertExecutor(AssertExecutor):
         try:
             result = eval(updated_assertion)
         except Exception as e:
-            logger.assertion_error(assertion=assertion, exception=e)
+            self.logger.assertion_error(assertion=assertion, exception=e)
             raise UnresolvableAssertionException(assertion=assertion)
 
         if not isinstance(result, bool):
             raise MalformedAssertionException(assertion=assertion)
 
         if result:
-            logger.assertion_success(assertion=assertion)
+            self.logger.assertion_success(assertion=assertion)
         else:
-            logger.assertion_fail(assertion=assertion, variables=variables)
+            self.logger.assertion_fail(assertion=assertion, variables=variables)
 
         return result
 
     def wrap_up_test(self, executed, success, failures):
-        logger.assert_test_result(executed, success, executed - success)
+        self.logger.assert_test_result(executed, success, executed - success)
         if success is not executed:
             raise TestFailException(failure_messages=failures)

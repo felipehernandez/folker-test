@@ -1,5 +1,5 @@
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 from folker.module.printt.action_executor import PrintActionExecutor
 from folker.module.printt.data import PrintStageData
@@ -7,9 +7,10 @@ from folker.module.printt.data import PrintStageData
 
 class TestPrintActionExecutor(TestCase):
 
-    @patch('folker.module.printt.action_executor.logger')
-    def test_execution(self, logger):
+    def test_execution(self):
+        logger = Mock()
         executor = PrintActionExecutor()
+        executor.set_logger(logger)
 
         stage_data = PrintStageData(id='1',
                                     name='print_stage',

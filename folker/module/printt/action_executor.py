@@ -1,6 +1,5 @@
 import time
 
-from folker import logger
 from folker.model.task import ActionExecutor
 from folker.module.printt.data import PrintStageData
 from folker.util.variable import replace_variables
@@ -12,7 +11,7 @@ class PrintActionExecutor(ActionExecutor):
         start = time.time()
 
         message = replace_variables(test_context, stage_context, stage_data.action.message)
-        logger.message(message)
+        self.logger.message(message)
 
         end = time.time()
         stage_context['elapsed_time'] = int((end - start) * 1000)

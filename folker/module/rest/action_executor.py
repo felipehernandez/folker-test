@@ -2,7 +2,6 @@ import time
 
 import requests
 
-from folker import logger
 from folker.model.task import ActionExecutor
 from folker.module.rest.data import RestStageData, RestActionData
 from folker.util.variable import replace_variables, recursive_replace_variables
@@ -32,7 +31,7 @@ class RestActionExecutor(ActionExecutor):
                 pass
 
         except Exception as e:
-            logger.action_error(str(e))
+            self.logger.action_error(str(e))
             stage_context['error'] = e
 
         end = time.time()
@@ -57,8 +56,8 @@ class RestActionExecutor(ActionExecutor):
                         url=url,
                         headers=headers,
                         body=None)
-        logger.action_debug('url:{url}\nheaders{headers}'.format(url=url,
-                                                                 headers=headers))
+        self.logger.action_debug('url:{url}\nheaders{headers}'.format(url=url,
+                                                                      headers=headers))
         return requests.get(url=url, headers=headers)
 
     def _do_post(self, rest_action: RestActionData, test_context: dict, stage_context: dict):
@@ -105,7 +104,7 @@ class RestActionExecutor(ActionExecutor):
             return requests.put(url=url, headers=headers)
 
     def _log_debug(self, method: str, url: str, headers: dict, body=None):
-        logger.action_debug('[{method}]\turl:{url}\n\theaders:{headers}\n\tbody:{body}'.format(method=method,
-                                                                                               url=url,
-                                                                                               headers=headers,
-                                                                                               body=body))
+        self.logger.action_debug('[{method}]\turl:{url}\n\theaders:{headers}\n\tbody:{body}'.format(method=method,
+                                                                                                    url=url,
+                                                                                                    headers=headers,
+                                                                                                    body=body))
