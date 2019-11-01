@@ -89,6 +89,10 @@ class Logger:
     def test_finish(self):
         print(self.report)
 
+    def test_finish_error(self, e: Exception):
+        self.stage_exception(e)
+        print(self.report)
+
     # Stage
     def stage_start(self, stage: StageData, test_context: dict):
         self._log_color(self.COLOR_HIGH_YELLOW, 'Stage: {name}'.format(id=stage.id, name=stage.name))
@@ -149,9 +153,9 @@ class Logger:
         self._print_color(print_color, 'Tests: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(len(success), len(failures), total))
 
         for passed in success:
-            self._log_color(self.COLOR_HIGH_GREEN, '\t{}'.format(passed))
+            self._print_color(self.COLOR_GREEN, '\t{}'.format(passed))
         for fail in failures:
-            self._log_color(self.COLOR_HIGH_RED, '\t{}'.format(fail))
+            self._print_color(self.COLOR_RED, '\t{}'.format(fail))
 
     #
     def _log_color(self, color, text, end=None):

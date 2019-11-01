@@ -95,7 +95,7 @@ class Test:
             for stage in self.stages:
                 test_context = stage.execute(test_context)
         except SourceException as e:
-            self.logger.stage_exception(e)
+            self.logger.test_finish_error(e)
             return False
 
         self.logger.test_finish()
