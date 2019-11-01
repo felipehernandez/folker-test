@@ -165,3 +165,8 @@ class Logger:
             print('{}{}{}'.format(color, text, self.COLOR_DEFAULT), end=end)
         else:
             print('{}{}{}'.format(color, text, self.COLOR_DEFAULT))
+
+
+class SequentialLogger(Logger):
+    def _log_color(self, color, text, end=None):
+        self._print_color(self, color, text, end=None)

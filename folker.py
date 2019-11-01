@@ -2,7 +2,7 @@ from multiprocessing import cpu_count
 from multiprocessing.pool import Pool
 
 from folker.load.files import load_test_files, load_template_files
-from folker.logger import Logger
+from folker.logger import Logger, SequentialLogger
 from folker.model.entity import Test
 from folker.model.error.folker import TestSuiteResultException
 
@@ -23,7 +23,7 @@ def execute_sequential_tests(sequential_tests: [Test]):
     success_tests = []
     fail_tests = []
     for test in sequential_tests:
-        test.set_logger(Logger())
+        test.set_logger(SequentialLogger())
         if test.execute():
             success_tests.append(test.name)
         else:
