@@ -169,4 +169,4 @@ class Logger:
 
 class SequentialLogger(Logger):
     def _log_color(self, color, text, end=None):
-        self._print_color(self, color, text, end=None)
+        self._print_color(color, text, end)
