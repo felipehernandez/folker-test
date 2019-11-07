@@ -1,4 +1,4 @@
-from copy import copy
+from copy import copy, deepcopy
 
 from folker.model.data import StageData, ActionData
 from folker.model.error.load import InvalidSchemaDefinitionException
@@ -7,7 +7,7 @@ from folker.model.error.load import InvalidSchemaDefinitionException
 class WaitActionData(ActionData):
     time: int
 
-    def __init__(self, time=None, template: bool = False, **kargs) -> None:
+    def __init__(self, time=None, template: bool = False) -> None:
         super().__init__()
 
         if time:
@@ -37,6 +37,8 @@ class WaitActionData(ActionData):
         new_data._validate_values()
         return new_data
 
+    def __copy__(self):
+        return deepcopy(self)
 
 class WaitStageData(StageData):
     action: WaitActionData
@@ -48,3 +50,6 @@ class WaitStageData(StageData):
             raise InvalidSchemaDefinitionException(missing_fields=['action'])
 
         self.action = WaitActionData(**kargs['action'])
+
+    def __copy__(self):
+        return deepcopy(self)
