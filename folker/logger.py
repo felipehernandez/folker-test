@@ -68,8 +68,8 @@ class Logger:
         if trace:
             self._print_color(self.COLOR_HIGH_YELLOW, 'File: {filename}'.format(filename=filename))
 
-    def loading_file_error(self, exception: Exception):
-        self._print_color(self.COLOR_HIGH_RED, exception)
+    def loading_file_error(self, file_name: str, exception: Exception):
+        self._print_color(self.COLOR_HIGH_RED, 'Error loading file {}: {}'.format(file_name, str(exception)))
 
     def loading_files_completed(self, files):
         if debug or trace:

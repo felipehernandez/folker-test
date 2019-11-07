@@ -1,7 +1,7 @@
 from multiprocessing import cpu_count
 from multiprocessing.pool import Pool
 
-from folker.load.files import load_test_files, load_template_files
+from folker.load.files import load_test_files, load_and_initialize_template_files
 from folker.logger import Logger, SequentialLogger
 from folker.model.entity import Test
 from folker.model.error.folker import TestSuiteResultException
@@ -32,8 +32,9 @@ def execute_sequential_tests(sequential_tests: [Test]):
     return success_tests, fail_tests
 
 
-load_template_files()
-tests = load_test_files()
+logger = Logger()
+load_and_initialize_template_files(logger)
+tests = load_test_files(logger)
 
 parallel_tests = [test for test in tests if test.parallel]
 sequential_tests = [test for test in tests if not test.parallel]
@@ -50,6 +51,6 @@ success.extend(success_tests)
 failures.extend(fail_tests)
 executed += len(success_tests) + len(fail_tests)
 
-Logger().assert_folker_result(executed, success, failures)
+logger.assert_folker_result(executed, success, failures)
 if len(success) is not executed:
     raise TestSuiteResultException(failures)

@@ -1,6 +1,16 @@
 from folker.model.error.error import SourceException
 
 
+class FileException(SourceException):
+    def __init__(self, file: str, e: Exception):
+        super().__init__(source='SchemaLoader',
+                         error='Error in file schema definition',
+                         cause=str(e),
+                         details={
+                             'file': file
+                         })
+
+
 class UnrecognisedSchemaException(SourceException):
 
     def __init__(self, stage_definition: dict, *args: object) -> None:
