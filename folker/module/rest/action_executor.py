@@ -1,3 +1,4 @@
+import json
 import time
 
 import requests
@@ -15,11 +16,16 @@ class RestActionExecutor(ActionExecutor):
         rest_action = stage_data.action
 
         try:
+            call_parameters = self._build_request_parameters(rest_action, stage_context, test_context)
+            self._log_debug(method=rest_action.method.name, **call_parameters)
+
             response = {
-                'GET': self._do_get,
-                'POST': self._do_post,
-                'PUT': self._do_put
-            }[rest_action.method.name](rest_action, test_context, stage_context)
+                'GET': requests.get,
+                'POST': requests.post,
+                'PUT': requests.put,
+                'DELETE': requests.delete,
+                'PATCH': requests.patch
+            }[rest_action.method.name](**call_parameters)
 
             stage_context['status_code'] = response.status_code
             stage_context['headers'] = response.headers
@@ -39,6 +45,17 @@ class RestActionExecutor(ActionExecutor):
 
         return test_context, stage_context
 
+    def _build_request_parameters(self, rest_action, stage_context, test_context):
+        call_parameters = {'url': self._build_url(rest_action, test_context, stage_context),
+                           'headers': recursive_replace_variables(test_context, stage_context, rest_action.headers)}
+
+        if rest_action.body:
+            call_parameters['data'] = rest_action.body
+        elif rest_action.body_json:
+            call_parameters['json'] = recursive_replace_variables(test_context, stage_context, rest_action.body_json)
+
+        return call_parameters
+
     def _build_url(self, rest_action: RestActionData, test_context: dict, stage_context: dict):
         url = rest_action.host
         if rest_action.uri:
@@ -47,64 +64,5 @@ class RestActionExecutor(ActionExecutor):
                                  stage_context=stage_context,
                                  text=url)
 
-    def _do_get(self, rest_action: RestActionData, test_context: dict, stage_context: dict):
-        url = self._build_url(rest_action, test_context, stage_context)
-
-        headers = recursive_replace_variables(test_context, stage_context, rest_action.headers)
-
-        self._log_debug(method=rest_action.method.name,
-                        url=url,
-                        headers=headers,
-                        body=None)
-        self.logger.action_debug('url:{url}\nheaders{headers}'.format(url=url,
-                                                                      headers=headers))
-        return requests.get(url=url, headers=headers)
-
-    def _do_post(self, rest_action: RestActionData, test_context: dict, stage_context: dict):
-        url = self._build_url(rest_action, test_context, stage_context)
-        headers = recursive_replace_variables(test_context, stage_context, rest_action.headers)
-
-        if rest_action.body:
-            self._log_debug(method=rest_action.method.name,
-                            url=url,
-                            headers=headers,
-                            body=rest_action.body)
-            return requests.post(url=url, headers=headers, data=rest_action.body)
-        elif rest_action.body_json:
-            resolved_json = recursive_replace_variables(test_context, stage_context, rest_action.body_json)
-            self._log_debug(method=rest_action.method.name,
-                            url=url,
-                            headers=headers,
-                            body=resolved_json)
-            return requests.post(url=url, headers=headers, json=resolved_json)
-        else:
-            return requests.post(url=url, headers=headers)
-
-    def _do_json_post(self, rest_action: RestActionData, test_context: dict, stage_context: dict):
-        pass
-
-    def _do_put(self, rest_action: RestActionData, test_context: dict, stage_context: dict):
-        url = self._build_url(rest_action, test_context, stage_context)
-        headers = recursive_replace_variables(test_context, stage_context, rest_action.headers)
-
-        if rest_action.body:
-            self._log_debug(method=rest_action.method.name,
-                            url=url,
-                            headers=headers,
-                            body=rest_action.body)
-            return requests.put(url=url, headers=headers, data=rest_action.body)
-        elif rest_action.body_json:
-            resolved_json = recursive_replace_variables(test_context, stage_context, rest_action.body_json)
-            self._log_debug(method=rest_action.method.name,
-                            url=url,
-                            headers=headers,
-                            body=resolved_json)
-            return requests.put(url=url, headers=headers, json=resolved_json)
-        else:
-            return requests.put(url=url, headers=headers)
-
-    def _log_debug(self, method: str, url: str, headers: dict, body=None):
-        self.logger.action_debug('[{method}]\turl:{url}\n\theaders:{headers}\n\tbody:{body}'.format(method=method,
-                                                                                                    url=url,
-                                                                                                    headers=headers,
-                                                                                                    body=body))
+    def _log_debug(self, **parameters):
+        self.logger.action_debug(json.dumps(parameters))
