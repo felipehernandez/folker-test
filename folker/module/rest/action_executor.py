@@ -50,7 +50,7 @@ class RestActionExecutor(ActionExecutor):
                            'headers': recursive_replace_variables(test_context, stage_context, rest_action.headers)}
 
         if rest_action.body:
-            call_parameters['data'] = rest_action.body
+            call_parameters['data'] = recursive_replace_variables(test_context, stage_context, rest_action.body)
         elif rest_action.body_json:
             call_parameters['headers']['Content-Type'] = 'application/json'
             call_parameters['json'] = recursive_replace_variables(test_context, stage_context, rest_action.body_json)

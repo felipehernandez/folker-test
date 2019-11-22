@@ -20,7 +20,7 @@ class ActionSchema(Schema):
     query_parameters = fields.Dict(keys=fields.String(), values=fields.String())
     headers = fields.Dict(keys=fields.String(), values=fields.String())
     params = fields.Dict(keys=fields.String(), values=fields.String())
-    body = fields.Dict()
+    body = fields.String()
     json = fields.Dict()
 
 
