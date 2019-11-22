@@ -16,7 +16,7 @@ class RestActionData(ActionData):
     method: RestMethod
     host: str
     uri: str
-    query_parameters = dict()
+    params = dict()
     headers = dict()
     body = dict()
     body_json = str
@@ -25,7 +25,7 @@ class RestActionData(ActionData):
                  method: str = None,
                  host: str = None,
                  uri: str = None,
-                 query_parameters: dict = None,
+                 params: dict = None,
                  headers: dict = None,
                  body=None,
                  template: bool = False,
@@ -43,10 +43,11 @@ class RestActionData(ActionData):
             self.host = host
 
         self.uri = uri
-        self.query_parameters = query_parameters if query_parameters else {}
+        self.query_parameters = params if params else {}
         self.headers = headers if headers else {}
         self.body = body
         self.body_json = kargs['json'] if kargs.__contains__('json') else None
+        self.params = params
 
         if not template:
             self._validate_values()
