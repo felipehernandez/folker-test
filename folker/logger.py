@@ -110,7 +110,7 @@ class Logger:
         self._log_color(self.COLOR_GREEN, message)
 
     def action_debug(self, message):
-        if trace:
+        if debug or trace:
             self._log_color(self.COLOR_GREY, message)
 
     def action_error(self, message):

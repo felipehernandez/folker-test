@@ -32,6 +32,8 @@ class RestActionExecutor(ActionExecutor):
             stage_context['response'] = response
             stage_context['response_text'] = response.text
             try:
+                self._log_debug(status_code=response.status_code,
+                                response=response.text)
                 stage_context['response_json'] = response.json()
             except:
                 pass
