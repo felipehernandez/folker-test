@@ -18,8 +18,9 @@ class RestActionData(ActionData):
     uri: str
     params = dict()
     headers = dict()
-    body = dict()
+    body = str
     body_json = str
+    data = dict()
 
     def __init__(self,
                  method: str = None,
@@ -28,6 +29,7 @@ class RestActionData(ActionData):
                  params: dict = None,
                  headers: dict = None,
                  body=None,
+                 data=None,
                  template: bool = False,
                  **kargs
                  ) -> None:
@@ -47,6 +49,7 @@ class RestActionData(ActionData):
         self.headers = headers if headers else {}
         self.body = body
         self.body_json = kargs['json'] if kargs.__contains__('json') else None
+        self.data = data
         self.params = params
 
         if not template:

@@ -22,6 +22,7 @@ class ActionSchema(Schema):
     params = fields.Dict(keys=fields.String(), values=fields.String())
     body = fields.String()
     json = fields.Dict()
+    data = fields.Dict()
 
 
 class StageSchema(Schema):
