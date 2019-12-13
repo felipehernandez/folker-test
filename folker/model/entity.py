@@ -88,9 +88,11 @@ class Test:
         for stage in self.stages:
             stage.set_logger(logger)
 
-    def execute(self) -> bool:
+    def execute(self, test_context=None) -> bool:
+        if test_context is None:
+            test_context = dict()
+
         self.logger.test_start(self.name, self.description)
-        test_context = dict()
         try:
             for stage in self.stages:
                 test_context = stage.execute(test_context)

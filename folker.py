@@ -5,11 +5,12 @@ from folker.load.files import load_test_files, load_and_initialize_template_file
 from folker.logger import Logger, SequentialLogger
 from folker.model.entity import Test
 from folker.model.error.folker import TestSuiteResultException
+from folker.util.parameters import capture_parameters_context
 
 
 def test_execution(test):
     test.set_logger(Logger())
-    return test.execute(), test.name
+    return test.execute(capture_parameters_context()), test.name
 
 
 def execute_parallel_test(parallel_tests: [Test]):
@@ -24,7 +25,7 @@ def execute_sequential_tests(sequential_tests: [Test]):
     fail_tests = []
     for test in sequential_tests:
         test.set_logger(SequentialLogger())
-        if test.execute():
+        if test.execute(capture_parameters_context()):
             success_tests.append(test.name)
         else:
             fail_tests.append(test.name)
