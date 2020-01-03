@@ -13,8 +13,11 @@ class PubSubActionExecutor(ActionExecutor):
 
     def __init__(self) -> None:
         super().__init__()
-        self.credentials_path = os.getcwd() + '/credentials/gcp/gcp-credentials.json'
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = self.credentials_path
+
+        credentials_path = os.getcwd() + '/credentials/gcp/gcp-credentials.json'
+        if os.path.exists(credentials_path):
+            self.credentials_path = credentials_path
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = self.credentials_path
 
         self.publisher = PublisherClient()
         self.subscriber = SubscriberClient()

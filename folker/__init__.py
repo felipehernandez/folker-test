@@ -1,6 +1,5 @@
 import importlib
 import os
-import sys
 
 from folker.util.parameters import is_debug, is_trace
 
