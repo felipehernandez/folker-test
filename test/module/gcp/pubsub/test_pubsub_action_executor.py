@@ -7,9 +7,12 @@ from folker.module.gcp.pubsub.data import PubSubStageData
 
 class TestPubSubActionExecutor(TestCase):
 
+    @patch('os.path.exists')
     @patch('folker.module.gcp.pubsub.action_executor.SubscriberClient')
     @patch('folker.module.gcp.pubsub.action_executor.PublisherClient')
-    def test_simple_publish_execution(self, MockPublisher, MockSubscriber):
+    def test_simple_publish_execution(self, MockPublisher, MockSubscriber, mock_os):
+        mock_os.return_value = True
+
         executor = PubSubActionExecutor()
 
         stage_data = PubSubStageData(id='1',
@@ -21,6 +24,7 @@ class TestPubSubActionExecutor(TestCase):
                                          'topic': 'a-topic',
                                          'message': 'Hello world'
                                      })
+
         MockPublisher.return_value.topic_path.return_value = 'topic-path'
         future = Mock()
         MockPublisher.return_value.publish.return_value = future
@@ -33,9 +37,12 @@ class TestPubSubActionExecutor(TestCase):
         self.assertEqual('message-id', stage_context['message_id'])
         MockPublisher.return_value.publish.assert_called_with(topic='topic-path', data='Hello world'.encode())
 
+    @patch('os.path.exists')
     @patch('folker.module.gcp.pubsub.action_executor.SubscriberClient')
     @patch('folker.module.gcp.pubsub.action_executor.PublisherClient')
-    def test_simple_ack_subscription_execution(self, MockPublisher, MockSubscriber):
+    def test_simple_ack_subscription_execution(self, MockPublisher, MockSubscriber, mock_os):
+        mock_os.return_value = True
+
         executor = PubSubActionExecutor()
 
         stage_data = PubSubStageData(id='1',
@@ -61,9 +68,12 @@ class TestPubSubActionExecutor(TestCase):
         self.assertEqual('a-message', stage_context['message_content'])
         MockSubscriber.return_value.acknowledge.assert_called_with('subscription-path', ['ack-id'])
 
+    @patch('os.path.exists')
     @patch('folker.module.gcp.pubsub.action_executor.SubscriberClient')
     @patch('folker.module.gcp.pubsub.action_executor.PublisherClient')
-    def test_simple_nack_subscription_execution(self, MockPublisher, MockSubscriber):
+    def test_simple_nack_subscription_execution(self, MockPublisher, MockSubscriber, mock_os):
+        mock_os.return_value = True
+
         executor = PubSubActionExecutor()
 
         stage_data = PubSubStageData(id='1',

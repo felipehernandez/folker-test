@@ -1,13 +1,15 @@
 from unittest import TestCase
+from unittest.mock import patch
 
 from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.module.gcp.pubsub.action_executor import PubSubActionExecutor
 from folker.module.gcp.pubsub.builder import PubSubStageBuilder
 
 
 class TestPubSubStageBuilder(TestCase):
 
-    def test_given_rest_stage_then_recognise(self):
+    @patch('folker.module.gcp.pubsub.builder.PubSubActionExecutor')
+    def test_given_rest_stage_then_recognise(self, MockPubSubActionExecutor):
+
         builder = PubSubStageBuilder()
 
         stage_definition = {
@@ -18,7 +20,8 @@ class TestPubSubStageBuilder(TestCase):
 
         self.assertTrue(recognises)
 
-    def test_given_not_pubsub_stage_then_recognise(self):
+    @patch('folker.module.gcp.pubsub.builder.PubSubActionExecutor')
+    def test_given_not_pubsub_stage_then_recognise(self, MockPubSubActionExecutor):
         builder = PubSubStageBuilder()
 
         stage_definition = {
@@ -29,7 +32,8 @@ class TestPubSubStageBuilder(TestCase):
 
         self.assertFalse(recognises)
 
-    def test_given_valid_publish_pubsub_stage_then_build(self):
+    @patch('folker.module.gcp.pubsub.builder.PubSubActionExecutor')
+    def test_given_valid_publish_pubsub_stage_then_build(self, MockPubSubActionExecutor):
         builder = PubSubStageBuilder()
 
         stage_definition = {
@@ -50,12 +54,13 @@ class TestPubSubStageBuilder(TestCase):
         self.assertIsNotNone(stage.data)
         self.assertIsNotNone(stage.executors)
         self.assertIsNotNone(stage.executors.action)
-        self.assertEqual(PubSubActionExecutor, type(stage.executors.action))
+        self.assertEqual(MockPubSubActionExecutor(), stage.executors.action)
         self.assertIsNotNone(stage.executors.assertion)
         self.assertIsNotNone(stage.executors.save)
         self.assertIsNotNone(stage.executors.log)
 
-    def test_given_valid_subscribe_pubsub_stage_then_build(self):
+    @patch('folker.module.gcp.pubsub.builder.PubSubActionExecutor')
+    def test_given_valid_subscribe_pubsub_stage_then_build(self, MockPubSubActionExecutor):
         builder = PubSubStageBuilder()
 
         stage_definition = {
@@ -75,12 +80,13 @@ class TestPubSubStageBuilder(TestCase):
         self.assertIsNotNone(stage.data)
         self.assertIsNotNone(stage.executors)
         self.assertIsNotNone(stage.executors.action)
-        self.assertEqual(PubSubActionExecutor, type(stage.executors.action))
+        self.assertEqual(MockPubSubActionExecutor(), stage.executors.action)
         self.assertIsNotNone(stage.executors.assertion)
         self.assertIsNotNone(stage.executors.save)
         self.assertIsNotNone(stage.executors.log)
 
-    def test_given_valid_pubsub_stage_with_missing_action_then_exception(self):
+    @patch('folker.module.gcp.pubsub.builder.PubSubActionExecutor')
+    def test_given_valid_pubsub_stage_with_missing_action_then_exception(self, MockPubSubActionExecutor):
         builder = PubSubStageBuilder()
 
         stage_definition = {
@@ -94,7 +100,8 @@ class TestPubSubStageBuilder(TestCase):
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action'], e.details['missing_fields'])
 
-    def test_given_valid_pubsub_stage_with_missing_method_in_action_then_exception(self):
+    @patch('folker.module.gcp.pubsub.builder.PubSubActionExecutor')
+    def test_given_valid_pubsub_stage_with_missing_method_in_action_then_exception(self, MockPubSubActionExecutor):
         builder = PubSubStageBuilder()
 
         stage_definition = {
@@ -111,7 +118,8 @@ class TestPubSubStageBuilder(TestCase):
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action.method'], e.details['missing_fields'])
 
-    def test_given_valid_pubsub_stage_with_wrong_method_in_action_then_exception(self):
+    @patch('folker.module.gcp.pubsub.builder.PubSubActionExecutor')
+    def test_given_valid_pubsub_stage_with_wrong_method_in_action_then_exception(self, MockPubSubActionExecutor):
         builder = PubSubStageBuilder()
 
         stage_definition = {
@@ -129,7 +137,8 @@ class TestPubSubStageBuilder(TestCase):
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action.method'], e.details['wrong_fields'])
 
-    def test_given_valid_publish_pubsub_stage_with_missing_topic_in_action_then_exception(self):
+    @patch('folker.module.gcp.pubsub.builder.PubSubActionExecutor')
+    def test_given_valid_publish_pubsub_stage_with_missing_topic_in_action_then_exception(self, MockPubSubActionExecutor):
         builder = PubSubStageBuilder()
 
         stage_definition = {
@@ -149,7 +158,8 @@ class TestPubSubStageBuilder(TestCase):
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action.topic'], e.details['missing_fields'])
 
-    def test_given_valid_publish_pubsub_stage_with_missing_message_in_action_then_exception(self):
+    @patch('folker.module.gcp.pubsub.builder.PubSubActionExecutor')
+    def test_given_valid_publish_pubsub_stage_with_missing_message_in_action_then_exception(self, MockPubSubActionExecutor):
         builder = PubSubStageBuilder()
 
         stage_definition = {
@@ -169,7 +179,8 @@ class TestPubSubStageBuilder(TestCase):
         except InvalidSchemaDefinitionException as e:
             self.assertEqual(['action.message'], e.details['missing_fields'])
 
-    def test_given_valid_subscribe_pubsub_stage_with_missing_subscription_in_action_then_exception(self):
+    @patch('folker.module.gcp.pubsub.builder.PubSubActionExecutor')
+    def test_given_valid_subscribe_pubsub_stage_with_missing_subscription_in_action_then_exception(self, MockPubSubActionExecutor):
         builder = PubSubStageBuilder()
 
         stage_definition = {
