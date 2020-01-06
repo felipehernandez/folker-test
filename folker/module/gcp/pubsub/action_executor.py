@@ -5,6 +5,7 @@ from google.cloud.pubsub_v1 import PublisherClient, SubscriberClient
 
 from folker.model.task import ActionExecutor
 from folker.module.gcp.pubsub.data import PubSubMethod, PubSubStageData, PubSubActionData
+from folker.util.variable import recursive_replace_variables
 
 
 class PubSubActionExecutor(ActionExecutor):
@@ -28,22 +29,30 @@ class PubSubActionExecutor(ActionExecutor):
         {
             PubSubMethod.PUBLISH: self._publish,
             PubSubMethod.SUBSCRIBE: self._subscribe
-        }.get(stage_data.action.method)(stage_data.action, stage_context)
+        }.get(stage_data.action.method)(stage_data.action, test_context, stage_context)
 
         end = time.time()
         stage_context['elapsed_time'] = int((end - start) * 1000)
 
         return test_context, stage_context
 
-    def _publish(self, action: PubSubActionData, stage_context: dict):
-        topic_path = self.publisher.topic_path(action.project, action.topic)
-        future = self.publisher.publish(topic=topic_path, data=action.message.encode())
+    def _publish(self, action: PubSubActionData, test_context: dict, stage_context: dict):
+        project = recursive_replace_variables(test_context, stage_context, action.project)
+        topic = recursive_replace_variables(test_context, stage_context, action.topic)
+        topic_path = self.publisher.topic_path(project, topic)
+        message = recursive_replace_variables(test_context, stage_context, action.message)
+
+        future = self.publisher.publish(topic=topic_path, data=message.encode())
 
         stage_context['message_id'] = future.result()
 
-    def _subscribe(self, action: PubSubActionData, stage_context: dict):
-        subscription_path = self.subscriber.subscription_path(action.project, action.subscription)
+    def _subscribe(self, action: PubSubActionData, test_context: dict, stage_context: dict):
+
+        project = recursive_replace_variables(test_context, stage_context, action.project)
+        subscription = recursive_replace_variables(test_context, stage_context, action.subscription)
+        subscription_path = self.subscriber.subscription_path(project, subscription)
         response = self.subscriber.pull(subscription=subscription_path, max_messages=1)
+
         for message in response.received_messages:
             stage_context['message_id'] = message.ack_id
             stage_context['message_content'] = message.message.data.decode('UTF-8')

@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.module.default.action_executor import DefaultActionExecutor
+from folker.module.gcp.pubsub.action_executor import PubSubActionExecutor
 from folker.module.gcp.pubsub.builder import PubSubStageBuilder
 
 
@@ -50,7 +50,7 @@ class TestPubSubStageBuilder(TestCase):
         self.assertIsNotNone(stage.data)
         self.assertIsNotNone(stage.executors)
         self.assertIsNotNone(stage.executors.action)
-        self.assertEqual(DefaultActionExecutor, type(stage.executors.action))
+        self.assertEqual(PubSubActionExecutor, type(stage.executors.action))
         self.assertIsNotNone(stage.executors.assertion)
         self.assertIsNotNone(stage.executors.save)
         self.assertIsNotNone(stage.executors.log)
@@ -75,7 +75,7 @@ class TestPubSubStageBuilder(TestCase):
         self.assertIsNotNone(stage.data)
         self.assertIsNotNone(stage.executors)
         self.assertIsNotNone(stage.executors.action)
-        self.assertEqual(DefaultActionExecutor, type(stage.executors.action))
+        self.assertEqual(PubSubActionExecutor, type(stage.executors.action))
         self.assertIsNotNone(stage.executors.assertion)
         self.assertIsNotNone(stage.executors.save)
         self.assertIsNotNone(stage.executors.log)

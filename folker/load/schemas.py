@@ -24,6 +24,9 @@ class ActionSchema(Schema):
     json = fields.Dict()
     data = fields.Dict()
 
+    package = fields.String()
+    clazz = fields.String(data_key='class')
+
 
 class StageSchema(Schema):
     id = fields.String()

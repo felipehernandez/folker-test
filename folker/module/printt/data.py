@@ -1,4 +1,4 @@
-from copy import copy, deepcopy
+from copy import deepcopy
 
 from folker.model.data import StageData, ActionData
 from folker.model.error.load import InvalidSchemaDefinitionException
