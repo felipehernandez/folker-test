@@ -1,5 +1,5 @@
 from unittest import TestCase
-from unittest.mock import patch, Mock
+from unittest.mock import Mock
 
 from folker.model.error.load import InvalidSchemaDefinitionException
 from folker.module.gcp.pubsub.builder import PubSubStageBuilder
@@ -31,7 +31,8 @@ class TestPubSubStageBuilder(TestCase):
         self.assertFalse(recognises)
 
     def test_given_valid_publish_pubsub_stage_then_build(self):
-        builder = PubSubStageBuilder(action=Mock())
+        action = Mock()
+        builder = PubSubStageBuilder(action=action)
 
         stage_definition = {
             'name': 'pubsub_stage',
@@ -51,13 +52,14 @@ class TestPubSubStageBuilder(TestCase):
         self.assertIsNotNone(stage.data)
         self.assertIsNotNone(stage.executors)
         self.assertIsNotNone(stage.executors.action)
-        self.assertEqual(Mock(), stage.executors.action)
+        self.assertEqual(action), stage.executors.action)
         self.assertIsNotNone(stage.executors.assertion)
         self.assertIsNotNone(stage.executors.save)
         self.assertIsNotNone(stage.executors.log)
 
     def test_given_valid_subscribe_pubsub_stage_then_build(self):
-        builder = PubSubStageBuilder(action=Mock())
+        action = Mock()
+        builder = PubSubStageBuilder(action=action)
 
         stage_definition = {
             'name': 'pubsub_stage',
@@ -76,7 +78,7 @@ class TestPubSubStageBuilder(TestCase):
         self.assertIsNotNone(stage.data)
         self.assertIsNotNone(stage.executors)
         self.assertIsNotNone(stage.executors.action)
-        self.assertEqual(Mock(), stage.executors.action)
+        self.assertEqual(action, stage.executors.action)
         self.assertIsNotNone(stage.executors.assertion)
         self.assertIsNotNone(stage.executors.save)
         self.assertIsNotNone(stage.executors.log)
