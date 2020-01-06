@@ -20,10 +20,8 @@ class PubSubActionExecutor(ActionExecutor):
             self.credentials_path = credentials_path
             os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = self.credentials_path
 
-        self.publisher = PublisherClient()
-        self.subscriber = SubscriberClient()
-
     def execute(self, stage_data: PubSubStageData, test_context: dict, stage_context: dict) -> (dict, dict):
+
         start = time.time()
 
         {
@@ -37,6 +35,8 @@ class PubSubActionExecutor(ActionExecutor):
         return test_context, stage_context
 
     def _publish(self, action: PubSubActionData, test_context: dict, stage_context: dict):
+        self.publisher = PublisherClient()
+
         project = recursive_replace_variables(test_context, stage_context, action.project)
         topic = recursive_replace_variables(test_context, stage_context, action.topic)
         topic_path = self.publisher.topic_path(project, topic)
@@ -47,6 +47,7 @@ class PubSubActionExecutor(ActionExecutor):
         stage_context['message_id'] = future.result()
 
     def _subscribe(self, action: PubSubActionData, test_context: dict, stage_context: dict):
+        self.subscriber = SubscriberClient()
 
         project = recursive_replace_variables(test_context, stage_context, action.project)
         subscription = recursive_replace_variables(test_context, stage_context, action.subscription)

@@ -1,5 +1,6 @@
 from folker.load.stage import StageBuilderStrategy
 from folker.model.entity import Stage, StageExecutors
+from folker.model.task import ActionExecutor
 from folker.module.default.assert_executor import DefaultAssertExecutor
 from folker.module.default.log_executor import DefaultLogExecutor
 from folker.module.default.save_executor import DefaultSaveExecutor
@@ -9,12 +10,12 @@ from folker.module.gcp.pubsub.data import PubSubStageData
 
 class PubSubStageBuilder(StageBuilderStrategy):
 
-    def __init__(self) -> None:
+    def __init__(self, action: ActionExecutor = None) -> None:
         super().__init__()
-        self._init_executors()
+        self._init_executors(action)
 
-    def _init_executors(self):
-        self.executors = StageExecutors(action=PubSubActionExecutor(),
+    def _init_executors(self, action: ActionExecutor = None):
+        self.executors = StageExecutors(action=action if action else PubSubActionExecutor(),
                                         assertion=DefaultAssertExecutor(),
                                         save=DefaultSaveExecutor(),
                                         log=DefaultLogExecutor())

@@ -9,7 +9,7 @@ class DefaultAssertExecutor(AssertExecutor):
     def execute(self, stage_data: StageData, test_context: dict, stage_context: dict) -> (dict, dict):
         assertion_definitions = stage_data.assertions.assertions
 
-        if len(assertion_definitions) is 0:
+        if len(assertion_definitions) == 0:
             return test_context, stage_context
 
         executed, success, failures = 0, 0, []
