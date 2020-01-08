@@ -37,7 +37,7 @@ class TestProtobufStageBuilder(TestCase):
             'type': 'PROTOBUF',
             'action':
                 {
-                    'method': 'WRITE',
+                    'method': 'CREATE',
                     'package': 'a_protobuf_package',
                     'clazz': 'AClass',
                     'data':
@@ -78,7 +78,7 @@ class TestProtobufStageBuilder(TestCase):
             'type': 'REST',
             'action':
                 {
-                    'method': 'WRITE',
+                    'method': 'CREATE',
                     'clazz': 'AClass',
                     'data':
                         {'attribute_1': 'value_1'}
@@ -96,7 +96,7 @@ class TestProtobufStageBuilder(TestCase):
 
         stage_definition = {
             'name': 'protobuf_stage',
-            'type': 'REST',
+            'type': 'PROTOBUF',
             'action':
                 {
                     'package': 'a_protobuf_package',
@@ -117,10 +117,10 @@ class TestProtobufStageBuilder(TestCase):
 
         stage_definition = {
             'name': 'protobuf_stage',
-            'type': 'REST',
+            'type': 'PROTOBUF',
             'action':
                 {
-                    'method': 'WRITE',
+                    'method': 'CREATE',
                     'package': 'a_protobuf_package',
                     'data':
                         {'attribute_1': 'value_1'}
