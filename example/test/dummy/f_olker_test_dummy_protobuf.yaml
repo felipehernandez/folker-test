@@ -5,7 +5,7 @@ stages:
   - name: protobug_write_stage
     type: PROTOBUF
     action:
-      method: WRITE
+      method: CREATE
       package: a_protobuf_package
       class: AClass
       data:

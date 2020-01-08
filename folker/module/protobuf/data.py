@@ -7,7 +7,7 @@ from folker.model.error.load import InvalidSchemaDefinitionException
 
 class ProtobufMethod(Enum):
     LOAD = auto()
-    WRITE = auto()
+    CREATE = auto()
 
 
 class ProtobufActionData(ActionData):
