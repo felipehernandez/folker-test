@@ -14,7 +14,7 @@ class PubSubActionData(ActionData):
     method: PubSubMethod = None
     project: str
     topic: str
-    headers: dict = {}
+    attributes: dict = {}
     message: str
     subscription: str
     ack: bool = False
@@ -23,7 +23,7 @@ class PubSubActionData(ActionData):
                  method: str = None,
                  project: str = None,
                  topic: str = None,
-                 headers=None,
+                 attributes: dict = None,
                  message=None,
                  subscription=None,
                  ack: bool = False,
@@ -45,7 +45,7 @@ class PubSubActionData(ActionData):
                 self.topic = topic
             if message:
                 self.message = message
-            self.headers = headers if headers else {}
+            self.attributes = attributes if attributes else {}
         elif PubSubMethod.SUBSCRIBE is self.method:
             if subscription:
                 self.subscription = subscription
@@ -94,7 +94,7 @@ class PubSubActionData(ActionData):
                method: str = None,
                project: str = None,
                topic: str = None,
-               headers=None,
+               attributes: dict = None,
                message=None,
                subscription=None,
                ack: bool = False,
@@ -110,8 +110,8 @@ class PubSubActionData(ActionData):
             new_data.project = project
         if topic:
             new_data.topic = topic
-        if headers:
-            new_data.headers = headers
+        if attributes:
+            new_data.attributes = attributes
         if message:
             new_data.message = message
         if subscription:

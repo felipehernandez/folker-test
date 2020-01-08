@@ -41,8 +41,9 @@ class PubSubActionExecutor(ActionExecutor):
         topic = recursive_replace_variables(test_context, stage_context, action.topic)
         topic_path = self.publisher.topic_path(project, topic)
         message = recursive_replace_variables(test_context, stage_context, action.message)
+        attributes = recursive_replace_variables(test_context, stage_context, action.attributes)
 
-        future = self.publisher.publish(topic=topic_path, data=message.encode())
+        future = self.publisher.publish(topic=topic_path, data=message.encode(), **attributes)
 
         stage_context['message_id'] = future.result()
 
