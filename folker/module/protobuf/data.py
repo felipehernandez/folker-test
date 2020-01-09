@@ -51,7 +51,7 @@ class ProtobufActionData(ActionData):
             missing_fields.append('action.package')
         if not hasattr(self, 'clazz') or not self.clazz:
             missing_fields.append('action.class')
-        if hasattr(self, 'method') and self.method == ProtobufMethod.WRITE and (not hasattr(self, 'data') or not self.data):
+        if hasattr(self, 'method') and self.method == ProtobufMethod.CREATE and (not hasattr(self, 'data') or not self.data):
             missing_fields.append('action.data')
         if hasattr(self, 'method') and self.method == ProtobufMethod.LOAD and (not hasattr(self, 'message') or not self.message):
             missing_fields.append('action.message')

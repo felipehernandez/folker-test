@@ -75,7 +75,7 @@ class TestProtobufStageBuilder(TestCase):
 
         stage_definition = {
             'name': 'protobuf_stage',
-            'type': 'REST',
+            'type': 'PROTOBUF',
             'action':
                 {
                     'method': 'CREATE',
