@@ -19,7 +19,7 @@ class ProtobufActionExecutor(ActionExecutor):
             protobuf_action = stage_data.action
             {
                 'LOAD': self._load,
-                'WRITE': self._write
+                'CREATE': self._create
             }[protobuf_action.method.name](protobuf_action, stage_context, test_context)
 
         except Exception as e:
@@ -31,7 +31,7 @@ class ProtobufActionExecutor(ActionExecutor):
 
         return test_context, stage_context
 
-    def _write(self, protobuf_action: ProtobufActionData, stage_context, test_context):
+    def _create(self, protobuf_action: ProtobufActionData, stage_context, test_context):
         proto_package = recursive_replace_variables(test_context, stage_context, protobuf_action.package)
         proto_class = recursive_replace_variables(test_context, stage_context, protobuf_action.clazz)
         data = recursive_replace_variables(test_context, stage_context, protobuf_action.data)

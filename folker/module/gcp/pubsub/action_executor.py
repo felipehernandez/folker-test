@@ -1,7 +1,9 @@
+import json
 import os
 import time
 
 from google.cloud.pubsub_v1 import PublisherClient, SubscriberClient
+from google.cloud.pubsub_v1.proto.pubsub_pb2 import PubsubMessage
 
 from folker.model.task import ActionExecutor
 from folker.module.gcp.pubsub.data import PubSubMethod, PubSubStageData, PubSubActionData
@@ -43,6 +45,7 @@ class PubSubActionExecutor(ActionExecutor):
         message = recursive_replace_variables(test_context, stage_context, action.message)
         attributes = recursive_replace_variables(test_context, stage_context, action.attributes)
 
+        self._log_debug(topic=topic_path, attributes=attributes, message=message)
         future = self.publisher.publish(topic=topic_path, data=message.encode(), **attributes)
 
         stage_context['message_id'] = future.result()
@@ -53,11 +56,20 @@ class PubSubActionExecutor(ActionExecutor):
         project = recursive_replace_variables(test_context, stage_context, action.project)
         subscription = recursive_replace_variables(test_context, stage_context, action.subscription)
         subscription_path = self.subscriber.subscription_path(project, subscription)
+
+        self._log_debug(subscription=subscription_path, ack=action.ack)
         response = self.subscriber.pull(subscription=subscription_path, max_messages=1)
 
         for message in response.received_messages:
-            stage_context['message_id'] = message.ack_id
+            message: PubsubMessage
+            stage_context['ack_id'] = message.ack_id
+            stage_context['message_id'] = message.message.message_id
+            stage_context['publish_time'] = message.message.publish_time
+            stage_context['attributes'] = message.message.attributes
             stage_context['message_content'] = message.message.data.decode('UTF-8')
 
             if action.ack:
                 self.subscriber.acknowledge(subscription_path, [message.ack_id])
+
+    def _log_debug(self, **parameters):
+        self.logger.action_debug(json.dumps(parameters))

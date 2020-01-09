@@ -11,6 +11,7 @@ stages:
       topic: a-topic
       message: hello world
     log:
+      - 'Elapsed time: ${elapsed_time}'
       - 'Message id: ${message_id}'
 
   - id: 2
@@ -22,4 +23,9 @@ stages:
       subscription: a-topic-subscription
       ack: True
     log:
-      - 'Message id: ${message_content}'
+      - 'Elapsed time: ${elapsed_time}'
+      - 'ACK id: ${ack_id}'
+      - 'Message id: ${message_id}'
+      - 'Publish time: ${publish_time}'
+      - 'Attributes: ${attributes}'
+      - 'Message content: ${message_content}'
