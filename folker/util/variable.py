@@ -18,7 +18,7 @@ def resolve_variable_reference(test_context: dict, stage_context: dict, variable
 
     test_value = _resolve_variable_reference(test_context, variable_reference)
 
-    if test_value:
+    if test_value is not None:
         return test_value
 
     raise VariableReferenceResolutionException(variable_reference=variable_reference)
