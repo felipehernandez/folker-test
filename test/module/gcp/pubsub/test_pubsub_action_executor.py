@@ -58,13 +58,15 @@ class TestPubSubActionExecutor(TestCase):
         received_message = Mock()
         MockSubscriber.return_value.pull.return_value.received_messages = [received_message]
         received_message.ack_id = 'ack-id'
+        received_message.message.message_id = 'message-id'
         received_message.message.data.decode.return_value = 'a-message'
 
         test_context, stage_context = executor.execute(stage_data, {}, {})
 
         self.assertEqual({}, test_context)
         self.assertTrue('elapsed_time' in stage_context)
-        self.assertEqual('ack-id', stage_context['message_id'])
+        self.assertEqual('ack-id', stage_context['ack_id'])
+        self.assertEqual('message-id', stage_context['message_id'])
         self.assertEqual('a-message', stage_context['message_content'])
         MockSubscriber.return_value.acknowledge.assert_called_with('subscription-path', ['ack-id'])
 
@@ -89,12 +91,14 @@ class TestPubSubActionExecutor(TestCase):
         received_message = Mock()
         MockSubscriber.return_value.pull.return_value.received_messages = [received_message]
         received_message.ack_id = 'ack-id'
+        received_message.message.message_id = 'message-id'
         received_message.message.data.decode.return_value = 'a-message'
 
         test_context, stage_context = executor.execute(stage_data, {}, {})
 
         self.assertEqual({}, test_context)
         self.assertTrue('elapsed_time' in stage_context)
-        self.assertEqual('ack-id', stage_context['message_id'])
+        self.assertEqual('ack-id', stage_context['ack_id'])
+        self.assertEqual('message-id', stage_context['message_id'])
         self.assertEqual('a-message', stage_context['message_content'])
         self.assertFalse(MockSubscriber.return_value.acknowledge.assert_called())

@@ -5,6 +5,7 @@ import time
 from google.cloud.pubsub_v1 import PublisherClient, SubscriberClient
 from google.cloud.pubsub_v1.proto.pubsub_pb2 import PubsubMessage
 
+from folker.logger import SequentialLogger
 from folker.model.task import ActionExecutor
 from folker.module.gcp.pubsub.data import PubSubMethod, PubSubStageData, PubSubActionData
 from folker.util.variable import recursive_replace_variables
@@ -16,6 +17,7 @@ class PubSubActionExecutor(ActionExecutor):
 
     def __init__(self) -> None:
         super().__init__()
+        self.logger = SequentialLogger()
 
         credentials_path = os.getcwd() + '/credentials/gcp/gcp-credentials.json'
         if os.path.exists(credentials_path):
