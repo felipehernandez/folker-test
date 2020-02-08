@@ -2,26 +2,25 @@ from pathlib import Path
 
 import yaml
 
-from folker import templates, stage_templates
-from folker.load.schemas import TestSchema, TemplateSchema
-from folker.logger import Logger
+from folker.load.schemas import TestSchema  # , TemplateSchema
+from folker.logger.logger import SystemLogger
 from folker.model.entity import Test
 
 
-def load_and_initialize_template_files(logger: Logger) -> [Test]:
-    schema = TemplateSchema()
-    logger.loading_template_files()
-    schemas = load_schemas(logger, '**/folker_template*.yaml', schema)
+# def load_and_initialize_template_files(logger: Logger) -> [Test]:
+#     # schema = TemplateSchema()
+#     logger.loading_template_files()
+#     # schemas = load_schemas(logger, '**/folker_template*.yaml', schema)
+#
+#     # for schema in schemas:
+#     #     templates[schema.id] = schema
+#     #     for stage in schema.stages:
+#     #         stage_templates[stage.data.id] = stage
+#
+#     return templates, stage_templates
 
-    for schema in schemas:
-        templates[schema.id] = schema
-        for stage in schema.stages:
-            stage_templates[stage.data.id] = stage
 
-    return templates, stage_templates
-
-
-def load_test_files(logger: Logger) -> [Test]:
+def load_test_files(logger: SystemLogger) -> [Test]:
     schema = TestSchema()
     logger.loading_test_files()
     schemas = load_schemas(logger, '**/folker_test*.yaml', schema)
@@ -29,7 +28,7 @@ def load_test_files(logger: Logger) -> [Test]:
     return schemas
 
 
-def load_schemas(logger: Logger, file_name: str, schema):
+def load_schemas(logger: SystemLogger, file_name: str, schema):
     schemas = []
     valid_files = []
 
@@ -42,7 +41,7 @@ def load_schemas(logger: Logger, file_name: str, schema):
     return schemas
 
 
-def load_schema(filename: str, schema, valid_test_files, logger: Logger):
+def load_schema(filename: str, schema, valid_test_files, logger: SystemLogger):
     file_path = filename.resolve().as_uri()[7:]
     logger.loading_file(filename)
     try:
