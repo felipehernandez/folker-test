@@ -4,8 +4,8 @@ description: Partial PRINT template
 stages:
   - id: partial_print_stage_reference
     name: print_stage
-    type: PRINT
     action:
+      type: PRINT
       message: Hello from template
     save:
       used: '0+ 1'

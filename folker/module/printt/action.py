@@ -18,8 +18,7 @@ class PrintAction(Action):
         return deepcopy(self)
 
     def enrich(self, template: 'PrintAction'):
-        if self.message is None:
-            self.message = template.message
+        self._set_attribute_if_missing(template, 'message')
 
     def validate(self):
         missing_fields = []

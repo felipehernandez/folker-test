@@ -17,8 +17,7 @@ class WaitAction(Action):
         return deepcopy(self)
 
     def enrich(self, template: 'WaitAction'):
-        if self.time is None:
-            self.time = template.time
+        self._set_attribute_if_missing('time', template)
 
     def validate(self):
         missing_fields = []

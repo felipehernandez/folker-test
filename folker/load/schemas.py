@@ -3,6 +3,7 @@ from marshmallow_oneofschema import OneOfSchema
 
 from folker.model.entity import Test, Stage
 from folker.module.printt.action import PrintAction
+from folker.module.rest.action import RestAction
 from folker.module.void.action import VoidAction
 from folker.module.wait.action import WaitAction
 
@@ -35,11 +36,29 @@ class WaitActionSchema(Schema):
         return WaitAction(**data)
 
 
+class RestActionSchema(Schema):
+    type = fields.String()
+
+    method = fields.String()
+    host = fields.String()
+    uri = fields.String()
+    params = fields.Dict(keys=fields.String(), values=fields.String())
+    headers = fields.Dict(keys=fields.String(), values=fields.String())
+    body = fields.String()
+    json = fields.Dict()
+    data = fields.Dict()
+
+    @post_load
+    def make_action(self, data, **kwargs):
+        return RestAction(**data)
+
+
 class ActionSchema(OneOfSchema):
     type_schemas = {
         'VOID': VoidActionSchema,
         'PRINT': PrintActionSchema,
-        'WAIT': WaitActionSchema
+        'WAIT': WaitActionSchema,
+        'REST': RestActionSchema
     }
 
 

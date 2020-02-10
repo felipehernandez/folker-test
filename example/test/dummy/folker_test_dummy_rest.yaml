@@ -3,8 +3,8 @@ description: Dummy Test for Rest Stage
 
 stages:
   - name: Get all posts
-    type: REST
     action:
+      type: REST
       method: GET
       host: https://jsonplaceholder.typicode.com
       uri: posts
@@ -12,8 +12,8 @@ stages:
       - '${status_code} is 200'
 
   - name: Create a post
-    type: REST
     action:
+      type: REST
       method: POST
       host: https://jsonplaceholder.typicode.com
       uri: posts

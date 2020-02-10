@@ -37,6 +37,13 @@ class ConsoleSequentialTestLogger(TestLogger, ColorLogger):
     def message(self, message):
         self._log(self.COLOR_GREEN, message)
 
+    def action_debug(self, message):
+        if debug or trace:
+            self._log(self.COLOR_GREY, message)
+
+    def action_error(self, message):
+        self._log(self.COLOR_HIGH_RED, message)
+
     # Log
     def log_text(self, log: str):
         self._log(self.COLOR_WHITE, log)

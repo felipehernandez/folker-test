@@ -78,6 +78,12 @@ class TestLogger(ABC):
     @abstractmethod
     def message(self, message): pass
 
+    @abstractmethod
+    def action_error(self, message): pass
+
+    @abstractmethod
+    def action_debug(self, message): pass
+
     # Assertions
     @abstractmethod
     def assertion_success(self, assertion: str): pass

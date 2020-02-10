@@ -11,7 +11,7 @@ class TestWaitAction(TestCase):
     def setUp(self) -> None:
         self.action = WaitAction()
 
-    def test_validate_missing_message(self):
+    def test_validate_missing_time(self):
         with self.assertRaises(InvalidSchemaDefinitionException) as execution_context:
             self.action.validate()
 

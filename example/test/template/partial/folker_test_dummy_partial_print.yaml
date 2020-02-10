@@ -14,6 +14,7 @@ stages:
 
   - id: partial_print_stage_reference
     action:
+      type: PRINT
       message: New hello
     log:
       - Hello 3

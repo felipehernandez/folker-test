@@ -20,7 +20,9 @@ class StageStep(ABC):
 
 
 class Action(StageStep, ABC):
-    pass
+    def _set_attribute_if_missing(self, template, attribute: str):
+        if self.__getattribute__(attribute) is None:
+            self.__setattr__(attribute, template.__getattribute__(attribute))
 
 
 class StageSave(StageStep):
