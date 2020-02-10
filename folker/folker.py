@@ -1,6 +1,6 @@
 from folker.executor.parallel_executor import ParallelExecutor
 from folker.executor.sequential_executor import SequentialExecutor
-from folker.load.files import load_test_files
+from folker.load.files import load_test_files, load_and_initialize_template_files
 from folker.logger import logger_factory
 from folker.model.error.folker import TestSuiteResultException
 
@@ -9,6 +9,7 @@ def run():
     logger = logger_factory.build_system_logger()
     sequential_executor = SequentialExecutor()
     parallel_executor = ParallelExecutor()
+    load_and_initialize_template_files(logger)
     tests = load_test_files(logger)
 
     parallel_tests = [test for test in tests if test.parallel]

@@ -9,6 +9,12 @@ class VoidAction(Action):
     def __init__(self, **kargs) -> None:
         super().__init__()
 
+    def enrich(self, template: 'VoidAction'):
+        pass
+
+    def validate(self):
+        pass
+
     def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
         return test_context, stage_context
 

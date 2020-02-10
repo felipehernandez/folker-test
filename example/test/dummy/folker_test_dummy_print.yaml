@@ -3,6 +3,6 @@ description: Dummy Test for Print Stage
 
 stages:
   - name: print_stage
-    type: PRINT
     action:
+      type: PRINT
       message: Hello world!

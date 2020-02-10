@@ -1,34 +1,44 @@
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from copy import copy
 
 from folker.logger.logger import TestLogger
 from folker.model.error.assertions import UnresolvableAssertionException, MalformedAssertionException, TestFailException
 from folker.model.error.error import SourceException
+from folker.model.error.load import InvalidSchemaDefinitionException
 from folker.util.variable import replace_variables, map_variables
 
 
-class Action:
+class StageStep(ABC):
+    @abstractmethod
+    def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):        pass
 
     @abstractmethod
-    def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
-        pass
+    def enrich(self, template): pass
+
+    @abstractmethod
+    def validate(self): pass
 
 
-class StageSave:
+class Action(StageStep, ABC):
+    pass
+
+
+class StageSave(StageStep):
     save: dict
 
     def __init__(self, save: dict = {}) -> None:
         super().__init__()
         self.save = save if save else {}
 
-    def enrich(self, save: dict = {}):
-        new_data = StageSave()
-        new_data.save = {}
-        new_data.save = {**self.save, **save}
-        return new_data
-
     def __copy__(self):
         return copy(self)
+
+    def enrich(self, template: 'StageSave'):
+        new_data = {**self.save, **template.save}
+        self.save = new_data
+
+    def validate(self):
+        pass
 
     def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
         for (variable, saving) in self.save.items():
@@ -41,18 +51,20 @@ class StageSave:
         return test_context, stage_context
 
 
-class StageLog:
+class StageLog(StageStep):
     logs: [str]
 
     def __init__(self, logs: [str] = []) -> None:
         super().__init__()
         self.logs = logs if logs else []
 
-    def extend(self, logs: [str] = []):
-        new_data = StageLog()
-        new_data.logs = []
-        new_data.logs.extend(self.logs + logs)
-        return new_data
+    def enrich(self, template: 'StageLog'):
+        new_data = []
+        new_data.extend(self.logs + template.logs)
+        self.logs = new_data
+
+    def validate(self):
+        pass
 
     def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
         for log in self.logs:
@@ -61,18 +73,20 @@ class StageLog:
         return test_context, stage_context
 
 
-class StageAssertions:
+class StageAssertions(StageStep):
     assertions: [str]
 
     def __init__(self, assertions: [str] = []) -> None:
         super().__init__()
         self.assertions = assertions
 
-    def enrich(self, assertions: [str] = []):
-        new_data = StageAssertions()
-        new_data.assertions = []
-        new_data.assertions.extend(self.assertions + assertions)
-        return new_data
+    def enrich(self, template: 'StageAssertions'):
+        new_data = []
+        new_data.extend(self.assertions + template.assertions)
+        self.assertions = new_data
+
+    def validate(self):
+        pass
 
     def __copy__(self):
         return copy(self)
@@ -123,7 +137,7 @@ class StageAssertions:
             raise TestFailException(failure_messages=failures)
 
 
-class Stage:
+class Stage(StageStep):
     id: str
     name: str
 
@@ -150,6 +164,33 @@ class Stage:
         self.log = StageLog(log)
         self.assertions = StageAssertions(assertions)
 
+    def enrich(self, template: 'Stage'):
+        if self.name == None:
+            self.name = template.name
+
+        if self.action:
+            self.action.enrich(template.action)
+        else:
+            self.action = template.action.__copy__()
+        if self.save:
+            self.save.enrich(template.save)
+        else:
+            self.save = template.save.__copy__()
+        if self.log:
+            self.log.enrich(template.log)
+        else:
+            self.log = template.log.__copy__()
+        if self.assertions:
+            self.assertions.enrich(template.assertions)
+        else:
+            self.assertions = template.assertions.__copy__()
+
+    def validate(self):
+        self.action.validate()
+        self.save.validate()
+        self.log.validate()
+        self.assertions.validate()
+
     def execute(self, logger: TestLogger, test_context: dict):
         stage_context = {}
         logger.stage_start(self.name, test_context)
@@ -168,6 +209,7 @@ class Stage:
 
 
 class Test:
+    id: str
     name: str
     description: str
     parallel: bool
@@ -175,16 +217,29 @@ class Test:
     stages: [Stage]
 
     def __init__(self,
+                 id: str = None,
                  name: str = 'UNDEFINED',
                  description: str = None,
                  parallel: bool = False,
                  stages: [Stage] = []
                  ) -> None:
         super().__init__()
+        self.id = id
         self.name = name
         self.description = description
         self.parallel = parallel
         self.stages = stages
+
+    def validate(self):
+        missing_fields = []
+        if self.name == None:
+            missing_fields.append('test.name')
+
+        if len(missing_fields) > 0:
+            raise InvalidSchemaDefinitionException(missing_fields=missing_fields)
+
+        for stage in self.stages:
+            stage.validate()
 
     def execute(self, logger: TestLogger, test_context: dict = None):
         if test_context is None:

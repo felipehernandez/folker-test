@@ -41,6 +41,9 @@ class ConsoleParallelTestLogger(TestLogger, ColorLogger):
         if trace:
             self._log(self.COLOR_GREY, 'STAGE CONTEXT: {}'.format(stage_context))
 
+    def message(self, message):
+        self._log(self.COLOR_GREEN, message)
+
     # Log
     def log_text(self, log: str):
         self._log(self.COLOR_WHITE, log)

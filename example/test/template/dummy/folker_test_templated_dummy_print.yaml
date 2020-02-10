@@ -5,6 +5,6 @@ stages:
   - id: print_stage_reference
 
   - name: print_stage
-    type: PRINT
     action:
+      type: PRINT
       message: Hello world again!

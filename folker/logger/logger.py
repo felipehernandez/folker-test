@@ -36,6 +36,9 @@ class ColorLogger:
 class SystemLogger(ABC):
     # Setup
     @abstractmethod
+    def loading_template_files(self): pass
+
+    @abstractmethod
     def loading_test_files(self): pass
 
     @abstractmethod
@@ -71,6 +74,9 @@ class TestLogger(ABC):
     # Action
     @abstractmethod
     def action_executed(self, stage_context: dict): pass
+
+    @abstractmethod
+    def message(self, message): pass
 
     # Assertions
     @abstractmethod
