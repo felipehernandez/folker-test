@@ -3,7 +3,7 @@ from unittest import TestCase
 from folker.module.void.action import VoidAction
 
 
-class TestVoidStage(TestCase):
+class TestVoidAction(TestCase):
     action: VoidAction
 
     def setUp(self) -> None:

@@ -4,13 +4,14 @@ from marshmallow_oneofschema import OneOfSchema
 from folker.model.entity import Test, Stage
 from folker.module.printt.action import PrintAction
 from folker.module.void.action import VoidAction
+from folker.module.wait.action import WaitAction
 
 
 class VoidActionSchema(Schema):
     type = fields.String()
 
     @post_load
-    def make_foo(self, data, **kwargs):
+    def make_action(self, data, **kwargs):
         return VoidAction(**data)
 
 
@@ -20,14 +21,25 @@ class PrintActionSchema(Schema):
     message = fields.String()
 
     @post_load
-    def make_foo(self, data, **kwargs):
+    def make_action(self, data, **kwargs):
         return PrintAction(**data)
+
+
+class WaitActionSchema(Schema):
+    type = fields.String()
+
+    time = fields.Float()
+
+    @post_load
+    def make_action(self, data, **kwargs):
+        return WaitAction(**data)
 
 
 class ActionSchema(OneOfSchema):
     type_schemas = {
         'VOID': VoidActionSchema,
-        'PRINT': PrintActionSchema
+        'PRINT': PrintActionSchema,
+        'WAIT': WaitActionSchema
     }
 
 
