@@ -47,9 +47,7 @@ class RestAction(Action):
             except:
                 raise InvalidSchemaDefinitionException(wrong_fields=['action.method'])
 
-        if host:
-            self.host = host
-
+        self.host = host
         self.uri = uri
         self.query_parameters = params if params else {}
         self.headers = headers if headers else {}

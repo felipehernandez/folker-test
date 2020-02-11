@@ -3,8 +3,8 @@ description: Dummy Test for Protobuf Stage
 
 stages:
   - name: protobug_write_stage
-    type: PROTOBUF
     action:
+      type: PROTOBUF
       method: CREATE
       package: a_protobuf_package
       class: AClass
@@ -19,8 +19,8 @@ stages:
       proto_serialize: ${proto_serialize}
 
   - name: protobug_load_stage
-    type: PROTOBUF
     action:
+      type: PROTOBUF
       method: LOAD
       package: a_protobuf_package
       class: AClass
