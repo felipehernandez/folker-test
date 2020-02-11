@@ -254,6 +254,9 @@ class Test:
         except SourceException as e:
             logger.test_finish_error(e)
             return False
+        except Exception as e:
+            logger.test_finish_error(e)
+            return False
 
         logger.test_finish()
 

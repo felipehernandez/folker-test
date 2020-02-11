@@ -1,11 +1,11 @@
-name: Rest Test
-description: Dummy Test for Rest Stage
+name: PubSub Test
+description: Dummy Test for PubSub Stage
 
 stages:
   - id: 1
     name: publish
-    type: PUBSUB
     action:
+      type: PUBSUB
       method: PUBLISH
       project: a-project
       topic: a-topic
@@ -16,8 +16,8 @@ stages:
 
   - id: 2
     name: subscribe
-    type: PUBSUB
     action:
+      type: PUBSUB
       method: SUBSCRIBE
       project: a-project
       subscription: a-topic-subscription

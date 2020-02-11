@@ -2,7 +2,7 @@ name: Protobuf Test
 description: Dummy Test for Protobuf Stage
 
 stages:
-  - name: protobug_write_stage
+  - name: protobuf_write_stage
     action:
       type: PROTOBUF
       method: CREATE
@@ -18,7 +18,7 @@ stages:
     save:
       proto_serialize: ${proto_serialize}
 
-  - name: protobug_load_stage
+  - name: protobuf_load_stage
     action:
       type: PROTOBUF
       method: LOAD

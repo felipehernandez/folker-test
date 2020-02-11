@@ -2,6 +2,7 @@ from marshmallow import Schema, fields, post_load, pre_load
 from marshmallow_oneofschema import OneOfSchema
 
 from folker.model.entity import Test, Stage
+from folker.module.gcp.pubsub.action import PubSubAction
 from folker.module.printt.action import PrintAction
 from folker.module.protobuf.action import ProtobufAction
 from folker.module.rest.action import RestAction
@@ -68,13 +69,30 @@ class ProtobufActionSchema(Schema):
         return ProtobufAction(**data)
 
 
+class PubSubActionSchema(Schema):
+    type = fields.String()
+
+    method = fields.String()
+    project = fields.String()
+    topic = fields.String()
+    attributes = fields.Dict(keys=fields.String(), values=fields.String())
+    message = fields.String()
+    subscription = fields.String()
+    ack = fields.Boolean()
+
+    @post_load
+    def make_action(self, data, **kwargs):
+        return PubSubAction(**data)
+
+
 class ActionSchema(OneOfSchema):
     type_schemas = {
         'VOID': VoidActionSchema,
         'PRINT': PrintActionSchema,
         'WAIT': WaitActionSchema,
         'REST': RestActionSchema,
-        'PROTOBUF': ProtobufActionSchema
+        'PROTOBUF': ProtobufActionSchema,
+        'PUBSUB': PubSubActionSchema
     }
 
 
