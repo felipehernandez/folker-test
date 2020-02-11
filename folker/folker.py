@@ -3,9 +3,12 @@ from folker.executor.sequential_executor import SequentialExecutor
 from folker.load.files import load_test_files, load_and_initialize_template_files
 from folker.logger import logger_factory
 from folker.model.error.folker import TestSuiteResultException
+from folker.util.parameters import load_command_arguments
 
 
 def run():
+    load_command_arguments()
+
     logger = logger_factory.build_system_logger()
     sequential_executor = SequentialExecutor()
     parallel_executor = ParallelExecutor()

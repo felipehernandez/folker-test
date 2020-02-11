@@ -29,18 +29,21 @@ def usage():
 
 
 command_options = {}
-try:
-    opts, args = getopt.getopt(sys.argv[1:],
-                               'dtf:c:',
-                               ['debug', 'trace', 'file=', 'context='])
-    for command_option in opts:
-        key = _resolve_command_option_key(command_option[0])
-        command_options[key] = _merge_parameter(key, command_options.get(key), command_option[1])
-except getopt.GetoptError as err:
-    # print help information and exit:
-    print(err)  # will print something like "option -a not recognized"
-    usage()
-    sys.exit(2)
+
+
+def load_command_arguments():
+    try:
+        opts, args = getopt.getopt(sys.argv[1:],
+                                   'dtf:c:',
+                                   ['debug', 'trace', 'file=', 'context='])
+        for command_option in opts:
+            key = _resolve_command_option_key(command_option[0])
+            command_options[key] = _merge_parameter(key, command_options.get(key), command_option[1])
+    except getopt.GetoptError as err:
+        # print help information and exit:
+        print(err)  # will print something like "option -a not recognized"
+        usage()
+        sys.exit(2)
 
 
 def is_debug():
@@ -52,7 +55,7 @@ def is_trace():
 
 
 def log_to_file():
-    return command_options['file'] if 'file' in command_options else None
+    return command_options.get('file', None)
 
 
 def capture_parameters_context():
