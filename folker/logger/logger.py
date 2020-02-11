@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from folker.model.error.error import SourceException
 
 
-class ColorLogger:
+class ColorLogger(ABC):
     COLOR_DEFAULT = '\033[0m'
 
     COLOR_BLACK = '\033[0;30m'
@@ -31,6 +31,27 @@ class ColorLogger:
             return '{}{}{}{}'.format(color, text, self.COLOR_DEFAULT, end)
         else:
             return '{}{}{}'.format(color, text, self.COLOR_DEFAULT)
+
+
+class FileLogger(ABC):
+    file_name: str
+    report: [str]
+    current_index = 0
+
+    def __init__(self, file_name: str) -> None:
+        super().__init__()
+        self.file_name = file_name
+        self.report = []
+
+    # Util
+    def _log(self, text, end=None):
+        self.report.append(text + (end if end else '\n'))
+
+    def _write_to_file(self):
+        f = open(self.file_name, 'a+')
+        for report_entry in self.report:
+            f.write(report_entry)
+        f.close()
 
 
 class SystemLogger(ABC):

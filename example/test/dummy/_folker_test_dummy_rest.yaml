@@ -1,5 +1,6 @@
 name: Rest Test
 description: Dummy Test for Rest Stage
+parallel: true
 
 stages:
   - name: Get all posts
