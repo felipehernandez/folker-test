@@ -2,10 +2,13 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from folker import is_debug, is_trace
-from folker.util.parameters import capture_parameters_context, load_command_arguments
+from folker.util.parameters import command_options, capture_parameters_context, load_command_arguments
 
 
 class TestStringMethods(TestCase):
+
+    def setUp(self) -> None:
+        command_options.clear()
 
     @patch('sys.argv', ['method', '-d'])
     def test_debug_flag(self):
@@ -47,22 +50,22 @@ class TestStringMethods(TestCase):
     def test_capture_parameters_context_no_values(self):
         load_command_arguments()
 
-        self.assertEquals({}, capture_parameters_context())
+        self.assertEqual({}, capture_parameters_context())
 
-    @patch('sys.argv', ['method', '-c key:value'])
+    @patch('sys.argv', ['method', '-ckey:value'])
     def test_capture_parameters_context_one_value(self):
         load_command_arguments()
 
-        self.assertEquals({'key': 'value'}, capture_parameters_context())
+        self.assertEqual({'key': 'value'}, capture_parameters_context())
 
     @patch('sys.argv', ['method', '--context=key:value'])
     def test_capture_parameters_context_long_one_value(self):
         load_command_arguments()
 
-        self.assertEquals({'key': 'value'}, capture_parameters_context())
+        self.assertEqual({'key': 'value'}, capture_parameters_context())
 
-    @patch('sys.argv', ['method', '-c key=value', '-c key2=value2'])
+    @patch('sys.argv', ['method', '-ckey:value', '-ckey2:value2'])
     def test_capture_parameters_context_multiple_values(self):
         load_command_arguments()
 
-        self.assertEquals({'key': 'value', 'key2': 'value2'}, capture_parameters_context())
+        self.assertEqual({'key': 'value', 'key2': 'value2'}, capture_parameters_context())

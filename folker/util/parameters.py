@@ -24,8 +24,8 @@ def _merge_parameter(key: str, old_value, new_value: str):
 def usage():
     print('-d               --debug                 debug')
     print('-t               --trace                 trace')
-    print('-f XXX.XX        --file=XXX.XX           log to file XXX.XX')
-    print('-c key:value     --context=key:value     ad to context key=value')
+    print('-fXXX.XX         --file=XXX.XX           log to file XXX.XX')
+    print('-ckey:value      --context=key:value     add to context key=value')
 
 
 command_options = {}
