@@ -7,8 +7,6 @@ from folker.util.parameters import load_command_arguments
 
 
 def run():
-    load_command_arguments()
-
     logger = logger_factory.build_system_logger()
     sequential_executor = SequentialExecutor()
     parallel_executor = ParallelExecutor()
