@@ -1,0 +1,31 @@
+name: PubSub Test
+description: Dummy Test for PubSub Stage
+
+stages:
+  - id: 1
+    name: publish
+    action:
+      type: PUBSUB
+      method: PUBLISH
+      project: a-project
+      topic: a-topic
+      message: hello world
+    log:
+      - 'Elapsed time: ${elapsed_time}'
+      - 'Message id: ${message_id}'
+
+  - id: 2
+    name: subscribe
+    action:
+      type: PUBSUB
+      method: SUBSCRIBE
+      project: a-project
+      subscription: a-topic-subscription
+      ack: True
+    log:
+      - 'Elapsed time: ${elapsed_time}'
+      - 'ACK id: ${ack_id}'
+      - 'Message id: ${message_id}'
+      - 'Publish time: ${publish_time}'
+      - 'Attributes: ${attributes}'
+      - 'Message content: ${message_content}'

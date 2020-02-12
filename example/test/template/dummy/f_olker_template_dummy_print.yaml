@@ -1,9 +1,0 @@
-id: simple_print_template
-description: Dummy PRINT template
-
-stages:
-  - id: print_stage_reference
-    name: print_stage
-    type: PRINT
-    action:
-      message: Hello world!

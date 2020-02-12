@@ -1,0 +1,21 @@
+name: Void Test
+description: Dummy Test for Void Stage
+parallel: True
+
+stages:
+  - name: void_stage
+    action:
+      type: VOID
+    save:
+      test: 'passing'
+    log:
+      - 'Hello world'
+
+
+  - name: void_stage2
+    action:
+      type: VOID
+    log:
+      - ${test}
+    assert:
+      - '1+1 == 2'

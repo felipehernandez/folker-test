@@ -1,0 +1,32 @@
+name: Protobuf Test
+description: Dummy Test for Protobuf Stage
+
+stages:
+  - name: protobuf_write_stage
+    action:
+      type: PROTOBUF
+      method: CREATE
+      package: a_protobuf_package
+      class: AClass
+      data:
+        attribute_1: value_1
+        attribute_2: value_2
+    log:
+      - ${elapsed_time}
+      - ${proto_object}
+      - ${proto_serialize}
+    save:
+      proto_serialize: ${proto_serialize}
+
+  - name: protobuf_load_stage
+    action:
+      type: PROTOBUF
+      method: LOAD
+      package: a_protobuf_package
+      class: AClass
+      message: ${proto_serialize}
+    log:
+      - ${elapsed_time}
+      - ${proto_object}
+      - ${proto_json}
+      - ${proto_dict}

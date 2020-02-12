@@ -1,0 +1,9 @@
+name: Print Test
+description: Dummy Test for Print Stage
+parallel: true
+
+stages:
+  - name: print_stage
+    action:
+      type: PRINT
+      message: Hello world!

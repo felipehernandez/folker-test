@@ -1,0 +1,10 @@
+name: Templated test
+description: Templated test
+
+stages:
+  - id: print_stage_reference
+
+  - name: print_stage
+    action:
+      type: PRINT
+      message: Hello world again!

@@ -1,8 +1,0 @@
-name: Print Test
-description: Dummy Test for Print Stage
-
-stages:
-  - name: print_stage
-    type: PRINT
-    action:
-      message: Hello world!
