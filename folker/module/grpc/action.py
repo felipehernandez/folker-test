@@ -15,7 +15,7 @@ class GrpcAction(Action):
 
     package: str
     stub: str
-    uri: str
+    method: str
     data: object
 
     def __init__(self,
@@ -23,6 +23,7 @@ class GrpcAction(Action):
                  uri: str = None,
                  package: str = None,
                  stub: str = None,
+                 method: str = None,
                  data: str = None,
                  **kargs) -> None:
         super().__init__()
@@ -32,6 +33,7 @@ class GrpcAction(Action):
 
         self.package = package
         self.stub = stub
+        self.method = method
 
         self.data = data
 
@@ -43,6 +45,7 @@ class GrpcAction(Action):
         self._set_attribute_if_missing(template, 'uri')
         self._set_attribute_if_missing(template, 'package')
         self._set_attribute_if_missing(template, 'stub')
+        self._set_attribute_if_missing(template, 'method')
         self._set_attribute_if_missing(template, 'data')
 
     def validate(self):
@@ -54,8 +57,8 @@ class GrpcAction(Action):
             missing_fields.append('action.package')
         if not hasattr(self, 'stub') or not self.stub:
             missing_fields.append('action.stub')
-        if not hasattr(self, 'data') or not self.data:
-            missing_fields.append('action.data')
+        if not hasattr(self, 'method') or not self.method:
+            missing_fields.append('action.method')
 
         if len(missing_fields) > 0:
             raise InvalidSchemaDefinitionException(missing_fields=missing_fields)
@@ -72,7 +75,8 @@ class GrpcAction(Action):
 
         data = resolve_variable_reference(test_context, stage_context, self.data)
 
-        response = stub.hello(data)
+        method_to_call = getattr(stub, self.method)
+        response = method_to_call(data)
         stage_context['response'] = response
         print(response)
 

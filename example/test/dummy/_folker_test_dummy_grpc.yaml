@@ -21,6 +21,7 @@ stages:
       host: 12.34.56.78:8080
       package: protos.TestProto_pb2_grpc
       stub: TestServiceStub
+      method: hello
       data: request
     save:
       response: ${response}
