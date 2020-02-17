@@ -1,6 +1,6 @@
 import json
 
-from folker import trace, debug
+from folker import is_debug, is_trace
 from folker.logger.logger import TestLogger, FileLogger
 from folker.model.error.error import SourceException
 
@@ -31,19 +31,19 @@ class FileParallelTestLogger(TestLogger, FileLogger):
     def stage_start(self, stage_name: str, test_context: dict):
         self._log('Stage: {name}'.format(name=stage_name))
 
-        if trace:
+        if is_trace():
             self._log('CONTEXT: {}'.format(test_context))
 
     # Action
     def action_executed(self, stage_context: dict):
-        if trace:
+        if is_trace():
             self._log('STAGE CONTEXT: {}'.format(stage_context))
 
     def message(self, message):
         self._log(message)
 
     def action_debug(self, message):
-        if debug or trace:
+        if is_debug():
             self._log(message)
 
     def action_error(self, message):
@@ -55,7 +55,7 @@ class FileParallelTestLogger(TestLogger, FileLogger):
 
     # Assertions
     def assertion_success(self, assertion: str):
-        if debug or trace:
+        if is_debug():
             self._log('\t{}'.format(assertion))
 
     def assertion_fail(self, assertion: str, variables: dict):
@@ -68,5 +68,5 @@ class FileParallelTestLogger(TestLogger, FileLogger):
     def assert_test_result(self, total, success, failures):
         if success is not total:
             self._log('\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success, failures, total))
-        elif debug or trace:
+        elif is_debug():
             self._log('\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success, failures, total))

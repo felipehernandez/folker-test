@@ -71,6 +71,19 @@ class SystemLogger(ABC):
     @abstractmethod
     def loading_files_completed(self, files): pass
 
+    # Protos
+    @abstractmethod
+    def loading_proto_files(self): pass
+
+    @abstractmethod
+    def loading_proto_file(self, filename): pass
+
+    @abstractmethod
+    def loading_proto_file_error(self, file_name: str, proto_command: str, exception: Exception): pass
+
+    @abstractmethod
+    def loading_proto_files_completed(self, files): pass
+
     # Wrap up
     @abstractmethod
     def assert_execution_result(self, total, success, failures): pass

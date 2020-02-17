@@ -6,11 +6,11 @@ stages:
     action:
       type: PROTOBUF
       method: CREATE
-      package: a_protobuf_package
-      class: AClass
+      package: protos.TestProto_pb2
+      class: TestRequest
       data:
-        attribute_1: value_1
-        attribute_2: value_2
+        firstName: Test
+        lastName: ing1
     log:
       - ${elapsed_time}
       - ${proto_object}
@@ -22,8 +22,8 @@ stages:
     action:
       type: PROTOBUF
       method: LOAD
-      package: a_protobuf_package
-      class: AClass
+      package: protos.TestProto_pb2
+      class: TestResponse
       message: ${proto_serialize}
     log:
       - ${elapsed_time}
