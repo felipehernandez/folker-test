@@ -2,6 +2,8 @@ import sys
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
+from grpc._channel import _MultiThreadedRendezvous
+
 from folker.model.error.load import InvalidSchemaDefinitionException
 from folker.module.grpc.action import GrpcAction
 
@@ -96,3 +98,32 @@ class TestGrpcAction(TestCase):
         mocked_stub.assert_called_with(mocked_channel)
         mocked_method.assert_called_with('data_value')
         self.assertEqual('returned_value', stage_context['response'])
+
+    @patch('grpc.insecure_channel')
+    def test_execution_get_list(self, mocked_grpc):
+        logger = Mock()
+
+        self.action.host = 'a_host'
+        self.action.package = 'a_package'
+        self.action.stub = 'a_stub'
+        self.action.method = 'a_method'
+        self.action.data = 'date_key'
+
+        mocked_channel = Mock()
+        mocked_module = Mock()
+        mocked_stub = Mock()
+        mocked_method = Mock()
+        mocked_grpc.return_value = mocked_channel
+        sys.modules['a_package'] = mocked_module
+        mocked_module.a_stub = mocked_stub
+        mocked_stub.return_value.a_method = mocked_method
+        mocked_response = Mock(_MultiThreadedRendezvous)
+        mocked_response.__iter__ = Mock(return_value=iter(['item1', 'item2']))
+        mocked_method.return_value = mocked_response
+
+        test_context, stage_context = self.action.execute(logger, {'date_key': 'data_value'}, {})
+
+        mocked_grpc.assert_called_with('a_host')
+        mocked_stub.assert_called_with(mocked_channel)
+        mocked_method.assert_called_with('data_value')
+        self.assertEqual(['item1', 'item2'], stage_context['response'])

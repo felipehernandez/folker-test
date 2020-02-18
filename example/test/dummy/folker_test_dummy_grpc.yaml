@@ -12,13 +12,14 @@ stages:
         firstName: Test
         lastName: ing1
     save:
+      host: 12.34.56.78:8080
       request: ${proto_object}
       serialised_request: ${proto_serialize}
 
-  - name: call server
+  - name: call server single
     action:
       type: GRPC
-      host: 12.34.56.78:8080
+      host: ${host}
       package: protos.TestProto_pb2_grpc
       stub: TestServiceStub
       method: hello
@@ -29,4 +30,21 @@ stages:
       - ${elapsed_time}
       - ${response}
     assert:
-      - '${response} is not None'
+      - ${response} is not None
+
+  - name: call server stream
+    action:
+      type: GRPC
+      host: ${host}
+      package: protos.TestProto_pb2_grpc
+      stub: TestServiceStub
+      method: hellos
+      data: request
+    save:
+      response: ${response}
+    log:
+      - ${elapsed_time}
+      - ${response}
+    assert:
+      - ${response} is not None
+      - len(${response}) > 1
