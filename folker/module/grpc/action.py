@@ -1,8 +1,8 @@
 import time
+from collections import Iterable
 from copy import deepcopy
 
 import grpc
-from grpc._channel import _MultiThreadedRendezvous
 
 from folker.logger.logger import TestLogger
 from folker.model.entity import Action
@@ -79,7 +79,7 @@ class GrpcAction(Action):
         method_to_call = getattr(stub, self.method)
         response = method_to_call(data)
 
-        if isinstance(response, _MultiThreadedRendezvous):
+        if isinstance(response, Iterable):
             stage_context['response'] = []
             for item in response:
                 stage_context['response'].append(item)
