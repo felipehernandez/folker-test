@@ -32,6 +32,8 @@ command_options = {}
 
 
 def load_command_arguments():
+    if len(sys.argv) == 1:
+        return
     try:
         opts, args = getopt.getopt(sys.argv[1:],
                                    'dtf:c:',
@@ -47,7 +49,7 @@ def load_command_arguments():
 
 
 def is_debug():
-    return 'debug' in command_options
+    return 'debug' in command_options or is_trace()
 
 
 def is_trace():

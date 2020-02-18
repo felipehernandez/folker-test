@@ -1,0 +1,32 @@
+name: GRPC Test
+description: Dummy Test for GRPC Stage
+
+stages:
+  - name: proto-create
+    action:
+      type: PROTOBUF
+      method: CREATE
+      package: protos.TestProto_pb2
+      class: TestRequest
+      data:
+        firstName: Test
+        lastName: ing1
+    save:
+      request: ${proto_object}
+      serialised_request: ${proto_serialize}
+
+  - name: call server
+    action:
+      type: GRPC
+      host: 12.34.56.78:8080
+      package: protos.TestProto_pb2_grpc
+      stub: TestServiceStub
+      method: hello
+      data: request
+    save:
+      response: ${response}
+    log:
+      - ${elapsed_time}
+      - ${response}
+    assert:
+      - '${response} is not None'

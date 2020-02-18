@@ -3,6 +3,7 @@ from marshmallow_oneofschema import OneOfSchema
 
 from folker.model.entity import Test, Stage
 from folker.module.gcp.pubsub.action import PubSubAction
+from folker.module.grpc.action import GrpcAction
 from folker.module.printt.action import PrintAction
 from folker.module.protobuf.action import ProtobufAction
 from folker.module.rest.action import RestAction
@@ -85,6 +86,22 @@ class PubSubActionSchema(Schema):
         return PubSubAction(**data)
 
 
+class GrpcActionSchema(Schema):
+    type = fields.String()
+
+    host = fields.String()
+    uri = fields.String()
+
+    package = fields.String()
+    stub = fields.String()
+    method = fields.String()
+    data = fields.String()
+
+    @post_load
+    def make_action(self, data, **kwargs):
+        return GrpcAction(**data)
+
+
 class ActionSchema(OneOfSchema):
     type_schemas = {
         'VOID': VoidActionSchema,
@@ -92,7 +109,8 @@ class ActionSchema(OneOfSchema):
         'WAIT': WaitActionSchema,
         'REST': RestActionSchema,
         'PROTOBUF': ProtobufActionSchema,
-        'PUBSUB': PubSubActionSchema
+        'PUBSUB': PubSubActionSchema,
+        'GRPC': GrpcActionSchema
     }
 
 

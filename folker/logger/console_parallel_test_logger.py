@@ -1,6 +1,6 @@
 import json
 
-from folker import trace, debug
+from folker import is_debug, is_trace
 from folker.logger.logger import TestLogger, ColorLogger
 from folker.model.error.error import SourceException
 
@@ -33,19 +33,19 @@ class ConsoleParallelTestLogger(TestLogger, ColorLogger):
     def stage_start(self, stage_name: str, test_context: dict):
         self._log(self.COLOR_HIGH_YELLOW, 'Stage: {name}'.format(name=stage_name))
 
-        if trace:
+        if is_trace():
             self._log(self.COLOR_GREY, 'CONTEXT: {}'.format(test_context))
 
     # Action
     def action_executed(self, stage_context: dict):
-        if trace:
+        if is_trace():
             self._log(self.COLOR_GREY, 'STAGE CONTEXT: {}'.format(stage_context))
 
     def message(self, message):
         self._log(self.COLOR_GREEN, message)
 
     def action_debug(self, message):
-        if debug or trace:
+        if is_debug():
             self._log(self.COLOR_GREY, message)
 
     def action_error(self, message):
@@ -57,7 +57,7 @@ class ConsoleParallelTestLogger(TestLogger, ColorLogger):
 
     # Assertions
     def assertion_success(self, assertion: str):
-        if debug or trace:
+        if is_debug():
             self._log(self.COLOR_GREEN, '\t{}'.format(assertion))
 
     def assertion_fail(self, assertion: str, variables: dict):
@@ -70,7 +70,7 @@ class ConsoleParallelTestLogger(TestLogger, ColorLogger):
     def assert_test_result(self, total, success, failures):
         if success is not total:
             self._log(self.COLOR_HIGH_RED, '\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success, failures, total))
-        elif debug or trace:
+        elif is_debug():
             self._log(self.COLOR_CYAN, '\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success, failures, total))
 
     # Util

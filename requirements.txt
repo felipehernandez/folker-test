@@ -7,3 +7,5 @@ PyYAML==5.1.2
 requests==2.22.0
 google-cloud-pubsub
 marshmallow-oneofschema
+grpcio
+grpcio-tools

@@ -15,8 +15,6 @@ def _test_execution(test: Test):
 
 class ParallelExecutor:
     def execute(self, parallel_tests: [Test]):
-        test_context = capture_parameters_context()
-
         pool = Pool(cpu_count())
         results = pool.map(_test_execution, parallel_tests)
         pool.close()

@@ -3,11 +3,7 @@ import os
 
 from folker.util.parameters import is_debug, is_trace, load_command_arguments
 
-load_command_arguments()
-debug = is_debug()
-trace = is_trace()
 templates, stage_templates = {}, {}
-
 
 # load assistants
 file_path = os.path.dirname(os.path.realpath(__file__))
