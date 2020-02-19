@@ -19,7 +19,7 @@ class ConsoleSequentialTestLogger(TestLogger, ColorLogger):
         self._log(self.COLOR_GREEN, 'Test successful')
 
     def test_finish_error(self, e: SourceException):
-        self._log(self.COLOR_RED, 'Test successful')
+        self._log(self.COLOR_RED, 'Test unsuccessful')
         self._log(self.COLOR_RED, e)
 
     # Stage

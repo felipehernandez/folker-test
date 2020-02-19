@@ -10,7 +10,7 @@ from folker.util.variable import replace_variables, map_variables
 
 class StageStep(ABC):
     @abstractmethod
-    def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):        pass
+    def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict): pass
 
     @abstractmethod
     def enrich(self, template): pass
@@ -139,7 +139,7 @@ class StageAssertions(StageStep):
             raise TestFailException(failure_messages=failures)
 
 
-class Stage(StageStep):
+class Stage():
     id: str
     name: str
 
@@ -167,7 +167,7 @@ class Stage(StageStep):
         self.assertions = StageAssertions(assertions)
 
     def enrich(self, template: 'Stage'):
-        if self.name == None:
+        if self.name is None:
             self.name = template.name
 
         if self.action:
@@ -188,13 +188,21 @@ class Stage(StageStep):
             self.assertions = template.assertions.__copy__()
 
     def validate(self):
-        self.action.validate()
-        self.save.validate()
-        self.log.validate()
-        self.assertions.validate()
+        if self.action is not None:
+            self.action.validate()
+        else:
+            fields_message = '{}[name].action'.format(self.name) if self.name else '{}[id].action'.format(self.id)
+            raise InvalidSchemaDefinitionException(wrong_fields=[fields_message])
+        if self.save is not None:
+            self.save.validate()
+        if self.log is not None:
+            self.log.validate()
+        if self.assertions is not None:
+            self.assertions.validate()
 
-    def execute(self, logger: TestLogger, test_context: dict):
-        stage_context = {}
+    def execute(self, logger: TestLogger, test_context: dict, stage_context=None):
+        if stage_context is None:
+            stage_context = {}
         logger.stage_start(self.name, test_context)
 
         try:
