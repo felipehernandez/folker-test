@@ -31,7 +31,7 @@ def load_test_files(logger: SystemLogger) -> [Test]:
 
 def _enrich_stages(schema_definition: Test):
     for stage in schema_definition.stages:
-        if stage.id != None and stage.id in stage_templates:
+        if stage.id is not None and stage.id in stage_templates:
             stage.enrich(stage_templates.get(stage.id))
     schema_definition.validate()
 

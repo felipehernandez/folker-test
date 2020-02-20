@@ -1,4 +1,5 @@
 import time
+from collections import Iterable
 from copy import deepcopy
 
 import grpc
@@ -73,12 +74,17 @@ class GrpcAction(Action):
         StubDefinition = getattr(imported_module, self.stub)
         stub = StubDefinition(channel)
 
-        data = resolve_variable_reference(test_context, stage_context, self.data)
+        data = resolve_variable_reference(test_context, stage_context, str(self.data))
 
         method_to_call = getattr(stub, self.method)
         response = method_to_call(data)
-        stage_context['response'] = response
-        print(response)
+
+        if isinstance(response, Iterable):
+            stage_context['response'] = []
+            for item in response:
+                stage_context['response'].append(item)
+        else:
+            stage_context['response'] = response
 
         end = time.time()
         stage_context['elapsed_time'] = int((end - start) * 1000)

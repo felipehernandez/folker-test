@@ -23,7 +23,7 @@ class FileSequentialTestLogger(TestLogger, FileLogger):
         self._write_to_file()
 
     def test_finish_error(self, e: SourceException):
-        self._log('Test successful')
+        self._log('Test unsuccessful')
         self._log(e)
         self._write_to_file()
 

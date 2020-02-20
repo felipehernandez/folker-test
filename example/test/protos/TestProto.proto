@@ -12,4 +12,5 @@ message TestResponse {
 
 service TestService {
     rpc hello (TestRequest) returns (TestResponse);
+    rpc hellos (TestRequest) returns (stream TestResponse);
 }
