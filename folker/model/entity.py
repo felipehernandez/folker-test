@@ -249,7 +249,11 @@ class Test:
             raise InvalidSchemaDefinitionException(missing_fields=missing_fields)
 
         for stage in self.stages:
-            stage.validate()
+            try:
+                stage.validate()
+            except InvalidSchemaDefinitionException as e:
+                message = '{}.{}'.format(self.name, e.details['wrong_fields'][0])
+                raise InvalidSchemaDefinitionException(wrong_fields=[message])
 
     def execute(self, logger: TestLogger, test_context: dict = None):
         if test_context is None:
