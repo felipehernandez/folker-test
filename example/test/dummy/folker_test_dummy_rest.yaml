@@ -1,0 +1,152 @@
+name: Rest Test
+description: Dummy Test for Rest Stage
+parallel: true
+
+stages:
+  - name: Setup test variables
+    action:
+      type: VOID
+    save:
+      mockserver_host: http://localhost:1080
+
+  - name: Reset mockserver
+    action:
+      type: REST
+      method: PUT
+      host: ${mockserver_host}
+      uri: reset
+    assert:
+      - ${status_code} == 200
+
+  - name: Setup mockserver GET
+    action:
+      type: REST
+      method: PUT
+      host: ${mockserver_host}
+      uri: expectation
+      headers:
+        Content-Type: application/json
+      json:
+        httpRequest:
+          method: GET
+          path: /asdGET
+        httpResponse:
+          statusCode: 200
+          headers:
+            - name: content-type
+              values:
+                - application/json
+          body: "{\"method\":\"asdGET\"}"
+    assert:
+      - ${status_code} == 201
+
+  - name: GET from server
+    action:
+      type: REST
+      method: GET
+      host: ${mockserver_host}
+      uri: asdGET
+    assert:
+      - ${status_code} == 200
+      - ${response_json.method} == 'asdGET'
+
+  - name: Setup mockserver GET with query parameters
+    action:
+      type: REST
+      method: PUT
+      host: ${mockserver_host}
+      uri: expectation
+      headers:
+        Content-Type: application/json
+      json:
+        httpRequest:
+          method: GET
+          path: /queryGET
+          queryStringParameters:
+            parameter1:
+              - value1
+        httpResponse:
+          statusCode: 200
+          headers:
+            - name: content-type
+              values:
+                - application/json
+          body: "{\"method\":\"queryGET\"}"
+    assert:
+      - ${status_code} == 201
+
+  - name: GET from server with query
+    action:
+      type: REST
+      method: GET
+      host: ${mockserver_host}
+      uri: queryGET
+      params:
+        parameter1: value1
+    assert:
+      - ${status_code} == 200
+      - ${response_json.method} == 'queryGET'
+
+  - name: Setup mockserver  POST
+    action:
+      type: REST
+      method: PUT
+      host: ${mockserver_host}
+      uri: expectation
+      headers:
+        Content-Type: application/json
+      json:
+        httpRequest:
+          method: POST
+          path: /asdPOST
+        httpResponse:
+          statusCode: 200
+          headers:
+            - name: content-type
+              values:
+                - application/json
+          body: "{\"method\":\"asdPOST\"}"
+    assert:
+      - ${status_code} == 201
+
+  - name: POST from server
+    action:
+      type: REST
+      method: POST
+      host: ${mockserver_host}
+      uri: asdPOST
+    assert:
+      - ${status_code} == 200
+      - ${response_json.method} == 'asdPOST'
+
+  - name: Setup mockserver DELETE
+    action:
+      type: REST
+      method: PUT
+      host: ${mockserver_host}
+      uri: expectation
+      headers:
+        Content-Type: application/json
+      json:
+        httpRequest:
+          method: DELETE
+          path: /asdDELETE
+        httpResponse:
+          statusCode: 200
+          headers:
+            - name: content-type
+              values:
+                - application/json
+          body: "{\"method\":\"asdDELETE\"}"
+    assert:
+      - ${status_code} == 201
+
+  - name: DELETE from server
+    action:
+      type: REST
+      method: DELETE
+      host: ${mockserver_host}
+      uri: asdDELETE
+    assert:
+      - ${status_code} == 200
+      - ${response_json.method} == 'asdDELETE'

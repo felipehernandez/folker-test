@@ -30,3 +30,8 @@ steps:
         - master
         - release
       event: push
+
+services:
+  name: mockserver
+  image: mockserver/mockserver:latest
+  ports: 1080:1080
