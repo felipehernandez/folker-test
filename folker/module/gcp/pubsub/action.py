@@ -4,6 +4,7 @@ import time
 from copy import deepcopy
 from enum import Enum, auto
 
+import grpc
 from google.cloud.pubsub_v1 import PublisherClient, SubscriberClient
 from google.cloud.pubsub_v1.proto.pubsub_pb2 import PubsubMessage
 
@@ -20,6 +21,7 @@ class PubSubMethod(Enum):
 
 class PubSubAction(Action):
     method: PubSubMethod
+    host: str
     project: str
     topic: str
     attributes: dict = {}
@@ -29,6 +31,7 @@ class PubSubAction(Action):
 
     def __init__(self,
                  method: str = None,
+                 host: str = None,
                  project: str = None,
                  topic: str = None,
                  subscription=None,
@@ -44,6 +47,7 @@ class PubSubAction(Action):
             except:
                 raise InvalidSchemaDefinitionException(wrong_fields=['action.method'])
 
+        self.host = host
         self.project = project
         self.attributes = attributes
 
@@ -58,6 +62,7 @@ class PubSubAction(Action):
 
     def enrich(self, template: 'ProtobufAction'):
         self._set_attribute_if_missing(template, 'method')
+        self._set_attribute_if_missing(template, 'host')
         self._set_attribute_if_missing(template, 'project')
         self._set_attribute_if_missing(template, 'topic')
         self._set_attribute_if_missing(template, 'subscription')
@@ -114,7 +119,7 @@ class PubSubAction(Action):
     def _publish(self, logger: TestLogger, test_context: dict, stage_context: dict):
         self._authenticate()
 
-        self.publisher = PublisherClient()
+        self.publisher = PublisherClient(channel=grpc.insecure_channel(target=self.host)) if self.host else PublisherClient()
 
         project = recursive_replace_variables(test_context, stage_context, self.project)
         topic = recursive_replace_variables(test_context, stage_context, self.topic)
@@ -130,7 +135,7 @@ class PubSubAction(Action):
     def _subscribe(self, logger: TestLogger, test_context: dict, stage_context: dict):
         self._authenticate()
 
-        self.subscriber = SubscriberClient()
+        self.subscriber = SubscriberClient(channel=grpc.insecure_channel(target=self.host)) if self.host else SubscriberClient()
 
         project = recursive_replace_variables(test_context, stage_context, self.project)
         subscription = recursive_replace_variables(test_context, stage_context, self.subscription)

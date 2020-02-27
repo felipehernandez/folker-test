@@ -2,25 +2,25 @@ name: PubSub Test
 description: Dummy Test for PubSub Stage
 
 stages:
-  - id: 1
-    name: publish
+  - name: publish
     action:
       type: PUBSUB
       method: PUBLISH
-      project: a-project
-      topic: a-topic
+      host: gcp-pubsub-emulator:8681
+      project: folker-test-gcp-test
+      topic: a_topic
       message: hello world
     log:
       - 'Elapsed time: ${elapsed_time}'
       - 'Message id: ${message_id}'
 
-  - id: 2
-    name: subscribe
+  - name: subscribe
     action:
       type: PUBSUB
       method: SUBSCRIBE
-      project: a-project
-      subscription: a-topic-subscription
+      host: gcp-pubsub-emulator:8681
+      project: folker-test-gcp-test
+      subscription: a_subscription
       ack: True
     log:
       - 'Elapsed time: ${elapsed_time}'
@@ -29,3 +29,5 @@ stages:
       - 'Publish time: ${publish_time}'
       - 'Attributes: ${attributes}'
       - 'Message content: ${message_content}'
+    assert:
+      - ${message_content} == 'hello world'

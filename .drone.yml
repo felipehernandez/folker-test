@@ -38,3 +38,7 @@ steps:
 services:
   - name: mockserver
     image: mockserver/mockserver:latest
+  - name: gcp-pubsub-emulator
+    image: messagebird/gcloud-pubsub-emulator:latest
+    env:
+      PUBSUB_PROJECT1: "folker-test-gcp-test,a_topic:a_subscription"
