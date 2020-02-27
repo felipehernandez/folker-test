@@ -7,7 +7,8 @@ stages:
     action:
       type: VOID
     save:
-      mockserver_host: http://localhost:1080
+#      mockserver_host: http://localhost:1080
+      mockserver_host: mockserver:1080
 
   - name: Reset mockserver
     action:
