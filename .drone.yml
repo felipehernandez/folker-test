@@ -15,7 +15,7 @@ steps:
       - mkdir protos
       - ls -la
       - cp -a ./example/protos/* ./protos/
-      - sleep 5 # time for mockserver to start
+      - sleep 10 # time for mockserver to start
       - python3 folker.py -t
 
   - name: bake
