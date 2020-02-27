@@ -12,6 +12,7 @@ steps:
     image: python:3.8-slim
     commands:
       - pip install -r requirements.txt
+      - cp example/* protos
       - python3 folker.py -t
 
   - name: bake
