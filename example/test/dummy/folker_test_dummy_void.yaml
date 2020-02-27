@@ -1,6 +1,5 @@
 name: Void Test
 description: Dummy Test for Void Stage
-parallel: True
 
 stages:
   - name: void_stage

@@ -1,9 +1,0 @@
-name: Wait Test P-2
-description: Dummy Test for Wait Stage
-parallel: true
-
-stages:
-  - name: wait_stage
-    type: WAIT
-    action:
-      time: 3
