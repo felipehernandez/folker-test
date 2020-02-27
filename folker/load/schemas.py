@@ -74,6 +74,7 @@ class PubSubActionSchema(Schema):
     type = fields.String()
 
     method = fields.String()
+    host = fields.String()
     project = fields.String()
     topic = fields.String()
     attributes = fields.Dict(keys=fields.String(), values=fields.String())

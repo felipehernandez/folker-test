@@ -1,8 +1,0 @@
-name: Wait Test S-1
-description: Dummy Test for Wait Stage
-
-stages:
-  - name: wait_stage
-    type: WAIT
-    action:
-      time: 1

@@ -8,6 +8,16 @@ steps:
       - pip install -r requirements.txt
       - python3 -m unittest -v
 
+  - name: integration-test
+    image: python:3.8-slim
+    commands:
+      - pip install -r requirements.txt
+      - mkdir protos
+      - ls -la
+      - cp -a ./example/protos/* ./protos/
+      - sleep 10 # time for mockserver to start
+      - python3 folker.py -t
+
   - name: bake
     image: plugins/docker
     settings:
@@ -24,3 +34,11 @@ steps:
         - master
         - release
       event: push
+
+services:
+  - name: mockserver
+    image: mockserver/mockserver:latest
+  - name: gcp-pubsub-emulator
+    image: messagebird/gcloud-pubsub-emulator:latest
+    environment:
+      PUBSUB_PROJECT1: "folker-test-gcp-test,a_topic:a_subscription"
