@@ -32,6 +32,6 @@ steps:
       event: push
 
 services:
-  name: mockserver
-  image: mockserver/mockserver:latest
-  ports: 1080:1080
+  - name: mockserver
+    image: mockserver/mockserver:latest
+    ports: 1080:1080
