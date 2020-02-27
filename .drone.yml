@@ -13,7 +13,7 @@ steps:
     commands:
       - pip install -r requirements.txt
       - mkdir protos
-      - cp -a /example/. /protos/
+      - cp -a /example/protos/* /protos/
       - sleep 5 # time for mockserver to start
       - python3 folker.py -t
 
