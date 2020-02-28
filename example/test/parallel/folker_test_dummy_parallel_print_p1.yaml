@@ -1,0 +1,19 @@
+name: Wait Test Parallel print 1
+description: Dummy Test for Wait Stage
+parallel: true
+
+stages:
+  - name: print stage 1
+    action:
+      type: PRINT
+      message: printing parallel 1.1
+
+  - name: print stage 2
+    action:
+      type: PRINT
+      message: printing parallel 1.2
+
+  - name: print stage 3
+    action:
+      type: PRINT
+      message: printing parallel 1.3
