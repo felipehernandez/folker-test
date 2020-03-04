@@ -61,3 +61,14 @@ class TestStageSave(TestCase):
 
         self.assertEqual({'save_in': 2}, test_context)
         self.assertEqual({}, stage_context)
+
+    def test_given_complex_save_then_complex_variable_in_context(self):
+        self.stage.save = {
+            'save.in.1': '0 + 1',
+            'save.in.2': '1 + 1'
+        }
+
+        test_context, stage_context = self.stage.execute(None, {}, {})
+
+        self.assertEqual({'save': {'in': {'1': 1, '2': 2}}}, test_context)
+        self.assertEqual({}, stage_context)
