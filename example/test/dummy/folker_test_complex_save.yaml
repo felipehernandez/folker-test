@@ -1,0 +1,24 @@
+name: Complex save Test
+description: Dummy Test for complex save
+
+stages:
+  - name: save1
+    action:
+      type: VOID
+    save:
+      root.0: value1
+      attribute.with.multiple.layers: value
+
+  - name: save2
+    action:
+      type: VOID
+    save:
+      root.1: value2
+
+  - name: asserts
+    action:
+      type: VOID
+    assert:
+      - ${root.0} == 'value1'
+      - ${root.1} == 'value2'
+      - ${attribute.with.multiple.layers} == 'value'

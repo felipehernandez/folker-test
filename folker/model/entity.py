@@ -1,3 +1,4 @@
+import collections
 from abc import abstractmethod, ABC
 from copy import copy
 
@@ -45,12 +46,39 @@ class StageSave(StageStep):
     def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
         for (variable, saving) in self.save.items():
             try:
-                updated_assertion, variables = map_variables(test_context, stage_context, saving)
-                test_context[variable] = eval(updated_assertion)
+                updated_saving, variables = map_variables(test_context, stage_context, saving)
+                saving_value = eval(updated_saving)
             except Exception as e:
-                test_context[variable] = replace_variables(test_context={}, stage_context=stage_context, text=saving)
+                saving_value = replace_variables(test_context={}, stage_context=stage_context, text=saving)
+
+            self._resolve_variable(test_context, variable, saving_value)
 
         return test_context, stage_context
+
+    def _resolve_variable(self, test_context: dict, variable, value) -> (str, object):
+        variable_children = variable.split('.')
+
+        if len(variable_children) == 1:
+            test_context[variable] = value
+            return
+
+        variable_root = variable_children[0]
+        variable_value = {variable_children[-1]: value}
+        for element in reversed(variable_children[1:-1]):
+            variable_value = {element: variable_value}
+
+        test_context[variable_root] = self._merge_dictionaries(test_context.get(variable_root, {}), variable_value)
+
+    def _merge_dictionaries(self, stable: dict, new_values: dict):
+        if len(new_values) == 0:
+            return stable
+        for k, v in new_values.items():
+            if (k in stable and isinstance(stable[k], dict)
+                    and isinstance(new_values[k], collections.Mapping)):
+                self._merge_dictionaries(stable[k], new_values[k])
+            else:
+                stable[k] = new_values[k]
+        return stable
 
 
 class StageLog(StageStep):
