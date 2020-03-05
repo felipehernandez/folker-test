@@ -23,11 +23,12 @@ class ConsoleSequentialTestLogger(TestLogger, ColorLogger):
         self._log(self.COLOR_RED, e)
 
     # Stage
-    def stage_start(self, stage_name: str, test_context: dict):
+    def stage_start(self, stage_name: str, test_context: dict, stage_context: dict):
         self._log(self.COLOR_HIGH_YELLOW, 'Stage: {name}'.format(name=stage_name))
 
         if is_trace():
-            self._log(self.COLOR_GREY, 'CONTEXT: {}'.format(test_context))
+            self._log(self.COLOR_GREY, 'TEST CONTEXT: {}'.format(test_context))
+            self._log(self.COLOR_GREY, 'STAGE CONTEXT: {}'.format(stage_context))
 
     # Action
     def action_executed(self, stage_context: dict):

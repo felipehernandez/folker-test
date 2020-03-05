@@ -1,0 +1,22 @@
+name: Print Test
+description: Dummy Test for Print Stage
+
+stages:
+  - name: foreach stage
+    foreach:
+      element: [ 'alpha', 'beta', 'charlie']
+    action:
+      type: PRINT
+      message: Hello ${element} (${element_index})!
+    save:
+      elements.${element_index}: ${element}
+
+  - name: assertions
+    foreach:
+      value: ${elements}
+    action:
+      type: VOID
+    assert:
+      - ${elements.0} == 'alpha'
+      - ${elements.1} == 'beta'
+      - ${elements.2} == 'charlie'

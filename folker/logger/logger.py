@@ -103,7 +103,7 @@ class TestLogger(ABC):
 
     # Stage
     @abstractmethod
-    def stage_start(self, stage_name: str, test_context: dict): pass
+    def stage_start(self, stage_name: str, test_context: dict, stage_context: dict): pass
 
     # Action
     @abstractmethod
