@@ -168,7 +168,7 @@ class StageAssertions(StageStep):
             raise TestFailException(failure_messages=failures)
 
 
-class Stage():
+class Stage:
     id: str
     name: str
 
