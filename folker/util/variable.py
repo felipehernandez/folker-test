@@ -3,8 +3,14 @@ import re
 from folker.model.error.variables import VariableReferenceResolutionException
 
 
+def contains_variable_reference(text):
+    if not isinstance(text, str):
+        return []
+    return re.findall('\${([^{}]+)}', text)
+
+
 def replace_variables(test_context: dict, stage_context: dict, text):
-    references = re.findall('\${([^{}]+)}', text)
+    references = contains_variable_reference(text)
     for reference in references:
         value = resolve_variable_reference(test_context=test_context, stage_context=stage_context, variable_reference=reference)
         text = text.replace('${' + reference + '}', str(value))
@@ -25,7 +31,7 @@ def resolve_variable_reference(test_context: dict, stage_context: dict, variable
 
 
 def map_variables(test_context: dict, stage_context: dict, text) -> (str, dict):
-    references = re.findall('\${([^{}]+)}', text)
+    references = contains_variable_reference(text)
     variables = {}
     for reference in references:
         value = resolve_variable_reference(test_context=test_context, stage_context=stage_context, variable_reference=reference)
@@ -61,3 +67,13 @@ def recursive_replace_variables(test_context: dict, stage_context: dict, object)
         return object
     else:
         return object
+
+
+def extract_value_from_cntext(test_context: dict, stage_context: dict, text):
+    if not isinstance(text, str):
+        return text
+    reference = contains_variable_reference(text)
+    if len(reference) == 0:
+        return text
+
+    return resolve_variable_reference(test_context, stage_context, reference[0])

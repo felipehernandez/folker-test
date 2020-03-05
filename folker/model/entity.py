@@ -6,7 +6,7 @@ from folker.logger.logger import TestLogger
 from folker.model.error.assertions import UnresolvableAssertionException, MalformedAssertionException, TestFailException
 from folker.model.error.error import SourceException
 from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.util.variable import replace_variables, map_variables
+from folker.util.variable import replace_variables, map_variables, extract_value_from_cntext
 
 
 class StageStep(ABC):
@@ -45,6 +45,7 @@ class StageSave(StageStep):
 
     def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
         for (variable, saving) in self.save.items():
+            variable = replace_variables(test_context, stage_context, variable)
             try:
                 updated_saving, variables = map_variables(test_context, stage_context, saving)
                 saving_value = eval(updated_saving)
@@ -171,6 +172,8 @@ class Stage():
     id: str
     name: str
 
+    foreach: dict
+
     action: Action
 
     save: StageSave
@@ -180,6 +183,7 @@ class Stage():
     def __init__(self,
                  id: str = None,
                  name: str = None,
+                 foreach: dict = {},
                  action: Action = None,
                  log: [str] = None,
                  save: dict = None,
@@ -189,6 +193,8 @@ class Stage():
         self.id = id
         self.name = name
 
+        self.foreach = foreach
+
         self.action = action
         self.save = StageSave(save)
         self.log = StageLog(log)
@@ -197,6 +203,10 @@ class Stage():
     def enrich(self, template: 'Stage'):
         if self.name is None:
             self.name = template.name
+
+        if self.foreach != {}:
+            new_data = {**self.foreach, **template.foreach}
+            self.foreach = new_data
 
         if self.action:
             self.action.enrich(template.action)
@@ -228,10 +238,21 @@ class Stage():
         if self.assertions is not None:
             self.assertions.validate()
 
-    def execute(self, logger: TestLogger, test_context: dict, stage_context=None):
-        if stage_context is None:
-            stage_context = {}
-        logger.stage_start(self.name, test_context)
+    def execute(self, logger: TestLogger, test_context: dict, stage_context: dict = {}):
+        if len(self.foreach) == 0:
+            return self._execute(logger, test_context, stage_context)
+        else:
+            key, values = self.foreach.popitem()
+            values = extract_value_from_cntext(test_context, stage_context, values)
+
+            for index, value in enumerate(values):
+                updated_stage_context = {**stage_context, key: value, key + '_index': index}
+                test_context = self.execute(logger, test_context, updated_stage_context)
+
+            return test_context
+
+    def _execute(self, logger: TestLogger, test_context: dict, stage_context: dict):
+        logger.stage_start(self.name, test_context, stage_context)
 
         try:
             test_context, stage_context = self.action.execute(logger=logger, test_context=test_context, stage_context=stage_context)

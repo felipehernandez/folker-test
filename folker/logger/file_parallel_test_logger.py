@@ -28,11 +28,12 @@ class FileParallelTestLogger(TestLogger, FileLogger):
         self._write_to_file()
 
     # Stage
-    def stage_start(self, stage_name: str, test_context: dict):
+    def stage_start(self, stage_name: str, test_context: dict, stage_context: dict):
         self._log('Stage: {name}'.format(name=stage_name))
 
         if is_trace():
-            self._log('CONTEXT: {}'.format(test_context))
+            self._log('TEST CONTEXT: {}'.format(test_context))
+            self._log('STAGE CONTEXT: {}'.format(stage_context))
 
     # Action
     def action_executed(self, stage_context: dict):

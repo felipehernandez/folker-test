@@ -119,6 +119,7 @@ class StageSchema(Schema):
     id = fields.String()
     name = fields.String()
 
+    foreach = fields.Mapping()
     action = fields.Nested(ActionSchema)
     save = fields.Mapping()
     log = fields.List(fields.String())
