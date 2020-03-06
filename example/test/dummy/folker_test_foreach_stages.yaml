@@ -20,3 +20,21 @@ stages:
       - ${elements.0} == 'alpha'
       - ${elements.1} == 'beta'
       - ${elements.2} == 'charlie'
+
+  - name: multiple variables foreach
+    foreach:
+      element1: [ 1, 2 ]
+      element2: [ 3, 7 ]
+    action:
+      type: VOID
+    save:
+      elements.${element1_index}${element2_index}: ${element1}+${element2}
+
+  - name: assert complex save
+    action:
+      type: VOID
+    assert:
+      - ${elements.00} == 4
+      - ${elements.01} == 8
+      - ${elements.10} == 5
+      - ${elements.11} == 9

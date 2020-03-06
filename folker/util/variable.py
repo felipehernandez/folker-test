@@ -69,11 +69,33 @@ def recursive_replace_variables(test_context: dict, stage_context: dict, object)
         return object
 
 
-def extract_value_from_cntext(test_context: dict, stage_context: dict, text):
-    if not isinstance(text, str):
-        return text
-    reference = contains_variable_reference(text)
-    if len(reference) == 0:
-        return text
+def extract_value_from_context(test_context: dict, stage_context: dict, reference):
+    if not isinstance(reference, str):
+        return reference
+    context_value = contains_variable_reference(reference)
+    if len(context_value) == 0:
+        return reference
 
-    return resolve_variable_reference(test_context, stage_context, reference[0])
+    return resolve_variable_reference(test_context, stage_context, context_value[0])
+
+
+def build_contexts(test_context: dict = {}, stage_context: dict = {}, variables: dict = {}) -> [dict]:
+    contexts = [{}]
+
+    for key in reversed(list(variables.keys())):
+        new_contexts = []
+        values = variables.get(key)
+        if isinstance(values, str):
+            values = extract_value_from_context(test_context, stage_context, values)
+            if isinstance(values, str):
+                values = [values]
+        for index, value in enumerate(values):
+            for context in [{**context} for context in contexts]:
+                new_contexts.append({
+                    **context,
+                    key: value,
+                    key + '_index': index
+                })
+        contexts = new_contexts
+
+    return contexts
