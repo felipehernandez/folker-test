@@ -146,6 +146,8 @@ class TestSchema(Schema):
     description = fields.String()
     parallel = fields.Boolean(default=False)
 
+    foreach = fields.Mapping()
+
     stages = fields.Nested(StageSchema, many=True)
 
     @post_load

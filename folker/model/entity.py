@@ -6,7 +6,8 @@ from folker.logger.logger import TestLogger
 from folker.model.error.assertions import UnresolvableAssertionException, MalformedAssertionException, TestFailException
 from folker.model.error.error import SourceException
 from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.util.variable import replace_variables, map_variables, extract_value_from_cntext
+from folker.util.parameters import capture_parameters_context
+from folker.util.variable import replace_variables, map_variables, build_contexts
 
 
 class StageStep(ABC):
@@ -52,7 +53,7 @@ class StageSave(StageStep):
             except Exception as e:
                 saving_value = replace_variables(test_context={}, stage_context=stage_context, text=saving)
 
-            self._resolve_variable(test_context, variable, saving_value)
+            test_context = self._resolve_variable(test_context, variable, saving_value)
 
         return test_context, stage_context
 
@@ -61,14 +62,16 @@ class StageSave(StageStep):
 
         if len(variable_children) == 1:
             test_context[variable] = value
-            return
+            return test_context
 
         variable_root = variable_children[0]
         variable_value = {variable_children[-1]: value}
-        for element in reversed(variable_children[1:-1]):
+        path = variable_children[1:-1]
+        for element in reversed(path):
             variable_value = {element: variable_value}
 
         test_context[variable_root] = self._merge_dictionaries(test_context.get(variable_root, {}), variable_value)
+        return test_context
 
     def _merge_dictionaries(self, stable: dict, new_values: dict):
         if len(new_values) == 0:
@@ -239,17 +242,10 @@ class Stage:
             self.assertions.validate()
 
     def execute(self, logger: TestLogger, test_context: dict, stage_context: dict = {}):
-        if len(self.foreach) == 0:
-            return self._execute(logger, test_context, stage_context)
-        else:
-            key, values = self.foreach.popitem()
-            values = extract_value_from_cntext(test_context, stage_context, values)
-
-            for index, value in enumerate(values):
-                updated_stage_context = {**stage_context, key: value, key + '_index': index}
-                test_context = self.execute(logger, test_context, updated_stage_context)
-
-            return test_context
+        contexts = build_contexts(test_context, stage_context, self.foreach)
+        for context in contexts:
+            test_context = self._execute(logger, test_context, context)
+        return test_context
 
     def _execute(self, logger: TestLogger, test_context: dict, stage_context: dict):
         logger.stage_start(self.name, test_context, stage_context)
@@ -273,6 +269,8 @@ class Test:
     description: str
     parallel: bool
 
+    foreach: dict
+
     stages: [Stage]
 
     def __init__(self,
@@ -280,6 +278,7 @@ class Test:
                  name: str = 'UNDEFINED',
                  description: str = None,
                  parallel: bool = False,
+                 foreach: dict = {},
                  stages: [Stage] = []
                  ) -> None:
         super().__init__()
@@ -287,6 +286,7 @@ class Test:
         self.name = name
         self.description = description
         self.parallel = parallel
+        self.foreach = foreach
         self.stages = stages
 
     def validate(self):
@@ -307,7 +307,15 @@ class Test:
     def execute(self, logger: TestLogger, test_context: dict = None):
         if test_context is None:
             test_context = dict()
+        execution_contexts = build_contexts(capture_parameters_context(), test_context, self.foreach)
+        executions_result = True
 
+        for execution_context in execution_contexts:
+            executions_result = executions_result and self._execute(logger, execution_context)
+
+        return executions_result
+
+    def _execute(self, logger: TestLogger, test_context: dict = None):
         logger.test_start(self.name, self.description)
         try:
             for stage in self.stages:
