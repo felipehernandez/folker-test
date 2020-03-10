@@ -6,6 +6,7 @@ from folker import templates, stage_templates
 from folker.load.schemas import TestSchema
 from folker.logger.logger import SystemLogger
 from folker.model.entity import Test
+from folker.util.parameters import test_file_regular_expression, parameterised_test_files
 
 
 def load_and_initialize_template_files(logger: SystemLogger) -> [Test]:
@@ -24,7 +25,9 @@ def load_and_initialize_template_files(logger: SystemLogger) -> [Test]:
 def load_test_files(logger: SystemLogger) -> [Test]:
     schema = TestSchema()
     logger.loading_test_files()
-    schemas = load_schemas(logger, '**/folker_test*.yaml', schema)
+    test_file_re = test_file_regular_expression()
+    # schemas = load_schemas(logger, '**/folker_test*.yaml', schema)
+    schemas = load_schemas(logger, test_file_re, schema)
 
     return schemas
 
@@ -39,16 +42,26 @@ def _enrich_stages(schema_definition: Test):
 def load_schemas(logger: SystemLogger, file_name: str, schema, template: bool = False):
     schemas = []
     valid_files = []
+    selected_test_files = parameterised_test_files()
 
     for filename in Path('./').absolute().glob(file_name):
-        schema_definition = load_schema(filename, schema, valid_files, logger)
-        if schema_definition:
-            if not template:
-                _enrich_stages(schema_definition)
-            schemas.append(schema_definition)
+        if _should_load_file(filename.name, template, selected_test_files):
+            schema_definition = load_schema(filename, schema, valid_files, logger)
+            if schema_definition:
+                if not template:
+                    _enrich_stages(schema_definition)
+                schemas.append(schema_definition)
 
     logger.loading_files_completed(valid_files)
     return schemas
+
+
+def _should_load_file(filename: str, template: bool, selected_test_files: [str]):
+    if template:
+        return True
+    if len(selected_test_files) == 0:
+        return True
+    return filename in selected_test_files
 
 
 def load_schema(filename: str, schema, valid_test_files, logger: SystemLogger):
