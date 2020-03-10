@@ -18,6 +18,22 @@ steps:
       - sleep 10 # time for mockserver to start
       - python3 folker.py -t
 
+  - name: bake-beta
+    image: plugins/docker
+    settings:
+      username:
+        from_secret: DOCKERHUB.USER
+      password:
+        from_secret: DOCKERHUB.PASSWORD
+      repo: folkertest/folkertest
+      tags:
+        - beta
+        - "0.2.${DRONE_BUILD_NUMBER}"
+    when:
+      branch:
+        - develop
+      event: push
+
   - name: bake
     image: plugins/docker
     settings:
