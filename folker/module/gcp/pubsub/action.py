@@ -17,6 +17,8 @@ from folker.util.variable import recursive_replace_variables
 class PubSubMethod(Enum):
     PUBLISH = auto()
     SUBSCRIBE = auto()
+    TOPICS = auto()
+    SUBSCRIPTIONS = auto()
 
 
 class PubSubAction(Action):
@@ -75,11 +77,12 @@ class PubSubAction(Action):
 
         if not hasattr(self, 'project') or not self.project:
             missing_fields.append('action.project')
+
         if not hasattr(self, 'method') or not self.method:
             missing_fields.append('action.method')
         elif PubSubMethod.PUBLISH is self.method:
             missing_fields.extend(self._validate_publish_values())
-        else:
+        elif PubSubMethod.SUBSCRIBE is self.method:
             missing_fields.extend(self._validate_subscribe_values())
 
         if len(missing_fields) > 0:
@@ -108,7 +111,9 @@ class PubSubAction(Action):
 
         {
             PubSubMethod.PUBLISH: self._publish,
-            PubSubMethod.SUBSCRIBE: self._subscribe
+            PubSubMethod.SUBSCRIBE: self._subscribe,
+            PubSubMethod.TOPICS: self._topics,
+            PubSubMethod.SUBSCRIPTIONS: self._subscriptions
         }.get(self.method)(logger, test_context, stage_context)
 
         end = time.time()
@@ -154,6 +159,30 @@ class PubSubAction(Action):
 
             if self.ack:
                 self.subscriber.acknowledge(subscription_path, [message.ack_id])
+
+    def _topics(self, logger: TestLogger, test_context: dict, stage_context: dict):
+        self._authenticate()
+
+        self.publisher = PublisherClient(channel=grpc.insecure_channel(target=self.host)) if self.host else PublisherClient()
+
+        project = recursive_replace_variables(test_context, stage_context, self.project)
+        project_path = self.publisher.project_path(project)
+        topics = self.publisher.list_topics(project_path)
+
+        topic_prefix = project_path + '/topics/'
+        stage_context['topics'] = [topic.name[len(topic_prefix):] for topic in topics]
+
+    def _subscriptions(self, logger: TestLogger, test_context: dict, stage_context: dict):
+        self._authenticate()
+
+        self.subscriber = SubscriberClient(channel=grpc.insecure_channel(target=self.host)) if self.host else SubscriberClient()
+
+        project = recursive_replace_variables(test_context, stage_context, self.project)
+        project_path = self.subscriber.project_path(project)
+        subscriptions = self.subscriber.list_subscriptions(project_path)
+
+        subscription_prefix = project_path + '/subscriptions/'
+        stage_context['subscriptions'] = [subscription.name[len(subscription_prefix):] for subscription in subscriptions]
 
     def _authenticate(self):
         credentials_path = os.getcwd() + '/credentials/gcp/gcp-credentials.json'

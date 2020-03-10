@@ -2,6 +2,24 @@ name: PubSub Test
 description: Dummy Test for PubSub Stage
 
 stages:
+  - name: check topic
+    action:
+      type: PUBSUB
+      method: TOPICS
+      host: gcp-pubsub-emulator:8681
+      project: folker-test-gcp-test
+    assert:
+      - "'a_topic' in ${topics}"
+
+  - name: check subscription
+    action:
+      type: PUBSUB
+      method: SUBSCRIPTIONS
+      host: gcp-pubsub-emulator:8681
+      project: folker-test-gcp-test
+    assert:
+      - "'a_subscription' in ${subscriptions}"
+
   - name: publish
     action:
       type: PUBSUB
