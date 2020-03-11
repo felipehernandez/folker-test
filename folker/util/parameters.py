@@ -6,7 +6,7 @@ def _resolve_command_option_key(command: str) -> str:
     return {
         '-d': 'debug', '--debug': 'debug',
         '-t': 'trace', '--trace': 'trace',
-        '-l': 'LOG', '--log': 'LOG',
+        '-l': 'log', '--log': 'log',
         '-c': 'context', '--context': 'context',
         '-f': 'file', '--file': 'files',
         '-F': 'file_re', '--FILE': 'file_re',
@@ -14,6 +14,7 @@ def _resolve_command_option_key(command: str) -> str:
 
 
 def _merge_parameter(key: str, old_value, new_value: str):
+    print(key, old_value, new_value)
     if key in ['debug', 'trace', 'file', 'log', 'file_re']:
         return new_value
     if key in ['context']:
@@ -28,14 +29,15 @@ def usage():
     print('-t                         --trace                           trace')
     print('-lXXX.XX                   --log=XXX.XX                      log to file XXX.XX')
     print('-ckey:value                --context=key:value               add to context key=value')
-    print('-ftest_file[,test_file]    --file=test_file[,test_file]      execute all tests whose file name are listed')
-    print('-Ftest_file_re             --FILE=test_file_re               execute all tests whose file name match the regular expression')
+    print('-ftest_file[,test_file]    --file=test_file[,test_file]      execute all tests whose file name are listed. Use quotes ("") if neccesary')
+    print('-Ftest_file_re             --FILE=test_file_re               execute all tests whose file name match the regular expression. Use quotes ("") if neccesary')
 
 
 command_options = {}
 
 
 def load_command_arguments():
+    print(sys.argv)
     if len(sys.argv) == 1:
         return
     try:
@@ -43,13 +45,16 @@ def load_command_arguments():
                                    'dtl:c:f:F:',
                                    ['debug', 'trace', 'log=', 'context=', 'file=', 'FILE='])
         for command_option in opts:
+            print(_resolve_command_option_key(command_option[0]))
             key = _resolve_command_option_key(command_option[0])
+            print(_merge_parameter(key, command_options.get(key), command_option[1]))
             command_options[key] = _merge_parameter(key, command_options.get(key), command_option[1])
     except getopt.GetoptError as err:
         # print help information and exit:
         print(err)  # will print something like "option -a not recognized"
         usage()
         sys.exit(2)
+    print(command_options)
 
 
 def is_debug():
