@@ -270,6 +270,7 @@ class Test:
     parallel: bool
 
     foreach: dict
+    tags: [str]
 
     stages: [Stage]
 
@@ -279,6 +280,7 @@ class Test:
                  description: str = None,
                  parallel: bool = False,
                  foreach: dict = {},
+                 tags: [str] = [],
                  stages: [Stage] = []
                  ) -> None:
         super().__init__()
@@ -287,6 +289,7 @@ class Test:
         self.description = description
         self.parallel = parallel
         self.foreach = foreach
+        self.tags = tags
         self.stages = stages
 
     def validate(self):

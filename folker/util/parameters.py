@@ -5,17 +5,20 @@ import sys
 def _resolve_command_option_key(command: str) -> str:
     return {
         '-d': 'debug', '--debug': 'debug',
-        '-t': 'trace', '--trace': 'trace',
-        '-l': 'LOG', '--log': 'LOG',
+        '--trace': 'trace',
+        '-t': 'tags', '--tags': 'tags',
+        '-l': 'log', '--log': 'log',
         '-c': 'context', '--context': 'context',
-        '-f': 'file', '--file': 'files',
+        '-f': 'file', '--file': 'file',
         '-F': 'file_re', '--FILE': 'file_re',
     }[command]
 
 
 def _merge_parameter(key: str, old_value, new_value: str):
-    if key in ['debug', 'trace', 'file', 'log', 'file_re']:
+    if key in ['debug', 'trace', 'log', 'file_re']:
         return new_value
+    if key in ['tags', 'file']:
+        return new_value if not old_value else old_value + ',' + new_value
     if key in ['context']:
         merge = old_value if old_value else {}
         pair = new_value.split(':')
@@ -25,11 +28,13 @@ def _merge_parameter(key: str, old_value, new_value: str):
 
 def usage():
     print('-d                         --debug                           debug')
-    print('-t                         --trace                           trace')
+    print('                           --trace                           trace')
     print('-lXXX.XX                   --log=XXX.XX                      log to file XXX.XX')
     print('-ckey:value                --context=key:value               add to context key=value')
-    print('-ftest_file[,test_file]    --file=test_file[,test_file]      execute all tests whose file name are listed')
-    print('-Ftest_file_re             --FILE=test_file_re               execute all tests whose file name match the regular expression')
+    print('-ftest_file[,test_file]    --file=test_file[,test_file]      execute all tests whose file name are listed. Use quotes ("") if neccesary')
+    print(
+        '-Ftest_file_re             --FILE=test_file_re               execute all tests whose file name match the regular expression. Use quotes ("") if neccesary')
+    print('-ttag[,tag]                --tags=tag,tags]                  execute all tests with specified tags')
 
 
 command_options = {}
@@ -40,8 +45,8 @@ def load_command_arguments():
         return
     try:
         opts, args = getopt.getopt(sys.argv[1:],
-                                   'dtl:c:f:F:',
-                                   ['debug', 'trace', 'log=', 'context=', 'file=', 'FILE='])
+                                   'dt:l:c:f:F:',
+                                   ['debug', 'trace', 'log=', 'context=', 'file=', 'FILE=', 'tags='])
         for command_option in opts:
             key = _resolve_command_option_key(command_option[0])
             command_options[key] = _merge_parameter(key, command_options.get(key), command_option[1])
@@ -74,6 +79,14 @@ def test_file_regular_expression():
 
 def parameterised_test_files():
     files = command_options.get('file', None)
+    if files is None:
+        return []
+    else:
+        return files.split(',')
+
+
+def parameterised_tags():
+    files = command_options.get('tags', None)
     if files is None:
         return []
     else:
