@@ -9,15 +9,15 @@ def _resolve_command_option_key(command: str) -> str:
         '-t': 'tags', '--tags': 'tags',
         '-l': 'log', '--log': 'log',
         '-c': 'context', '--context': 'context',
-        '-f': 'file', '--file': 'files',
+        '-f': 'file', '--file': 'file',
         '-F': 'file_re', '--FILE': 'file_re',
     }[command]
 
 
 def _merge_parameter(key: str, old_value, new_value: str):
-    if key in ['debug', 'trace', 'file', 'log', 'file_re']:
+    if key in ['debug', 'trace', 'log', 'file_re']:
         return new_value
-    if key in ['tags']:
+    if key in ['tags', 'file']:
         return new_value if not old_value else old_value + ',' + new_value
     if key in ['context']:
         merge = old_value if old_value else {}
