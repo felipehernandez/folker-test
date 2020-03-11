@@ -36,11 +36,11 @@ def usage():
         '-Ftest_file_re             --FILE=test_file_re               execute all tests whose file name match the regular expression. Use quotes ("") if neccesary')
     print('-ttag[,tag]                --tags=tag,tags]                  execute all tests with specified tags')
 
-
 command_options = {}
 
 
 def load_command_arguments():
+    print(sys.argv)
     if len(sys.argv) == 1:
         return
     try:
@@ -48,13 +48,16 @@ def load_command_arguments():
                                    'dt:l:c:f:F:',
                                    ['debug', 'trace', 'log=', 'context=', 'file=', 'FILE=', 'tags='])
         for command_option in opts:
+            print(_resolve_command_option_key(command_option[0]))
             key = _resolve_command_option_key(command_option[0])
+            print(_merge_parameter(key, command_options.get(key), command_option[1]))
             command_options[key] = _merge_parameter(key, command_options.get(key), command_option[1])
     except getopt.GetoptError as err:
         # print help information and exit:
         print(err)  # will print something like "option -a not recognized"
         usage()
         sys.exit(2)
+    print(command_options)
 
 
 def is_debug():
