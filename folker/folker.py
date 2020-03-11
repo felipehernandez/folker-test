@@ -3,8 +3,9 @@ from folker.executor.sequential_executor import SequentialExecutor
 from folker.load.files import load_test_files, load_and_initialize_template_files
 from folker.load.protos import generate_protos
 from folker.logger import logger_factory
+from folker.model.entity import Test
 from folker.model.error.folker import TestSuiteResultException
-from folker.util.parameters import load_command_arguments
+from folker.util.parameters import load_command_arguments, parameterised_tags
 
 
 def run():
@@ -14,27 +15,38 @@ def run():
 
     generate_protos(logger)
 
-    sequential_executor = SequentialExecutor()
-    parallel_executor = ParallelExecutor()
-
     load_and_initialize_template_files(logger)
     tests = load_test_files(logger)
 
-    parallel_tests = [test for test in tests if test.parallel]
-    sequential_tests = [test for test in tests if not test.parallel]
+    tests = filter_tests_by_tags(tests)
 
     executed, success, failures = 0, [], []
-
-    success_tests, fail_tests = parallel_executor.execute(parallel_tests)
-    success.extend(success_tests)
-    failures.extend(fail_tests)
-    executed += len(success_tests) + len(fail_tests)
-
-    success_tests, fail_tests = sequential_executor.execute(sequential_tests)
-    success.extend(success_tests)
-    failures.extend(fail_tests)
-    executed += len(success_tests) + len(fail_tests)
+    executed = execute_tests(tests=[test for test in tests if test.parallel],
+                             executor=ParallelExecutor(),
+                             executed_tests=executed,
+                             cumulative_failures=failures,
+                             cumulative_success=success)
+    executed = execute_tests(tests=[test for test in tests if not test.parallel],
+                             executor=SequentialExecutor(),
+                             executed_tests=executed,
+                             cumulative_failures=failures,
+                             cumulative_success=success)
 
     logger.assert_execution_result(executed, success, failures)
     if len(success) is not executed:
         raise TestSuiteResultException(failures)
+
+
+def execute_tests(tests, executor, executed_tests, cumulative_failures, cumulative_success):
+    success_tests, fail_tests = executor.execute(tests)
+    cumulative_success.extend(success_tests)
+    cumulative_failures.extend(fail_tests)
+    executed_tests += len(success_tests) + len(fail_tests)
+    return executed_tests
+
+
+def filter_tests_by_tags(tests: [Test]):
+    tags = parameterised_tags()
+    if len(tags) == 0:
+        return tests
+    return [test for test in tests if len([tag for tag in test.tags if tag in tags]) > 0]
