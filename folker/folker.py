@@ -49,4 +49,4 @@ def filter_tests_by_tags(tests: [Test]):
     tags = parameterised_tags()
     if len(tags) == 0:
         return tests
-    return [test for test in tests if len([tag for tag in test.tags if tag in tags]) > 0]
+    return [test for test in tests if all(tag in test.tags for tag in tags)]
