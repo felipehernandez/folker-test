@@ -1,0 +1,82 @@
+name: Apigee proto test
+tags:
+  - rest
+  - proto
+  - complex
+
+stages:
+  - name: Setup test variables
+    action:
+      type: VOID
+    save:
+#      mockserver_host: http://localhost:1080
+      mockserver_host: http://mockserver:1080
+
+  - name: Reset mockserver
+    action:
+      type: REST
+      method: PUT
+      host: ${mockserver_host}
+      uri: reset
+    assert:
+      - ${status_code} == 200
+
+  - name: Create proto
+    action:
+      type: PROTOBUF
+      method: CREATE
+      package: protos.TestProto_pb2
+      class: TestRequest
+      data:
+        firstName: Test
+        lastName: ing
+    save:
+      serialised_request: ${proto_serialize}
+
+  - name: Setup mockserver
+    action:
+      type: REST
+      method: PUT
+      host: ${mockserver_host}
+      uri: expectation
+      headers:
+        Content-Type: application/json
+      json:
+        httpRequest:
+          method: GET
+          path: /asdGET
+        httpResponse:
+          statusCode: 200
+          headers:
+            - name: content-type
+              values:
+                - application/x-protobuf
+          body: ${serialised_request}
+    assert:
+      - ${status_code} == 201
+
+  - name: Rest call
+    action:
+      type: REST
+      method: GET
+      host: ${mockserver_host}
+      uri: asdGET
+      headers:
+        Accept: application/x-protobuf
+    assert:
+      - ${status_code} == 200
+    save:
+      proto_serialize: ${response_text}
+
+  - name: Load proto
+    action:
+      type: PROTOBUF
+      method: LOAD
+      package: protos.TestProto_pb2
+      class: TestRequest
+      message: ${proto_serialize}
+    assert:
+      - ${proto_object}.firstName == 'Test'
+      - ${proto_object}.lastName == 'ing'
+      - ${proto_dict.firstName} == 'Test'
+      - ${proto_dict.lastName} == 'ing'

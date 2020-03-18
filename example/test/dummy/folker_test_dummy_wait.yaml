@@ -1,8 +1,15 @@
 name: Wait Test
 description: Dummy Test for Wait Stage
+tags:
+  - dummy
+  - wait
 
 stages:
   - name: wait_stage
     action:
       type: WAIT
       time: 3
+    log:
+      - ${elapsed_time}
+    assert:
+      - ${elapsed_time} >= 3000

@@ -1,5 +1,8 @@
 name: Complex save Test
 description: Dummy Test for complex save
+tags:
+  - dummy
+  - save
 
 stages:
   - name: save1

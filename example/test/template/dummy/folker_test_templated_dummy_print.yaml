@@ -1,5 +1,8 @@
 name: Templated test
 description: Templated test
+tags:
+  - template
+  - dummy
 
 stages:
   - id: print_stage_reference

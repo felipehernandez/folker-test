@@ -1,6 +1,8 @@
 name: Rest Test
 description: Dummy Test for Rest Stage
-parallel: true
+tags:
+  - dummy
+  - rest
 
 stages:
   - name: Setup test variables
@@ -151,3 +153,11 @@ stages:
     assert:
       - ${status_code} == 200
       - ${response_json.method} == 'asdDELETE'
+    log:
+      - ${status_code}
+      - ${headers}
+      - ${response}
+      - ${response_text}
+      - ${response_json}
+      - ${elapsed_time}
+#      - ${error}

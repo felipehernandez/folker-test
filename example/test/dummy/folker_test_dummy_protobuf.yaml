@@ -1,5 +1,8 @@
 name: Protobuf Test
 description: Dummy Test for Protobuf Stage
+tags:
+  - dummy
+  - proto
 
 stages:
   - name: protobuf_write_stage

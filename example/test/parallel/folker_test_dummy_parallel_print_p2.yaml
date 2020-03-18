@@ -1,6 +1,8 @@
 name: Wait Test Parallel print 2
 description: Dummy Test for Wait Stage
 parallel: true
+tags:
+  - parallel
 
 stages:
   - name: print stage 2
