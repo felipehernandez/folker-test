@@ -1,5 +1,8 @@
 name: PubSub Test
 description: Dummy Test for PubSub Stage
+tags:
+  - dummy
+  - pubsub
 
 stages:
   - name: check topic

@@ -1,6 +1,8 @@
 name: Parallel Wait Test
 description: Dummy Test for Wait Stage
 parallel: true
+tags:
+  - parallel
 
 stages:
   - name: wait_stage

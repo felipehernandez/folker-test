@@ -1,5 +1,8 @@
 name: Void Test
 description: Dummy Test for Void Stage
+tags:
+  - dummy
+  - void
 
 stages:
   - name: void_stage
@@ -9,7 +12,6 @@ stages:
       test: 'passing'
     log:
       - 'Hello world'
-
 
   - name: void_stage2
     action:

@@ -1,5 +1,9 @@
 name: Print Test
 description: Dummy Test for Print Stage
+tags:
+  - dummy
+  - print
+  - foreach
 
 stages:
   - name: foreach stage
