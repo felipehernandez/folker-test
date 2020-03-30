@@ -80,6 +80,8 @@ def extract_value_from_context(test_context: dict, stage_context: dict, referenc
 
 
 def build_contexts(test_context: dict = {}, stage_context: dict = {}, variables: dict = {}) -> [dict]:
+    if len(variables) == 0:
+        return [stage_context]
     contexts = [{}]
 
     for key in reversed(list(variables.keys())):
