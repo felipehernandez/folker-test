@@ -248,7 +248,8 @@ class Stage:
         return test_context
 
     def _execute(self, logger: TestLogger, test_context: dict, stage_context: dict):
-        logger.stage_start(self.name, test_context, stage_context)
+        name = replace_variables(test_context, stage_context, self.name)
+        logger.stage_start(name, test_context, stage_context)
 
         try:
             test_context, stage_context = self.action.execute(logger=logger, test_context=test_context, stage_context=stage_context)
