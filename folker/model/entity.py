@@ -320,7 +320,8 @@ class Test:
         return executions_result
 
     def _execute(self, logger: TestLogger, test_context: dict = None):
-        logger.test_start(self.name, self.description)
+        name = replace_variables(test_context, {}, self.name)
+        logger.test_start(name, self.description)
         try:
             for stage in self.stages:
                 test_context = stage.execute(logger, test_context)
