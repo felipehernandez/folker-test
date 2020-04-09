@@ -9,7 +9,7 @@ def generate_protos(logger: SystemLogger):
 
     valid_files = []
 
-    for filename in Path('./protos').glob('**/*.proto'):
+    for filename in Path('.').glob('**/*.proto'):
         file_name = str(filename)
         # logger.loading_proto_file(file_name)
         proto_run = ['python3',
