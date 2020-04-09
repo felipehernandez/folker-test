@@ -9,7 +9,7 @@ stages:
     action:
       type: PROTOBUF
       method: CREATE
-      package: TestProto
+      package: protos.TestProto
       class: TestRequest
       data:
         firstName: Test
@@ -25,7 +25,7 @@ stages:
     action:
       type: PROTOBUF
       method: LOAD
-      package: TestProto
+      package: protos.TestProto
       class: TestResponse
       message: ${proto_serialize}
     log:

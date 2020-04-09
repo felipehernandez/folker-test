@@ -32,7 +32,7 @@ class GrpcAction(Action):
         self.host = host
         self.uri = uri
 
-        self.package = 'protos.' + package + '_pb2_grpc' if package else None
+        self.package = package + '_pb2_grpc' if package else None
         self.stub = stub
         self.method = method
 

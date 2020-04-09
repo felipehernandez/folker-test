@@ -39,7 +39,7 @@ class ProtobufAction(Action):
             except:
                 raise InvalidSchemaDefinitionException(wrong_fields=['action.method'])
 
-        self.package = 'protos.' + package + '_pb2' if package else None
+        self.package = package + '_pb2' if package else None
         self.clazz = clazz
         self.data = data
         self.message = message

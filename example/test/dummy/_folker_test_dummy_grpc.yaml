@@ -6,7 +6,7 @@ stages:
     action:
       type: PROTOBUF
       method: CREATE
-      package: TestProto
+      package: protos.TestProto
       class: TestRequest
       data:
         firstName: Test
@@ -20,7 +20,7 @@ stages:
     action:
       type: GRPC
       host: ${host}
-      package: TestProto
+      package: protos.TestProto
       stub: TestServiceStub
       method: hello
       data: request
@@ -36,7 +36,7 @@ stages:
     action:
       type: GRPC
       host: ${host}
-      package: TestProto
+      package: protos.TestProto
       stub: TestServiceStub
       method: hellos
       data: request
