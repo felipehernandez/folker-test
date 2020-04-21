@@ -5,11 +5,14 @@ from folker.logger.logger import SystemLogger
 
 
 def generate_protos(logger: SystemLogger):
-    # logger.loading_proto_files()
+    logger.loading_proto_files()
 
     valid_files = []
 
     for filename in Path('.').glob('**/*.proto'):
+        if 'lib/python3' in str(filename):
+            break
+        print(filename)
         file_name = str(filename)
         # logger.loading_proto_file(file_name)
         proto_run = ['python3',
