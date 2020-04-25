@@ -53,8 +53,13 @@ steps:
 
 services:
   - name: mockserver
+    # http://mockserver:1080
     image: mockserver/mockserver:latest
   - name: gcp-pubsub-emulator
+    # gcp-pubsub-emulator:8681
     image: messagebird/gcloud-pubsub-emulator:latest
     environment:
       PUBSUB_PROJECT1: "folker-test-gcp-test,a_topic:a_subscription"
+  - name: grpc-test-server
+    # grpc-test-server:8682
+    image: folkertest/grpc-test-server:latest

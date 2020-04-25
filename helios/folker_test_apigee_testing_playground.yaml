@@ -1,0 +1,38 @@
+name: Apigee Test CTrip VCN
+description: Apigee CTrip VCN integration
+parallel: True
+tags:
+  - apigee
+  - playground
+
+stages:
+  - id: initialize_apigee_sta_helios
+
+  - name: Apigee authentication
+    action:
+      type: REST
+      method: POST
+      host: ${apigee_host}
+      uri: oauth/client_credential/accesstoken?grant_type=client_credentials
+      headers:
+        Content-Type: application/x-www-form-urlencoded
+      data:
+        client_id: ${client_id}
+        client_secret: ${client_secret}
+    save:
+      auth_access_token: ${response_json.access_token}
+  
+  - name: Hit endpoint
+    action:
+      type: REST
+      method: GET
+      host: ${apigee_host}
+      uri: partners/configuration/HEL1101
+      headers:
+        Content-Type: application/json
+        Authorization: 'Bearer ${auth_access_token}'
+    # assert:
+      # - ${status_code} == 200
+    log:
+      - ${status_code}
+      - ${response_text}
