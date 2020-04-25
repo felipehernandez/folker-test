@@ -1,5 +1,8 @@
 name: GRPC Test
 description: Dummy Test for GRPC Stage
+tags:
+  - dummy
+  - grpc
 
 stages:
   - name: proto-create
@@ -12,7 +15,7 @@ stages:
         firstName: Test
         lastName: ing1
     save:
-      host: 12.34.56.78:8080
+      host: grpc-test-server:8682
       request: ${proto_object}
       serialised_request: ${proto_serialize}
 

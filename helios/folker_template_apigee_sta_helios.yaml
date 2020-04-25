@@ -1,0 +1,14 @@
+id: template_apigee_sta_test_api
+
+stages:
+  - id: initialize_apigee_sta_helios
+    name: Load Apigee's Helios test credentials
+    action:
+      type: VOID
+    save:
+      client_id: Wqc7aYn2b1nYEZse6p5QG8HS0joQ7G55
+      client_secret: lYg40FNUXHfbSELR
+      apigee_host: https://partnerapi.staging.travix.com
+
+      partner_id: HEL2001
+      order_number: HEL2-0000001
