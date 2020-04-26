@@ -16,7 +16,7 @@ steps:
       - ls -la
       - cp -a ./example/protos/* ./protos/
       - sleep 10 # time for mockserver to start
-      - python3 folker.py -trace
+      - python3 folker.py --trace
 
   - name: bake-beta
     image: plugins/docker
