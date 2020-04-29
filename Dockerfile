@@ -1,5 +1,7 @@
 FROM python:3.8-slim
 
+WORKDIR /
+
 COPY folker folker
 COPY ./folker.py folker.py
 COPY ./requirements.txt requirements.txt
