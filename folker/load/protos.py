@@ -11,7 +11,7 @@ def generate_protos(logger: SystemLogger):
 
     for filename in Path('.').glob('**/*.proto'):
         file_name = str(filename)
-        if 'site-packages/google/cloud/pubsub_v1/proto/pubsub.proto' in file_name:
+        if 'usr/local/lib/python' in file_name:
             break
         logger.loading_proto_file(file_name)
         proto_run = ['python3',
