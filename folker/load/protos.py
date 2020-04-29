@@ -9,24 +9,24 @@ def generate_protos(logger: SystemLogger):
 
     valid_files = []
 
-    for filename in Path('.').glob('**/*.proto'):
+    for filename in Path('/').glob('**/*.proto'):
         file_name = str(filename)
         if 'usr/local/lib/python' in file_name:
             logger.loading_proto_file_skipped(file_name)
-            break
-        logger.loading_proto_file(file_name)
-        proto_run = ['python3',
-                     '-m',
-                     'grpc_tools.protoc',
-                     '-I.',
-                     '--python_out=.',
-                     '--grpc_python_out=.',
-                     './' + file_name]
-        try:
-            result = subprocess.run(proto_run)
-            valid_files.append(file_name)
-        except Exception as e:
-            logger.loading_proto_file_error(file_name, proto_run, e)
-            pass
+        else:
+            logger.loading_proto_file(file_name)
+            proto_run = ['python3',
+                         '-m',
+                         'grpc_tools.protoc',
+                         '-I.',
+                         '--python_out=.',
+                         '--grpc_python_out=.',
+                         './' + file_name]
+            try:
+                result = subprocess.run(proto_run)
+                valid_files.append(file_name)
+            except Exception as e:
+                logger.loading_proto_file_error(file_name, proto_run, e)
+                pass
 
     logger.loading_proto_files_completed(valid_files)
