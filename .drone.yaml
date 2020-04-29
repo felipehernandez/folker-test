@@ -11,13 +11,13 @@ steps:
   - name: integration-test
     image: python:3.8-slim
     commands:
-      - cd /
       - pip install -r requirements.txt
-      - mkdir protos
+      - mkdir /protos
       - ls -la
-      - cp -a ./example/protos/* ./protos/
+      - cp -a ./example/protos/* /protos/
       - sleep 10 # time for mockserver to start
-      - python3 folker.py --trace
+      - cd /
+      - python3 drone/src/folker.py --trace
 
   - name: bake-beta
     image: plugins/docker
