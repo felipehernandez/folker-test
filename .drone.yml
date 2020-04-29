@@ -13,11 +13,15 @@ steps:
     commands:
       - pip install -r requirements.txt
       - mkdir /protos
+      - mkdir /folker
+      - cp -a ./folker.py         /
+      - cp -a ./folker/*          /folker/
+      - cp -a ./example/protos/*  /protos/
       - ls -la
-      - cp -a ./example/protos/* /protos/
-      - sleep 10 # time for mockserver to start
       - cd /
-      - python3 drone/src/folker.py --trace
+      - sleep 5 # time for mockserver to start
+      - ls -la
+      - python3 folker.py --trace
 
   - name: bake-beta
     image: plugins/docker
