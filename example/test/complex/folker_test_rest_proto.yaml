@@ -1,4 +1,4 @@
-name: Apigee proto test
+name: Rest proto test
 tags:
   - rest
   - proto
