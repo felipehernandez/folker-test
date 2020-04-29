@@ -13,4 +13,6 @@ RUN python3 -m unittest -v
 #COPY example example
 #RUN python3 folker.py -t
 
+WORKDIR /
+
 ENTRYPOINT ["python", "folker.py"]
