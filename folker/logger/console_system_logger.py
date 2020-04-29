@@ -36,6 +36,10 @@ class ConsoleSystemLogger(SystemLogger, ColorLogger):
         if is_trace():
             self._log(self.COLOR_HIGH_YELLOW, 'Proto file: {filename}'.format(filename=filename))
 
+    def loading_proto_file_skipped(self, filename):
+        if is_trace():
+            self._log(self.COLOR_GREY, 'Skipped Proto file: {filename}'.format(filename=filename))
+
     def loading_proto_file_error(self, file_name: str, proto_command: str, exception: Exception):
         self._log(self.COLOR_HIGH_RED, 'Error loading proto file {} [{}]: {}'.format(file_name, proto_command, str(exception)))
 

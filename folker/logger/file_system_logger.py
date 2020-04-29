@@ -39,6 +39,10 @@ class FileSystemLogger(SystemLogger, FileLogger):
         if is_trace():
             self._log('Proto file: {filename}'.format(filename=filename))
 
+    def loading_proto_file_skipped(self, filename):
+        if is_trace():
+            self._log('Skipped Proto file: {filename}'.format(filename=filename))
+
     def loading_proto_file_error(self, file_name: str, proto_command: str, exception: Exception):
         self._log('Error loading proto file {} [{}]: {}'.format(file_name, proto_command, str(exception)))
 

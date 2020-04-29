@@ -76,6 +76,9 @@ class SystemLogger(ABC):
     def loading_proto_files(self): pass
 
     @abstractmethod
+    def loading_proto_file_skipped(self, filename): pass
+
+    @abstractmethod
     def loading_proto_file(self, filename): pass
 
     @abstractmethod
