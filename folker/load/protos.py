@@ -12,6 +12,7 @@ def generate_protos(logger: SystemLogger):
     for filename in Path('.').glob('**/*.proto'):
         file_name = str(filename)
         if 'usr/local/lib/python' in file_name:
+            logger.loading_proto_file_skipped(file_name)
             break
         logger.loading_proto_file(file_name)
         proto_run = ['python3',
