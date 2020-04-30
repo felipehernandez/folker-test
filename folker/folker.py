@@ -32,7 +32,7 @@ def run():
                              cumulative_failures=failures,
                              cumulative_success=success)
 
-    logger.assert_execution_result(executed, success, failures)
+    logger.assert_execution_result(executed, sorted(success), sorted(failures))
     if len(success) is not executed:
         raise TestSuiteResultException(failures)
 
