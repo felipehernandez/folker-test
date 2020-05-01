@@ -241,8 +241,8 @@ class Stage:
         if self.assertions is not None:
             self.assertions.validate()
 
-    def execute(self, logger: TestLogger, test_context: dict, stage_context: dict = {}):
-        contexts = build_contexts(test_context, stage_context, self.foreach)
+    def execute(self, logger: TestLogger, test_context: dict):
+        contexts = build_contexts(test_context, {}, self.foreach)
         for context in contexts:
             test_context = self._execute(logger, test_context, context)
         return test_context
@@ -319,7 +319,7 @@ class Test:
 
         return executions_result
 
-    def _execute(self, logger: TestLogger, test_context: dict = None):
+    def _execute(self, logger: TestLogger, test_context: dict):
         name = replace_variables(test_context, {}, self.name)
         logger.test_start(name, self.description)
         try:
