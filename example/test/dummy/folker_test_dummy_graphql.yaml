@@ -10,7 +10,7 @@ stages:
       type: VOID
     save:
 #      host: http://localhost:8683
-      host: graphql-test-server:8683
+      host: http://graphql-test-server:8683
       uri: graphql
 
   - name: retrieve people
