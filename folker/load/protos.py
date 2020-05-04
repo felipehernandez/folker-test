@@ -9,7 +9,7 @@ def generate_protos(logger: SystemLogger):
 
     valid_files = []
 
-    for filename in Path('/').glob('**/*.proto'):
+    for filename in Path('./').glob('**/*.proto'):
         file_name = str(filename)
         if '/lib/python3.' in file_name:
             logger.loading_proto_file_skipped(file_name)

@@ -2,6 +2,7 @@ from marshmallow import Schema, fields, post_load, pre_load
 from marshmallow_oneofschema import OneOfSchema
 
 from folker.model.entity import Test, Stage
+from folker.model.graphql.action import GraphQLAction
 from folker.module.gcp.pubsub.action import PubSubAction
 from folker.module.grpc.action import GrpcAction
 from folker.module.printt.action import PrintAction
@@ -103,6 +104,20 @@ class GrpcActionSchema(Schema):
         return GrpcAction(**data)
 
 
+class GraphQLActionSchema(Schema):
+    type = fields.String()
+
+    host = fields.String()
+    uri = fields.String()
+
+    query = fields.String()
+    mutation = fields.String()
+
+    @post_load
+    def make_action(self, data, **kwargs):
+        return GraphQLAction(**data)
+
+
 class ActionSchema(OneOfSchema):
     type_schemas = {
         'VOID': VoidActionSchema,
@@ -111,7 +126,8 @@ class ActionSchema(OneOfSchema):
         'REST': RestActionSchema,
         'PROTOBUF': ProtobufActionSchema,
         'PUBSUB': PubSubActionSchema,
-        'GRPC': GrpcActionSchema
+        'GRPC': GrpcActionSchema,
+        'GRAPHQL': GraphQLActionSchema
     }
 
 

@@ -9,3 +9,4 @@ google-cloud-pubsub
 marshmallow-oneofschema
 grpcio
 grpcio-tools
+gql
