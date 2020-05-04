@@ -1,0 +1,83 @@
+name: GraphQL Test
+description: Dummy Test for GraphQL Stage
+tags:
+  - dummy
+  - graphql
+
+stages:
+  - name: setup
+    action:
+      type: VOID
+    save:
+#      host: http://localhost:8683
+      host: http://graphql-test-server:8683
+      uri: graphql
+
+  - name: retrieve people
+    action:
+      type: GRAPHQL
+      host: ${host}
+      uri: ${uri}
+      query: >
+        getPersons {
+          id
+          firstName
+          lastName
+        }
+    log:
+      - ${response}
+      - ${elapsed_time}
+    assert:
+      - len(${response.getPersons}) >= 50
+
+  - name: add person
+    action:
+      type: GRAPHQL
+      host: ${host}
+      uri: ${uri}
+      mutation: >
+        addPerson (firstName: "Paco", lastName: "Smith") {
+          id
+          firstName
+          lastName
+        }
+    log:
+      - ${response}
+      - ${elapsed_time}
+    assert:
+      - ${response.addPerson.id} == '51'
+
+  - name: retrieve people and check new entry
+    action:
+      type: GRAPHQL
+      host: ${host}
+      uri: ${uri}
+      query: >
+        getPersons {
+          id
+          firstName
+          lastName
+        }
+    log:
+      - ${response}
+      - ${elapsed_time}
+    assert:
+      - len(${response.getPersons}) > 50
+
+  - name: retrieve new person
+    action:
+      type: GRAPHQL
+      host: ${host}
+      uri: ${uri}
+      query: >
+        getPersonById (id: 51) {
+          id
+          firstName
+          lastName
+        }
+    log:
+      - ${response}
+      - ${elapsed_time}
+    assert:
+      - ${response.getPersonById.id} == '51'
+      - ${response.getPersonById.firstName} == 'Paco'

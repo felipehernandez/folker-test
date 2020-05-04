@@ -66,3 +66,6 @@ services:
   - name: grpc-test-server
     # grpc-test-server:8682
     image: folkertest/grpc-test-server:latest
+  - name: graphql-test-server
+    # grpc-test-server:8682
+    image: folkertest/graphql-test-server:latest
