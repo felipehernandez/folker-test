@@ -71,3 +71,8 @@ services:
   - name: graphql-test-server
     # grpc-test-server:8682
     image: folkertest/graphql-test-server:latest
+  - name: postgres-server
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: docker
+    image: postgres
