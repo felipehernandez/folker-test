@@ -1,12 +1,14 @@
 google
-certifi==2019.9.11
+certifi==2020.4.5.1
 chardet==3.0.4
-idna==2.8
-marshmallow==3.4.0
-PyYAML==5.1.2
-requests==2.22.0
+idna==2.9
+marshmallow==3.6.0
+PyYAML==5.3.1
+requests==2.23.0
 google-cloud-pubsub
 marshmallow-oneofschema
 grpcio
 grpcio-tools
 gql
+# psycopg2==2.8.5
+psycopg2-binary==2.8.5
