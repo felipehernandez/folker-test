@@ -12,11 +12,13 @@ steps:
     image: python:3.8-slim
     commands:
       - pip install -r requirements.txt
-      - mkdir /protos
       - mkdir /folker
+      - mkdir /protos
+      - mkdir /testcode
       - cp -a ./folker.py         /
       - cp -a ./folker/*          /folker/
       - cp -a ./example/protos/*  /protos/
+      - cp -a ./example/code/*    /testcode/
       - cd /
       - sleep 5 # time for mockserver to start
       - python3 folker.py --trace
