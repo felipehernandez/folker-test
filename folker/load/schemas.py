@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields, post_load, pre_load
 from marshmallow_oneofschema import OneOfSchema
 
-from folker.model.entity import Test, Stage
+from folker.model.entity import Test, Stage, Profile
 
 
 class ActionSchema(OneOfSchema):
@@ -48,3 +48,13 @@ class TestSchema(Schema):
     def make_test(self, data, **kwargs):
         test = Test(**data)
         return test
+
+
+class ProfileSchema(Schema):
+    name = fields.String()
+    context = fields.Mapping()
+
+    @post_load
+    def make_profile(self, data, **kwargs):
+        profile = Profile(**data)
+        return profile

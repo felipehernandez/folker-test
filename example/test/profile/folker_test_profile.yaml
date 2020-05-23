@@ -1,0 +1,10 @@
+name: Profile Test
+description: Dummy Test for Test Profiling
+tags:
+  - profile
+
+stages:
+  - name: print
+    action:
+      type: PRINT
+      message: ${variable1}

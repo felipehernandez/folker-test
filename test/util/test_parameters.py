@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from folker import is_debug, is_trace
 from folker.util.parameters import command_options, capture_parameters_context, load_command_arguments, parameterised_tags, parameterised_test_files, \
-    test_file_regular_expression
+    test_file_regular_expression, parameterised_profile
 
 
 class TestStringMethods(TestCase):
@@ -172,3 +172,15 @@ class TestStringMethods(TestCase):
         load_command_arguments()
 
         self.assertEqual('**/asd', test_file_regular_expression())
+
+    @patch('sys.argv', ['method', '-pa_profile'])
+    def test_profile_flag(self):
+        load_command_arguments()
+
+        self.assertEqual('a_profile', parameterised_profile())
+
+    @patch('sys.argv', ['method', '--profile=a_profile'])
+    def test_profile_flag_long(self):
+        load_command_arguments()
+
+        self.assertEqual('a_profile', parameterised_profile())

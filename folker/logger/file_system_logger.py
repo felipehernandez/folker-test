@@ -8,6 +8,10 @@ class FileSystemLogger(SystemLogger, FileLogger):
         super().__init__(file_name)
 
     # Setup
+    def loading_profile_files(self):
+        if is_debug():
+            self._log('Loading profile files')
+
     def loading_template_files(self):
         if is_debug():
             self._log('Loading template files')

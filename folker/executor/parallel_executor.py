@@ -2,14 +2,18 @@ import copy
 from multiprocessing.pool import Pool
 from os import cpu_count
 
+from folker import profiles
 from folker.logger import logger_factory
 from folker.logger.logger_factory import LoggerType
 from folker.model.entity import Test
-from folker.util.parameters import capture_parameters_context
+from folker.util.parameters import capture_parameters_context, parameterised_profile
 
 
 def _test_execution(test: Test):
-    test_context = capture_parameters_context()
+    test_context = {
+        **(profiles.get(parameterised_profile(), {})),
+        **(capture_parameters_context())
+    }
     return test.execute(logger_factory.build_test_logger(LoggerType.PARALLEL), copy.deepcopy(test_context)), test.name
 
 

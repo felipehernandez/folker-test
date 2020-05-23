@@ -2,8 +2,8 @@ from pathlib import Path
 
 import yaml
 
-from folker import templates, stage_templates
-from folker.load.schemas import TestSchema
+from folker import templates, stage_templates, profiles
+from folker.load.schemas import TestSchema, ProfileSchema
 from folker.logger.logger import SystemLogger
 from folker.model.entity import Test
 from folker.util.parameters import test_file_regular_expression, parameterised_test_files
@@ -79,3 +79,14 @@ def load_definition(file_path, schema):
     with open(file_path, 'r') as stream:
         safe_load = yaml.safe_load(stream)
         return schema.load(safe_load)
+
+
+def load_profile_files(logger: SystemLogger):
+    schema = ProfileSchema()
+    logger.loading_profile_files()
+    schemas = load_schemas(logger, '**/folker_profile*.yaml', schema, template=True)
+
+    for schema in schemas:
+        profiles[schema.name] = schema.context
+
+    return profiles

@@ -5,6 +5,10 @@ from folker.logger.logger import ColorLogger, SystemLogger
 class ConsoleSystemLogger(SystemLogger, ColorLogger):
 
     # Setup
+    def loading_profile_files(self):
+        if is_debug():
+            self._log(self.COLOR_HIGH_CYAN, 'Loading profile files')
+
     def loading_template_files(self):
         if is_debug():
             self._log(self.COLOR_HIGH_CYAN, 'Loading template files')
