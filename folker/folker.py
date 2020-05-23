@@ -1,6 +1,6 @@
 from folker.executor.parallel_executor import ParallelExecutor
 from folker.executor.sequential_executor import SequentialExecutor
-from folker.load.files import load_test_files, load_and_initialize_template_files
+from folker.load.files import load_test_files, load_and_initialize_template_files, load_profile_files
 from folker.load.protos import generate_protos
 from folker.logger import logger_factory
 from folker.model.entity import Test
@@ -15,6 +15,7 @@ def run():
 
     generate_protos(logger)
 
+    load_profile_files(logger)
     load_and_initialize_template_files(logger)
     tests = load_test_files(logger)
 

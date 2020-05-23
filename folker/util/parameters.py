@@ -11,12 +11,11 @@ def _resolve_command_option_key(command: str) -> str:
         '-c': 'context', '--context': 'context',
         '-f': 'file', '--file': 'file',
         '-F': 'file_re', '--FILE': 'file_re',
+        '-p': 'profile', '--profile': 'profile'
     }[command]
 
 
 def _merge_parameter(key: str, old_value, new_value: str):
-    if key in ['debug', 'trace', 'log', 'file_re']:
-        return new_value
     if key in ['tags', 'file']:
         return new_value if not old_value else old_value + ',' + new_value
     if key in ['context']:
@@ -24,6 +23,8 @@ def _merge_parameter(key: str, old_value, new_value: str):
         pair = new_value.split(':')
         merge[pair[0]] = pair[1]
         return merge
+    else: # ['debug', 'trace', 'log', 'file_re', 'profile']
+        return new_value
 
 
 def usage():
@@ -35,6 +36,7 @@ def usage():
     print(
         '-Ftest_file_re             --FILE=test_file_re               execute all tests whose file name match the regular expression. Use quotes ("") if neccesary')
     print('-ttag[,tag]                --tags=tag,tags]                  execute all tests with specified tags')
+    print('-pprofile                  --profile=profile                 loads a profile file to load context data')
 
 
 command_options = {}
@@ -45,8 +47,8 @@ def load_command_arguments():
         return
     try:
         opts, args = getopt.getopt(sys.argv[1:],
-                                   'dt:l:c:f:F:',
-                                   ['debug', 'trace', 'log=', 'context=', 'file=', 'FILE=', 'tags='])
+                                   'dt:l:c:f:F:p:',
+                                   ['debug', 'trace', 'log=', 'context=', 'file=', 'FILE=', 'tags=', 'profile='])
         for command_option in opts:
             key = _resolve_command_option_key(command_option[0])
             command_options[key] = _merge_parameter(key, command_options.get(key), command_option[1])
@@ -91,3 +93,7 @@ def parameterised_tags():
         return []
     else:
         return files.split(',')
+
+
+def parameterised_profile():
+    return command_options.get('profile', None)

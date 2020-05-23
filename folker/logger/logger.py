@@ -57,6 +57,10 @@ class FileLogger(ABC):
 class SystemLogger(ABC):
     # Setup
     @abstractmethod
+    def loading_profile_files(self):
+        pass
+
+    @abstractmethod
     def loading_template_files(self): pass
 
     @abstractmethod
