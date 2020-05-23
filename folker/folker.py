@@ -4,8 +4,8 @@ from folker.load.files import load_test_files, load_and_initialize_template_file
 from folker.load.protos import generate_protos
 from folker.logger import logger_factory
 from folker.model.entity import Test
-from folker.model.error.folker import TestSuiteResultException
-from folker.util.parameters import load_command_arguments, parameterised_tags
+from folker.model.error.folker import TestSuiteResultException, TestSuiteNumberExecutionsException
+from folker.util.parameters import load_command_arguments, parameterised_tags, parameterised_number_of_tests
 
 
 def run():
@@ -36,6 +36,9 @@ def run():
     logger.assert_execution_result(executed, sorted(success), sorted(failures))
     if len(success) is not executed:
         raise TestSuiteResultException(failures)
+    expected_number_of_tests = parameterised_number_of_tests()
+    if expected_number_of_tests and parameterised_number_of_tests != executed:
+        raise TestSuiteNumberExecutionsException(expected_number_of_tests, executed)
 
 
 def execute_tests(tests, executor, executed_tests, cumulative_failures, cumulative_success):

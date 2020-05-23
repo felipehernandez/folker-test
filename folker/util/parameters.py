@@ -11,7 +11,8 @@ def _resolve_command_option_key(command: str) -> str:
         '-c': 'context', '--context': 'context',
         '-f': 'file', '--file': 'file',
         '-F': 'file_re', '--FILE': 'file_re',
-        '-p': 'profile', '--profile': 'profile'
+        '-p': 'profile', '--profile': 'profile',
+        '-n': 'number'
     }[command]
 
 
@@ -23,7 +24,7 @@ def _merge_parameter(key: str, old_value, new_value: str):
         pair = new_value.split(':')
         merge[pair[0]] = pair[1]
         return merge
-    else: # ['debug', 'trace', 'log', 'file_re', 'profile']
+    else:  # ['debug', 'trace', 'log', 'file_re', 'profile', 'number']
         return new_value
 
 
@@ -37,6 +38,7 @@ def usage():
         '-Ftest_file_re             --FILE=test_file_re               execute all tests whose file name match the regular expression. Use quotes ("") if neccesary')
     print('-ttag[,tag]                --tags=tag,tags]                  execute all tests with specified tags')
     print('-pprofile                  --profile=profile                 loads a profile file to load context data')
+    print('-nX                                                          checks the total number of tests executed')
 
 
 command_options = {}
@@ -47,7 +49,7 @@ def load_command_arguments():
         return
     try:
         opts, args = getopt.getopt(sys.argv[1:],
-                                   'dt:l:c:f:F:p:',
+                                   'dt:l:c:f:F:p:n:',
                                    ['debug', 'trace', 'log=', 'context=', 'file=', 'FILE=', 'tags=', 'profile='])
         for command_option in opts:
             key = _resolve_command_option_key(command_option[0])
@@ -97,3 +99,7 @@ def parameterised_tags():
 
 def parameterised_profile():
     return command_options.get('profile', None)
+
+
+def parameterised_number_of_tests():
+    return command_options.get('number', None)
