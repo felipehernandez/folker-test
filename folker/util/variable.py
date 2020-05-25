@@ -13,7 +13,10 @@ def replace_variables(test_context: dict, stage_context: dict, text):
     references = contains_variable_reference(text)
     for reference in references:
         value = resolve_variable_reference(test_context=test_context, stage_context=stage_context, variable_reference=reference)
-        text = text.replace('${' + reference + '}', str(value))
+        if text == '${' + reference + '}':
+            text = value
+        else:
+            text = text.replace('${' + reference + '}', str(value))
     return text
 
 

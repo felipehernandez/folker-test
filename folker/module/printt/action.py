@@ -1,10 +1,9 @@
-import time
 from copy import deepcopy
 
 from folker.logger.logger import TestLogger
 from folker.model.entity import Action
 from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.util.variable import replace_variables
+from folker.util.decorator import timed_action, resolvable_variables
 
 
 class PrintAction(Action):
@@ -29,13 +28,9 @@ class PrintAction(Action):
         if len(missing_fields) > 0:
             raise InvalidSchemaDefinitionException(missing_fields=missing_fields)
 
+    @resolvable_variables
+    @timed_action
     def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
-        start = time.time()
-
-        message = replace_variables(test_context, stage_context, self.message)
-        logger.message(message)
-
-        end = time.time()
-        stage_context['elapsed_time'] = int((end - start) * 1000)
+        logger.message(self.message)
 
         return test_context, stage_context

@@ -4,6 +4,7 @@ from copy import deepcopy
 from folker.logger.logger import TestLogger
 from folker.model.entity import Action
 from folker.model.error.load import InvalidSchemaDefinitionException
+from folker.util.decorator import timed_action
 
 
 class WaitAction(Action):
@@ -28,12 +29,7 @@ class WaitAction(Action):
         if len(missing_fields) > 0:
             raise InvalidSchemaDefinitionException(missing_fields=missing_fields)
 
+    @timed_action
     def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
-        start = time.time()
-
         time.sleep(self.time)
-
-        end = time.time()
-        stage_context['elapsed_time'] = int((end - start) * 1000)
-
         return test_context, stage_context

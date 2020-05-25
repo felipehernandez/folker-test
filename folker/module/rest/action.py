@@ -1,5 +1,4 @@
 import json
-import time
 from copy import deepcopy
 from enum import Enum, auto
 
@@ -8,7 +7,7 @@ import requests
 from folker.logger.logger import TestLogger
 from folker.model.entity import Action
 from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.util.variable import replace_variables, recursive_replace_variables
+from folker.util.decorator import timed_action, resolvable_variables
 
 
 class RestMethod(Enum):
@@ -80,11 +79,11 @@ class RestAction(Action):
         if len(missing_fields) > 0:
             raise InvalidSchemaDefinitionException(missing_fields=missing_fields)
 
+    @resolvable_variables
+    @timed_action
     def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
-        start = time.time()
-
         try:
-            call_parameters = self._build_request_parameters(stage_context, test_context)
+            call_parameters = self._build_request_parameters()
             self._log_debug(logger=logger, method=self.method.name, **call_parameters)
 
             response = {
@@ -111,35 +110,26 @@ class RestAction(Action):
             logger.action_error(str(e))
             stage_context['error'] = e
 
-        end = time.time()
-        stage_context['elapsed_time'] = int((end - start) * 1000)
-
         return test_context, stage_context
 
-    def _build_request_parameters(self, stage_context, test_context):
-        call_parameters = {'url': self._build_url(test_context, stage_context),
-                           'headers': recursive_replace_variables(test_context, stage_context, self.headers)}
+    def _build_request_parameters(self):
+        call_parameters = {'url': self._build_url(), 'headers': self.headers}
 
         if self.body:
-            call_parameters['data'] = recursive_replace_variables(test_context, stage_context, self.body)
+            call_parameters['data'] = self.body
         elif self.data:
-            call_parameters['data'] = recursive_replace_variables(test_context, stage_context, self.data)
+            call_parameters['data'] = self.data
         elif self.body_json:
             call_parameters['headers']['Content-Type'] = 'application/json'
-            call_parameters['json'] = recursive_replace_variables(test_context, stage_context, self.body_json)
+            call_parameters['json'] = self.body_json
 
         if self.params:
             call_parameters['params'] = self.params
 
         return call_parameters
 
-    def _build_url(self, test_context: dict, stage_context: dict):
-        url = self.host
-        if self.uri:
-            url = url + '/' + self.uri
-        return replace_variables(test_context=test_context,
-                                 stage_context=stage_context,
-                                 text=url)
+    def _build_url(self):
+        return (self.host + '/' + self.uri) if self.uri else self.host
 
     def _log_debug(self, logger: TestLogger, **parameters):
         logger.action_debug(json.dumps(parameters))

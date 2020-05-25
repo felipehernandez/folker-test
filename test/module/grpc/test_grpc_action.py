@@ -78,7 +78,7 @@ class TestGrpcAction(TestCase):
         self.action.package = 'a_package'
         self.action.stub = 'a_stub'
         self.action.method = 'a_method'
-        self.action.data = 'date_key'
+        self.action.data = 'data_value'
 
         mocked_channel = Mock()
         mocked_module = Mock()
@@ -91,7 +91,9 @@ class TestGrpcAction(TestCase):
         mocked_response = Mock(return_value='returned_value')
         mocked_method.return_value = mocked_response
 
-        test_context, stage_context = self.action.execute(logger, {'date_key': 'data_value'}, {})
+        test_context, stage_context = self.action.execute(logger,
+                                                          test_context={},
+                                                          stage_context={})
 
         mocked_grpc.assert_called_with('a_host')
         mocked_stub.assert_called_with(mocked_channel)
@@ -106,7 +108,7 @@ class TestGrpcAction(TestCase):
         self.action.package = 'a_package'
         self.action.stub = 'a_stub'
         self.action.method = 'a_method'
-        self.action.data = 'date_key'
+        self.action.data = 'data_value'
 
         mocked_channel = Mock()
         mocked_module = Mock()
@@ -120,7 +122,9 @@ class TestGrpcAction(TestCase):
         mocked_response.__iter__ = Mock(return_value=iter(['item1', 'item2']))
         mocked_method.return_value = mocked_response
 
-        test_context, stage_context = self.action.execute(logger, {'date_key': 'data_value'}, {})
+        test_context, stage_context = self.action.execute(logger,
+                                                          test_context={},
+                                                          stage_context={})
 
         mocked_grpc.assert_called_with('a_host')
         mocked_stub.assert_called_with(mocked_channel)

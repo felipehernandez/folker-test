@@ -1,4 +1,3 @@
-import time
 from copy import deepcopy
 from enum import Enum, auto
 
@@ -7,7 +6,7 @@ import psycopg2
 from folker.logger.logger import TestLogger
 from folker.model.entity import Action
 from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.util.variable import replace_variables
+from folker.util.decorator import timed_action, resolvable_variables
 
 
 class PostgresMethod(Enum):
@@ -91,21 +90,15 @@ class PostgresAction(Action):
         if len(missing_fields) > 0:
             raise InvalidSchemaDefinitionException(missing_fields=missing_fields)
 
+    @resolvable_variables
+    @timed_action
     def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
-        start = time.time()
-
-        user = replace_variables(test_context=test_context, stage_context=stage_context, text=self.user)
-        password = replace_variables(test_context=test_context, stage_context=stage_context, text=self.password)
-        host = replace_variables(test_context=test_context, stage_context=stage_context, text=self.host)
-        port = replace_variables(test_context=test_context, stage_context=stage_context, text=self.port)
-        database = replace_variables(test_context=test_context, stage_context=stage_context, text=self.database)
-
         try:
-            connection = psycopg2.connect(user=user,
-                                          password=password,
-                                          host=host,
-                                          port=port,
-                                          database=database)
+            connection = psycopg2.connect(user=self.user,
+                                          password=self.password,
+                                          host=self.host,
+                                          port=self.port,
+                                          database=self.database)
             logger.action_debug('Connected to {}:{}/{} as {}'.format(self.host, self.port, self.database, self.user))
 
             cursor = connection.cursor()
@@ -132,8 +125,5 @@ class PostgresAction(Action):
                 cursor.close()
                 connection.close()
                 logger.action_debug('Disconnected from {}:{}/{} as {}'.format(self.host, self.port, self.database, self.user))
-
-        end = time.time()
-        stage_context['elapsed_time'] = int((end - start) * 1000)
 
         return test_context, stage_context
