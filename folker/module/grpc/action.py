@@ -1,13 +1,10 @@
 from collections import Iterable
-from copy import deepcopy
 
 import grpc
 
 from folker.logger.logger import TestLogger
 from folker.model.entity import Action
-from folker.model.error.load import InvalidSchemaDefinitionException
 from folker.util.decorator import timed_action, resolvable_variables
-from folker.util.variable import resolve_variable_reference
 
 
 class GrpcAction(Action):
@@ -38,31 +35,13 @@ class GrpcAction(Action):
 
         self.data = data
 
-    def __copy__(self):
-        return deepcopy(self)
-
-    def enrich(self, template: 'GrpcAction'):
-        self._set_attribute_if_missing(template, 'host')
-        self._set_attribute_if_missing(template, 'uri')
-        self._set_attribute_if_missing(template, 'package')
-        self._set_attribute_if_missing(template, 'stub')
-        self._set_attribute_if_missing(template, 'method')
-        self._set_attribute_if_missing(template, 'data')
-
-    def validate(self):
-        missing_fields = []
-
-        if not hasattr(self, 'host') or not self.host:
-            missing_fields.append('action.host')
-        if not hasattr(self, 'package') or not self.package:
-            missing_fields.append('action.package')
-        if not hasattr(self, 'stub') or not self.stub:
-            missing_fields.append('action.stub')
-        if not hasattr(self, 'method') or not self.method:
-            missing_fields.append('action.method')
-
-        if len(missing_fields) > 0:
-            raise InvalidSchemaDefinitionException(missing_fields=missing_fields)
+    def mandatory_fields(self):
+        return [
+            'host',
+            'package',
+            'stub',
+            'method',
+        ]
 
     @resolvable_variables
     @timed_action

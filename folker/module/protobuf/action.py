@@ -1,5 +1,4 @@
 import json
-from copy import deepcopy
 from enum import Enum, auto
 
 from google.protobuf import json_format
@@ -43,32 +42,22 @@ class ProtobufAction(Action):
         self.data = data
         self.message = message
 
-    def __copy__(self):
-        return deepcopy(self)
+    def mandatory_fields(self) -> [str]:
+        return [
+            'method',
+            'package'
+        ]
 
-    def enrich(self, template: 'RestAction'):
-        self._set_attribute_if_missing(template, 'method')
-        self._set_attribute_if_missing(template, 'package')
-        self._set_attribute_if_missing(template, 'clazz')
-        self._set_attribute_if_missing(template, 'data')
-        self._set_attribute_if_missing(template, 'message')
-
-    def validate(self):
-        missing_fields = []
-
-        if not hasattr(self, 'method') or not self.method:
-            missing_fields.append('action.method')
-        if not hasattr(self, 'package') or not self.package:
-            missing_fields.append('action.package')
-        if not hasattr(self, 'clazz') or not self.clazz:
+    def validate_specific(self, missing_fields):
+        if not hasattr(self, 'clazz') or not self.__getattribute__('clazz'):
             missing_fields.append('action.class')
+
         if hasattr(self, 'method') and self.method == ProtobufMethod.CREATE and (not hasattr(self, 'data') or not self.data):
             missing_fields.append('action.data')
         if hasattr(self, 'method') and self.method == ProtobufMethod.LOAD and (not hasattr(self, 'message') or not self.message):
             missing_fields.append('action.message')
 
-        if len(missing_fields) > 0:
-            raise InvalidSchemaDefinitionException(missing_fields=missing_fields)
+        return missing_fields
 
     @resolvable_variables
     @timed_action

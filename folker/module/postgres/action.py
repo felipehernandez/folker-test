@@ -1,4 +1,3 @@
-from copy import deepcopy
 from enum import Enum, auto
 
 import psycopg2
@@ -57,38 +56,16 @@ class PostgresAction(Action):
         self.database = database
         self.sql = sql
 
-    def __copy__(self):
-        return deepcopy(self)
-
-    def enrich(self, template: 'PostgresAction'):
-        self._set_attribute_if_missing(template, 'method')
-        self._set_attribute_if_missing(template, 'host')
-        self._set_attribute_if_missing(template, 'port')
-        self._set_attribute_if_missing(template, 'user')
-        self._set_attribute_if_missing(template, 'password')
-        self._set_attribute_if_missing(template, 'database')
-        self._set_attribute_if_missing(template, 'sql')
-
-    def validate(self):
-        missing_fields = []
-
-        if not hasattr(self, 'method') or not self.method:
-            missing_fields.append('action.method')
-        if not hasattr(self, 'host') or not self.host:
-            missing_fields.append('action.host')
-        if not hasattr(self, 'port') or not self.port:
-            self.host = '5432'
-        if not hasattr(self, 'user') or not self.user:
-            missing_fields.append('action.user')
-        if not hasattr(self, 'password') or not self.password:
-            missing_fields.append('action.password')
-        if not hasattr(self, 'database') or not self.database:
-            missing_fields.append('action.database')
-        if not hasattr(self, 'sql') or not self.sql:
-            missing_fields.append('action.sql')
-
-        if len(missing_fields) > 0:
-            raise InvalidSchemaDefinitionException(missing_fields=missing_fields)
+    def mandatory_fields(self):
+        return [
+            'method'
+            'host'
+            'port'
+            'user'
+            'password'
+            'database'
+            'sql'
+        ]
 
     @resolvable_variables
     @timed_action

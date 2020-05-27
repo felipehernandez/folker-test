@@ -61,31 +61,19 @@ class PubSubAction(Action):
     def __copy__(self):
         return deepcopy(self)
 
-    def enrich(self, template: 'ProtobufAction'):
-        self._set_attribute_if_missing(template, 'method')
-        self._set_attribute_if_missing(template, 'host')
-        self._set_attribute_if_missing(template, 'project')
-        self._set_attribute_if_missing(template, 'topic')
-        self._set_attribute_if_missing(template, 'subscription')
-        self._set_attribute_if_missing(template, 'attributes')
-        self._set_attribute_if_missing(template, 'message')
-        self._set_attribute_if_missing(template, 'ack')
+    def mandatory_fields(self):
+        return [
+            'project',
+            'method'
+        ]
 
-    def validate(self):
-        missing_fields = []
-
-        if not hasattr(self, 'project') or not self.project:
-            missing_fields.append('action.project')
-
-        if not hasattr(self, 'method') or not self.method:
-            missing_fields.append('action.method')
-        elif PubSubMethod.PUBLISH is self.method:
+    def validate_specific(self, missing_fields):
+        if hasattr(self, 'method') and PubSubMethod.PUBLISH is self.method:
             missing_fields.extend(self._validate_publish_values())
-        elif PubSubMethod.SUBSCRIBE is self.method:
+        if hasattr(self, 'method') and PubSubMethod.SUBSCRIBE is self.method:
             missing_fields.extend(self._validate_subscribe_values())
 
-        if len(missing_fields) > 0:
-            raise InvalidSchemaDefinitionException(missing_fields=missing_fields)
+        return missing_fields
 
     def _validate_publish_values(self) -> [str]:
         missing_fields = []

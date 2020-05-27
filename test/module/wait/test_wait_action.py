@@ -27,7 +27,7 @@ class TestWaitAction(TestCase):
 
         self.action.time = 0.1
 
-        test_context, stage_context = self.action.execute(logger, {}, {})
+        test_context, stage_context = self.action.execute(logger, test_context={}, stage_context={})
 
         self.assertEqual({}, test_context)
         self.assertTrue('elapsed_time' in stage_context)

@@ -21,14 +21,6 @@ class CodeAction(Action):
         self.method = method
         self.parameters = parameters
 
-    def __copy__(self):
-        return deepcopy(self)
-
-    def enrich(self, template: 'CodeAction'):
-        self._set_attribute_if_missing(template, 'package')
-        self._set_attribute_if_missing(template, 'method')
-        self._set_attribute_if_missing(template, 'parameters')
-
     def validate(self):
         missing_fields = []
 

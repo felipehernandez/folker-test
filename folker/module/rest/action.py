@@ -1,5 +1,4 @@
 import json
-from copy import deepcopy
 from enum import Enum, auto
 
 import requests
@@ -55,29 +54,11 @@ class RestAction(Action):
         self.data = data
         self.params = params
 
-    def __copy__(self):
-        return deepcopy(self)
-
-    def enrich(self, template: 'RestAction'):
-        self._set_attribute_if_missing(template, 'method')
-        self._set_attribute_if_missing(template, 'host')
-        self._set_attribute_if_missing(template, 'uri')
-        self._set_attribute_if_missing(template, 'query_parameters')
-        self._set_attribute_if_missing(template, 'headers')
-        self._set_attribute_if_missing(template, 'body')
-        self._set_attribute_if_missing(template, 'json')
-        self._set_attribute_if_missing(template, 'data')
-
-    def validate(self):
-        missing_fields = []
-
-        if not hasattr(self, 'method') or not self.method:
-            missing_fields.append('action.method')
-        if not hasattr(self, 'host') or not self.host:
-            missing_fields.append('action.host')
-
-        if len(missing_fields) > 0:
-            raise InvalidSchemaDefinitionException(missing_fields=missing_fields)
+    def mandatory_fields(self) -> [str]:
+        return [
+            'method',
+            'host'
+        ]
 
     @resolvable_variables
     @timed_action
