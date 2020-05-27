@@ -19,6 +19,12 @@ class CodeAction(Action):
         self.method = method
         self.parameters = parameters
 
+    def mandatory_fields(self) -> [str]:
+        return [
+            'module',
+            'method'
+        ]
+
     def validate(self):
         missing_fields = []
 

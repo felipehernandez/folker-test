@@ -148,7 +148,8 @@ class PubSubAction(Action):
         topics = self.publisher.list_topics(project_path)
 
         topic_prefix = project_path + '/topics/'
-        stage_context['topics'] = [topic.name[len(topic_prefix):] for topic in topics]
+        prefix_len = len(topic_prefix)
+        stage_context['topics'] = [topic.name[prefix_len:] for topic in topics]
 
     def _subscriptions(self, logger: TestLogger, stage_context: dict):
         self._authenticate()

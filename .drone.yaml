@@ -69,7 +69,7 @@ services:
     # grpc-test-server:8682
     image: folkertest/grpc-test-server:latest
   - name: graphql-test-server
-    # grpc-test-server:8682
+    # graphql-test-server:8683
     image: folkertest/graphql-test-server:latest
   - name: postgres-server
     environment:
