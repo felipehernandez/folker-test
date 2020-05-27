@@ -58,12 +58,12 @@ class PostgresAction(Action):
 
     def mandatory_fields(self):
         return [
-            'method'
-            'host'
-            'port'
-            'user'
-            'password'
-            'database'
+            'method',
+            'host',
+            'port',
+            'user',
+            'password',
+            'database',
             'sql'
         ]
 

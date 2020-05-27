@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 from folker.logger.logger import TestLogger
 from folker.model.entity import Action
 from folker.model.error.load import InvalidSchemaDefinitionException
