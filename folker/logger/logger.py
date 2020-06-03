@@ -114,13 +114,19 @@ class TestLogger(ABC):
 
     # Action
     @abstractmethod
-    def action_executed(self, stage_context: dict): pass
+    def action_prelude(self, action: dict, test_context: dict, stage_context: dict): pass
+
+    @abstractmethod
+    def action_conclusion(self, action: dict, test_context: dict, stage_context: dict): pass
 
     @abstractmethod
     def message(self, message): pass
 
     @abstractmethod
     def action_error(self, message): pass
+
+    @abstractmethod
+    def action_warn(self, message): pass
 
     @abstractmethod
     def action_debug(self, message): pass
