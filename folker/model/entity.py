@@ -283,7 +283,6 @@ class Stage:
 
         try:
             test_context, stage_context = self.action.execute(logger=logger, test_context=test_context, stage_context=stage_context)
-            logger.action_executed(stage_context)
             test_context, stage_context = self.save.execute(logger=logger, test_context=test_context, stage_context=stage_context)
             test_context, stage_context = self.log.execute(logger=logger, test_context=test_context, stage_context=stage_context)
             test_context, stage_context = self.assertions.execute(logger=logger, test_context=test_context, stage_context=stage_context)

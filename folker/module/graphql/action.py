@@ -3,7 +3,7 @@ from gql.transport.requests import RequestsHTTPTransport
 
 from folker.logger.logger import TestLogger
 from folker.model.entity import Action
-from folker.util.decorator import timed_action, resolvable_variables
+from folker.util.decorator import timed_action, resolvable_variables, loggable
 
 
 class GraphQLAction(Action):
@@ -34,12 +34,13 @@ class GraphQLAction(Action):
         ]
 
     def validate_specific(self, missing_fields):
-        if (not hasattr(self, 'query') and not self.__getattribute__('query')) and \
-                (not hasattr(self, 'mutation') and not self.__getattribute__('mutation')):
+        if (not hasattr(self, 'query') or not self.__getattribute__('query')) and \
+                (not hasattr(self, 'mutation') or not self.__getattribute__('mutation')):
             missing_fields.extend(['action.query', 'action.mutation'])
 
         return missing_fields
 
+    @loggable
     @resolvable_variables
     @timed_action
     def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):

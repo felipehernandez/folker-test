@@ -4,7 +4,7 @@ import grpc
 
 from folker.logger.logger import TestLogger
 from folker.model.entity import Action
-from folker.util.decorator import timed_action, resolvable_variables
+from folker.util.decorator import timed_action, resolvable_variables, loggable
 
 
 class GrpcAction(Action):
@@ -43,10 +43,11 @@ class GrpcAction(Action):
             'method',
         ]
 
+    @loggable
     @resolvable_variables
     @timed_action
     def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
-        url = self._build_url(stage_context)
+        url = self._build_url()
         channel = grpc.insecure_channel(url)
 
         imported_module = __import__(self.package, fromlist=[self.stub])
@@ -65,5 +66,5 @@ class GrpcAction(Action):
 
         return test_context, stage_context
 
-    def _build_url(self, stage_context: dict):
+    def _build_url(self):
         return (self.host + '/' + self.uri) if self.uri else self.host

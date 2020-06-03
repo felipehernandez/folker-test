@@ -10,7 +10,7 @@ from google.cloud.pubsub_v1.proto.pubsub_pb2 import PubsubMessage
 from folker.logger.logger import TestLogger
 from folker.model.entity import Action
 from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.util.decorator import timed_action, resolvable_variables
+from folker.util.decorator import timed_action, resolvable_variables, loggable
 
 
 class PubSubMethod(Enum):
@@ -93,6 +93,7 @@ class PubSubAction(Action):
 
         return missing_fields
 
+    @loggable
     @resolvable_variables
     @timed_action
     def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
