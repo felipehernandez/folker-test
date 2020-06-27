@@ -68,4 +68,8 @@ class FileSystemLogger(SystemLogger, FileLogger):
         for fail in failures:
             self._log('\t{}'.format(fail))
 
+    def assert_number_tests_executed(self, expected: int, executed: int):
+        if expected != executed:
+            self._log('Expected: {} - Executed: '.format(executed, expected))
+
         self._write_to_file()

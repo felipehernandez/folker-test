@@ -66,6 +66,10 @@ class ConsoleSystemLogger(SystemLogger, ColorLogger):
         for fail in failures:
             self._log(self.COLOR_RED, '\t{}'.format(fail))
 
+    def assert_number_tests_executed(self, expected: int, executed: int):
+        if expected != executed:
+            self._log(self.COLOR_RED, 'Expected: {} - Executed: '.format(executed, expected))
+
     # Util
     def _log(self, color, text, end=None):
         print(self._log_color(color, text, end))
