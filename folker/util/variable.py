@@ -21,16 +21,11 @@ def replace_variables(test_context: dict, stage_context: dict, text):
 
 
 def resolve_variable_reference(test_context: dict, stage_context: dict, variable_reference: str) -> str:
-    stage_value = _resolve_variable_reference(stage_context, variable_reference)
-    if stage_value is not None:
-        return stage_value
-
-    test_value = _resolve_variable_reference(test_context, variable_reference)
-
-    if test_value is not None:
-        return test_value
-
-    raise VariableReferenceResolutionException(variable_reference=variable_reference)
+    try:
+        return _resolve_variable_reference(stage_context, variable_reference)
+    except VariableReferenceResolutionException:
+        pass
+    return _resolve_variable_reference(test_context, variable_reference)
 
 
 def map_variables(test_context: dict, stage_context: dict, text) -> (str, dict):
@@ -52,9 +47,12 @@ def _resolve_variable_reference(context: dict, path: str) -> str:
         for step in path_steps:
             if '[' in step:
                 step = int(step[1:-1])
-            context_navigation = context_navigation[step]
+            try:
+                context_navigation = context_navigation[step]
+            except:
+                context_navigation = getattr(context_navigation, step)
     except:
-        return None
+        raise VariableReferenceResolutionException(variable_reference=path)
 
     return context_navigation
 

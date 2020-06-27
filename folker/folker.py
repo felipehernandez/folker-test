@@ -37,7 +37,7 @@ def run():
     if len(success) is not executed:
         raise TestSuiteResultException(failures)
     expected_number_of_tests = parameterised_number_of_tests()
-    if expected_number_of_tests and expected_number_of_tests is executed:
+    if expected_number_of_tests and int(expected_number_of_tests) != executed:
         raise TestSuiteNumberExecutionsException(expected_number_of_tests, executed)
 
 

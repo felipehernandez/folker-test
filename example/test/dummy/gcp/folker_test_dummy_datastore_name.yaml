@@ -1,0 +1,65 @@
+name: Datastore Test with name
+description: Dummy Test for Datastore Stage using name
+tags:
+  - dummy
+  - datastore
+
+stages:
+  - name: setup
+    action:
+      type: VOID
+    save:
+      #       host: localhost:8684
+      host: gcp-datastore-emulator:8684
+
+  - name: put entity
+    action:
+      type: DATASTORE
+      method: PUT
+      host: ${host}
+      project: folker-test-gcp-test
+      key:
+        kind: Test
+        name: '1-2-3'
+      entity:
+        k1: v1
+        k2: v2
+
+  - name: get entity
+    action:
+      type: DATASTORE
+      method: GET
+      host: ${host}
+      project: folker-test-gcp-test
+      key:
+        kind: Test
+        name: '1-2-3'
+    assert:
+      - ${key.kind} == 'Test'
+      - ${key.id} == None
+      - ${key.name} == '1-2-3'
+      - ${entity.k1} == 'v1'
+      - ${entity.k2} == 'v2'
+
+  - name: delete entity
+    action:
+      type: DATASTORE
+      method: DELETE
+      host: ${host}
+      project: folker-test-gcp-test
+      key:
+        kind: Test
+        name: '1-2-3'
+
+  - name: get entity
+    action:
+      type: DATASTORE
+      method: GET
+      host: ${host}
+      project: folker-test-gcp-test
+      key:
+        kind: Test
+        name: '1-2-3'
+    assert:
+      - ${key} == None
+      - ${entity} == None

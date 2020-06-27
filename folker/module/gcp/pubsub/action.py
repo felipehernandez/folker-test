@@ -22,8 +22,11 @@ class PubSubMethod(Enum):
 
 class PubSubAction(Action):
     method: PubSubMethod
+
     host: str
     project: str
+    credentials_path: str
+
     topic: str
     attributes: dict = {}
     message: str
@@ -34,6 +37,7 @@ class PubSubAction(Action):
                  method: str = None,
                  host: str = None,
                  project: str = None,
+                 credentials: str = None,
                  topic: str = None,
                  subscription=None,
                  attributes: dict = None,
@@ -50,6 +54,8 @@ class PubSubAction(Action):
 
         self.host = host
         self.project = project
+        self.credentials_path = credentials
+
         self.attributes = attributes
 
         self.topic = topic
@@ -97,6 +103,8 @@ class PubSubAction(Action):
     @resolvable_variables
     @timed_action
     def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
+        self._authenticate()
+
         {
             PubSubMethod.PUBLISH: self._publish,
             PubSubMethod.SUBSCRIBE: self._subscribe,
@@ -107,8 +115,6 @@ class PubSubAction(Action):
         return test_context, stage_context
 
     def _publish(self, logger: TestLogger, stage_context: dict):
-        self._authenticate()
-
         self.publisher = PublisherClient(channel=grpc.insecure_channel(target=self.host)) if self.host else PublisherClient()
 
         topic_path = self.publisher.topic_path(self.project, self.topic)
@@ -120,8 +126,6 @@ class PubSubAction(Action):
         stage_context['message_id'] = future.result()
 
     def _subscribe(self, logger: TestLogger, stage_context: dict):
-        self._authenticate()
-
         self.subscriber = SubscriberClient(channel=grpc.insecure_channel(target=self.host)) if self.host else SubscriberClient()
 
         subscription_path = self.subscriber.subscription_path(self.project, self.subscription)
@@ -141,8 +145,6 @@ class PubSubAction(Action):
                 self.subscriber.acknowledge(subscription_path, [message.ack_id])
 
     def _topics(self, logger: TestLogger, stage_context: dict):
-        self._authenticate()
-
         self.publisher = PublisherClient(channel=grpc.insecure_channel(target=self.host)) if self.host else PublisherClient()
 
         project_path = self.publisher.project_path(self.project)
@@ -153,8 +155,6 @@ class PubSubAction(Action):
         stage_context['topics'] = [topic.name[prefix_len:] for topic in topics]
 
     def _subscriptions(self, logger: TestLogger, stage_context: dict):
-        self._authenticate()
-
         self.subscriber = SubscriberClient(channel=grpc.insecure_channel(target=self.host)) if self.host else SubscriberClient()
 
         project = self.project

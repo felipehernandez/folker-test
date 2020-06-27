@@ -15,13 +15,15 @@ steps:
       - mkdir /folker
       - mkdir /protos
       - mkdir /testcode
-      - cp -a ./folker.py         /
-      - cp -a ./folker/*          /folker/
-      - cp -a ./example/protos/*  /protos/
-      - cp -a ./example/code/*    /testcode/
+      - mkdir /credentials
+      - cp -a ./folker.py             /
+      - cp -a ./folker/*              /folker
+      - cp -a ./example/protos/*      /protos
+      - cp -a ./example/code/*        /testcode
+      - cp -a ./example/credentials/* /credentials
       - cd /
       - sleep 5 # time for mockserver to start
-      - python3 folker.py -p test-profile -n 19 --trace
+      - python3 folker.py -p test-profile -n 21 --trace
 
   - name: bake-beta
     image: plugins/docker
@@ -57,22 +59,34 @@ steps:
       event: push
 
 services:
-  - name: mockserver
     # http://mockserver:1080
+  - name: mockserver
     image: mockserver/mockserver:latest
-  - name: gcp-pubsub-emulator
+
     # gcp-pubsub-emulator:8681
+  - name: gcp-pubsub-emulator
     image: messagebird/gcloud-pubsub-emulator:latest
     environment:
       PUBSUB_PROJECT1: "folker-test-gcp-test,a_topic:a_subscription"
-  - name: grpc-test-server
+
+    # gcp-datastore-emulator:8684
+  - name: gcp-datastore-emulator
+    image: singularities/datastore-emulator
+    environment:
+      DATASTORE_PROJECT_ID: folker-test-gcp-test
+      DATASTORE_LISTEN_ADDRESS: 0.0.0.0:8684
+
     # grpc-test-server:8682
+  - name: grpc-test-server
     image: folkertest/grpc-test-server:latest
-  - name: graphql-test-server
+
     # graphql-test-server:8683
+  - name: graphql-test-server
     image: folkertest/graphql-test-server:latest
+
+    # postgres-server:5432
   - name: postgres-server
+    image: postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: docker
-    image: postgres
