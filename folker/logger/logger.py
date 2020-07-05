@@ -95,6 +95,9 @@ class SystemLogger(ABC):
     @abstractmethod
     def assert_execution_result(self, total, success, failures): pass
 
+    @abstractmethod
+    def assert_number_tests_executed(self,  expected: int, executed: int): pass
+
 
 class TestLogger(ABC):
 
