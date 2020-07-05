@@ -34,9 +34,10 @@ Each time we want to access to data stored in any of the contexts we need to spe
 
 ## Test
 A tests is defined as follows:
-- name: name of the tests
+- name: text to identify the test
 - description: brief description of the test
 - tags: tag the test in case we want to execute just part of the entire test suite
+- foreach: key-value pairs that will trigger an entire execution for each combination. The values are listed values that will be added to the **test context** and will be executed separatelly.
 - stages: secuential steps to execute as part of the test. 
 ```
 name: Example test  
@@ -73,9 +74,134 @@ stages:
 		  - 1 + 1 == 2
 ```
 #### Action
+Defines the unique activity to be perform on the *stage*. Each "action* is identyfy by the attribure **type** among its particular ones. Each *action* performs a different activity and thus define a different output. There are some generated values that are consistent for all *actions*:
+- elapsed_time: specifies the time it took the activity to complete.
+- error: contains any usefull information to identify the reason the activity could not be completed. This information contains error due to actual perform rather than data related.
+
+The possible activities are as follows:
+##### CODE
+##### FILE
+##### GCP / DATASTORE
+##### GCP / PUBSUB
+##### GRAPHQL
+##### GRPC
+##### POSTGRES
+##### PRINT
+##### PROTOBUF
+##### REST
 ##### VOID
+##### WAIT
 #### Save
+Defines key value pairs so usefull information can be stored on the **test context** for future
+```
+name: Complex save Test
+description: Dummy Test for complex save
+tags:
+  - dummy
+  - save
+
+stages:
+  - name: save1
+    action:
+      type: VOID
+    save:
+      root.0: value1
+      attribute.with.multiple.layers: value
+
+  - name: save2
+    action:
+      type: VOID
+    save:
+      root.1: value2
+
+  - name: asserts
+    action:
+      type: VOID
+    assert:
+      - ${root.0} == 'value1'
+      - ${root.1} == 'value2'
+      - ${attribute.with.multiple.layers} == 'value' 
+```
+Both *key* and *value* accept variable replacement but only *value* supports statement resolution.
+```
+name: Print Test
+description: Dummy Test for Print Stage
+tags:
+  - dummy
+  - print
+  - foreach
+
+stages:
+  - name: foreach stage
+    foreach:
+      element: [ 'alpha', 'beta', 'charlie']
+    action:
+      type: PRINT
+      message: Hello ${element} (${element_index})!
+    save:
+      elements.${element_index}: ${element}
+
+  - name: assertions
+    foreach:
+      value: ${elements}
+    action:
+      type: VOID
+    assert:
+      - ${elements.0} == 'alpha'
+      - ${elements.1} == 'beta'
+      - ${elements.2} == 'charlie'
+
+  - name: multiple variables foreach
+    foreach:
+      element1: [ 1, 2 ]
+      element2: [ 3, 7 ]
+    action:
+      type: VOID
+    save:
+      elements.${element1_index}${element2_index}: ${element1}+${element2}
+
+  - name: assert complex save
+    action:
+      type: VOID
+    assert:
+      - ${elements.00} == 4
+      - ${elements.01} == 8
+      - ${elements.10} == 5
+      - ${elements.11} == 9
+```
 #### Log
+Contains a list of texts that will be printed for the desired report out.
+```
+name: Void Test
+description: Dummy Test for Void Stage
+tags:
+  - dummy
+  - void
+
+stages:
+  - name: void_stage
+    action:
+      type: VOID
+    save:
+      test: 'passing'
+    log:
+      - 'Hello world'
+```
 #### Assert
+Contains a list of statements that will be asserted after the *activity* is performed.
+```
+stages:
+  - name: example
+    action:
+      type: VOID
+    save:
+      root.0: value1
+      attribute.with.multiple.layers: value
+    assert:
+      - 1+1 == 2
+      - len(['']) == 1
+      - ${root.0} == 'value1'
+      - ${attribute.with.multiple.layers} == 'value'
+```
 ## Template
 ## Profile
