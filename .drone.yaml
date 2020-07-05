@@ -24,6 +24,8 @@ steps:
       - cd /
       - sleep 5 # time for mockserver to start
       - python3 folker.py -p test-profile -n 24 --trace
+      - python3 folker.py -t dummy -t print -n 1 --trace
+      - python3 folker.py -t dummy -t print --trace
 
   - name: bake-beta
     image: plugins/docker
