@@ -57,6 +57,11 @@ stages:
         kind: Test
         names: '${entities_name}'
 
+  - name: wait
+    action:
+      type: WAIT
+      time: 1
+
   - name: get entities
     action:
       type: DATASTORE
