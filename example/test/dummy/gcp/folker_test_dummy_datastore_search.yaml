@@ -20,10 +20,9 @@ stages:
       project: folker-test-gcp-test
       key:
         kind: Test
-        name: '1-2-3'
+        name: 'search-1'
       entity:
-        k1: v1
-        k2: v2
+        test: search
 
   - name: get entities
     action:
@@ -33,7 +32,7 @@ stages:
       key:
         kind: Test
     assert:
-      - ${result.[0].key.name} == '1-2-3'
+      - ${result.[0].key.name} == 'search-1'
 
   - name: delete entity
     action:
@@ -43,4 +42,4 @@ stages:
       project: folker-test-gcp-test
       key:
         kind: Test
-        name: '1-2-3'
+        name: 'search-1'

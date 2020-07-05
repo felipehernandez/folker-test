@@ -20,10 +20,9 @@ stages:
       project: folker-test-gcp-test
       key:
         kind: Test
-        name: '1-2-3'
+        name: 'bulk-1'
       entity:
-        k1: v1
-        k2: v2
+        test: bulk_delete_1
 
   - name: put entity
     action:
@@ -33,10 +32,9 @@ stages:
       project: folker-test-gcp-test
       key:
         kind: Test
-        name: '1-2-4'
+        name: 'bulk-2'
       entity:
-        k1: v1
-        k2: v2
+        test: bulk_delete_2
 
   - name: get entities
     action:

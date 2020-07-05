@@ -20,8 +20,9 @@ stages:
       project: folker-test-gcp-test
       key:
         kind: Test
-        name: '1-2-3'
+        name: 'name-1'
       entity:
+        test: name
         k1: v1
         k2: v2
 
@@ -33,7 +34,7 @@ stages:
       project: folker-test-gcp-test
       key:
         kind: Test
-        name: '1-2-3'
+        name: 'name-1'
     assert:
       - ${key.kind} == 'Test'
       - ${key.id} == None
@@ -49,7 +50,7 @@ stages:
       project: folker-test-gcp-test
       key:
         kind: Test
-        name: '1-2-3'
+        name: 'name-1'
 
   - name: get entity
     action:
@@ -59,7 +60,7 @@ stages:
       project: folker-test-gcp-test
       key:
         kind: Test
-        name: '1-2-3'
+        name: 'name-1'
     assert:
       - ${key} == None
       - ${entity} == None
