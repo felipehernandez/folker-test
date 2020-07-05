@@ -1,4 +1,4 @@
-name: Datastore Test with id
+name: Datastore with id Test
 description: Dummy Test for Datastore Stage using id
 tags:
   - dummy

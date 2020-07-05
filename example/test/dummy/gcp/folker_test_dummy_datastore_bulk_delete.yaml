@@ -1,5 +1,5 @@
-name: Datastore with name Test
-description: Dummy Test for Datastore Stage using name
+name: Datastore bulk delete Test
+description: Dummy Test for Datastore bulk delete
 tags:
   - dummy
   - datastore
@@ -25,41 +25,46 @@ stages:
         k1: v1
         k2: v2
 
-  - name: get entity
+  - name: put entity
     action:
       type: DATASTORE
-      method: GET
+      method: PUT
       host: ${host}
       project: folker-test-gcp-test
       key:
         kind: Test
-        name: '1-2-3'
-    assert:
-      - ${key.kind} == 'Test'
-      - ${key.id} == None
-      - ${key.name} == '1-2-3'
-      - ${entity.k1} == 'v1'
-      - ${entity.k2} == 'v2'
+        name: '1-2-4'
+      entity:
+        k1: v1
+        k2: v2
 
-  - name: delete entity
+  - name: get entities
     action:
       type: DATASTORE
-      method: DELETE
-      host: ${host}
+      method: QUERY
       project: folker-test-gcp-test
       key:
         kind: Test
-        name: '1-2-3'
-
-  - name: get entity
-    action:
-      type: DATASTORE
-      method: GET
-      host: ${host}
-      project: folker-test-gcp-test
-      key:
-        kind: Test
-        name: '1-2-3'
     assert:
-      - ${key} == None
-      - ${entity} == None
+      - len(${result}) == 2
+    save:
+      entities_name: '[entity.key.name for entity in ${result}]'
+
+  - name: bulk delete entities
+    action:
+      type: DATASTORE
+      method: BULK_DELETE
+      project: folker-test-gcp-test
+      key:
+        kind: Test
+        names: '${entities_name}'
+
+  - name: get entities
+    action:
+      type: DATASTORE
+      method: QUERY
+      project: folker-test-gcp-test
+      key:
+        kind: Test
+    assert:
+      - len(${result}) == 0

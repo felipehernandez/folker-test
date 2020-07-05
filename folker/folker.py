@@ -36,7 +36,7 @@ def run():
     logger.assert_execution_result(executed, sorted(success), sorted(failures))
     expected_number_of_tests = parameterised_number_of_tests()
     logger.assert_number_tests_executed(expected_number_of_tests, executed)
-    if len(success) is not executed:
+    if len(success) != executed:
         raise TestSuiteResultException(failures)
     if expected_number_of_tests and int(expected_number_of_tests) != executed:
         raise TestSuiteNumberExecutionsException(expected_number_of_tests, executed)
