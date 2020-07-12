@@ -6,7 +6,7 @@ from enum import Enum, auto
 from google.cloud import datastore
 
 from folker.logger.logger import TestLogger
-from folker.model.entity import Action
+from folker.model.stage.action import Action
 from folker.model.error.load import InvalidSchemaDefinitionException
 from folker.util.decorator import timed_action, resolvable_variables, loggable
 

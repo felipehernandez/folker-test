@@ -5,7 +5,7 @@ import yaml
 from folker import templates, stage_templates, profiles
 from folker.load.schemas import TestSchema, ProfileSchema
 from folker.logger.logger import SystemLogger
-from folker.model.entity import Test
+from folker.model.test import Test
 from folker.util.parameters import test_file_regular_expression, parameterised_test_files
 
 

@@ -3,7 +3,7 @@ import copy
 from folker import profiles
 from folker.logger import logger_factory
 from folker.logger.logger_factory import LoggerType
-from folker.model.entity import Test
+from folker.model.test import Test
 from folker.util.parameters import capture_parameters_context, parameterised_profile
 
 
