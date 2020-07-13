@@ -36,6 +36,11 @@ stages:
       entity:
         test: bulk_delete_2
 
+  - name: wait
+    action:
+      type: WAIT
+      time: 1
+
   - name: get entities
     action:
       type: DATASTORE
