@@ -1,13 +1,11 @@
-import time
-from copy import deepcopy
 from enum import Enum, auto
 
 import psycopg2
 
 from folker.logger.logger import TestLogger
-from folker.model.entity import Action
+from folker.model.stage.action import Action
 from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.util.variable import replace_variables
+from folker.util.decorator import timed_action, resolvable_variables, loggable
 
 
 class PostgresMethod(Enum):
@@ -58,54 +56,27 @@ class PostgresAction(Action):
         self.database = database
         self.sql = sql
 
-    def __copy__(self):
-        return deepcopy(self)
+    def mandatory_fields(self):
+        return [
+            'method',
+            'host',
+            'port',
+            'user',
+            'password',
+            'database',
+            'sql'
+        ]
 
-    def enrich(self, template: 'PostgresAction'):
-        self._set_attribute_if_missing(template, 'method')
-        self._set_attribute_if_missing(template, 'host')
-        self._set_attribute_if_missing(template, 'port')
-        self._set_attribute_if_missing(template, 'user')
-        self._set_attribute_if_missing(template, 'password')
-        self._set_attribute_if_missing(template, 'database')
-        self._set_attribute_if_missing(template, 'sql')
-
-    def validate(self):
-        missing_fields = []
-
-        if not hasattr(self, 'method') or not self.method:
-            missing_fields.append('action.method')
-        if not hasattr(self, 'host') or not self.host:
-            missing_fields.append('action.host')
-        if not hasattr(self, 'port') or not self.port:
-            self.host = '5432'
-        if not hasattr(self, 'user') or not self.user:
-            missing_fields.append('action.user')
-        if not hasattr(self, 'password') or not self.password:
-            missing_fields.append('action.password')
-        if not hasattr(self, 'database') or not self.database:
-            missing_fields.append('action.database')
-        if not hasattr(self, 'sql') or not self.sql:
-            missing_fields.append('action.sql')
-
-        if len(missing_fields) > 0:
-            raise InvalidSchemaDefinitionException(missing_fields=missing_fields)
-
+    @loggable
+    @resolvable_variables
+    @timed_action
     def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
-        start = time.time()
-
-        user = replace_variables(test_context=test_context, stage_context=stage_context, text=self.user)
-        password = replace_variables(test_context=test_context, stage_context=stage_context, text=self.password)
-        host = replace_variables(test_context=test_context, stage_context=stage_context, text=self.host)
-        port = replace_variables(test_context=test_context, stage_context=stage_context, text=self.port)
-        database = replace_variables(test_context=test_context, stage_context=stage_context, text=self.database)
-
         try:
-            connection = psycopg2.connect(user=user,
-                                          password=password,
-                                          host=host,
-                                          port=port,
-                                          database=database)
+            connection = psycopg2.connect(user=self.user,
+                                          password=self.password,
+                                          host=self.host,
+                                          port=self.port,
+                                          database=self.database)
             logger.action_debug('Connected to {}:{}/{} as {}'.format(self.host, self.port, self.database, self.user))
 
             cursor = connection.cursor()
@@ -132,8 +103,5 @@ class PostgresAction(Action):
                 cursor.close()
                 connection.close()
                 logger.action_debug('Disconnected from {}:{}/{} as {}'.format(self.host, self.port, self.database, self.user))
-
-        end = time.time()
-        stage_context['elapsed_time'] = int((end - start) * 1000)
 
         return test_context, stage_context

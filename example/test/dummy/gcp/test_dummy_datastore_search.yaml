@@ -1,0 +1,50 @@
+name: Datastore search Test
+description: Dummy Test for Datastore Stage search
+tags:
+  - dummy
+  - datastore
+
+stages:
+  - name: setup
+    action:
+      type: VOID
+    save:
+      #       host: localhost:8684
+      host: gcp-datastore-emulator:8684
+
+  - name: put entity
+    action:
+      type: DATASTORE
+      method: PUT
+      host: ${host}
+      project: folker-test-gcp-test
+      key:
+        kind: Test
+        name: 'search-1'
+      entity:
+        test: search
+
+  - name: wait
+    action:
+      type: WAIT
+      time: 1
+
+  - name: get entities
+    action:
+      type: DATASTORE
+      method: QUERY
+      project: folker-test-gcp-test
+      key:
+        kind: Test
+    assert:
+      - ${result.[0].key.name} == 'search-1'
+
+  - name: delete entity
+    action:
+      type: DATASTORE
+      method: DELETE
+      host: ${host}
+      project: folker-test-gcp-test
+      key:
+        kind: Test
+        name: 'search-1'

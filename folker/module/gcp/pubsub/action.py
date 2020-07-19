@@ -1,6 +1,5 @@
 import json
 import os
-import time
 from copy import deepcopy
 from enum import Enum, auto
 
@@ -9,9 +8,9 @@ from google.cloud.pubsub_v1 import PublisherClient, SubscriberClient
 from google.cloud.pubsub_v1.proto.pubsub_pb2 import PubsubMessage
 
 from folker.logger.logger import TestLogger
-from folker.model.entity import Action
+from folker.model.stage.action import Action
 from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.util.variable import recursive_replace_variables
+from folker.util.decorator import timed_action, resolvable_variables, loggable
 
 
 class PubSubMethod(Enum):
@@ -23,8 +22,11 @@ class PubSubMethod(Enum):
 
 class PubSubAction(Action):
     method: PubSubMethod
+
     host: str
     project: str
+    credentials_path: str
+
     topic: str
     attributes: dict = {}
     message: str
@@ -35,6 +37,7 @@ class PubSubAction(Action):
                  method: str = None,
                  host: str = None,
                  project: str = None,
+                 credentials: str = None,
                  topic: str = None,
                  subscription=None,
                  attributes: dict = None,
@@ -51,6 +54,8 @@ class PubSubAction(Action):
 
         self.host = host
         self.project = project
+        self.credentials_path = credentials
+
         self.attributes = attributes
 
         self.topic = topic
@@ -62,31 +67,19 @@ class PubSubAction(Action):
     def __copy__(self):
         return deepcopy(self)
 
-    def enrich(self, template: 'ProtobufAction'):
-        self._set_attribute_if_missing(template, 'method')
-        self._set_attribute_if_missing(template, 'host')
-        self._set_attribute_if_missing(template, 'project')
-        self._set_attribute_if_missing(template, 'topic')
-        self._set_attribute_if_missing(template, 'subscription')
-        self._set_attribute_if_missing(template, 'attributes')
-        self._set_attribute_if_missing(template, 'message')
-        self._set_attribute_if_missing(template, 'ack')
+    def mandatory_fields(self):
+        return [
+            'project',
+            'method'
+        ]
 
-    def validate(self):
-        missing_fields = []
-
-        if not hasattr(self, 'project') or not self.project:
-            missing_fields.append('action.project')
-
-        if not hasattr(self, 'method') or not self.method:
-            missing_fields.append('action.method')
-        elif PubSubMethod.PUBLISH is self.method:
+    def validate_specific(self, missing_fields):
+        if hasattr(self, 'method') and PubSubMethod.PUBLISH is self.method:
             missing_fields.extend(self._validate_publish_values())
-        elif PubSubMethod.SUBSCRIBE is self.method:
+        if hasattr(self, 'method') and PubSubMethod.SUBSCRIBE is self.method:
             missing_fields.extend(self._validate_subscribe_values())
 
-        if len(missing_fields) > 0:
-            raise InvalidSchemaDefinitionException(missing_fields=missing_fields)
+        return missing_fields
 
     def _validate_publish_values(self) -> [str]:
         missing_fields = []
@@ -106,45 +99,36 @@ class PubSubAction(Action):
 
         return missing_fields
 
+    @loggable
+    @resolvable_variables
+    @timed_action
     def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
-        start = time.time()
+        self._authenticate()
 
         {
             PubSubMethod.PUBLISH: self._publish,
             PubSubMethod.SUBSCRIBE: self._subscribe,
             PubSubMethod.TOPICS: self._topics,
             PubSubMethod.SUBSCRIPTIONS: self._subscriptions
-        }.get(self.method)(logger, test_context, stage_context)
-
-        end = time.time()
-        stage_context['elapsed_time'] = int((end - start) * 1000)
+        }.get(self.method)(logger, stage_context)
 
         return test_context, stage_context
 
-    def _publish(self, logger: TestLogger, test_context: dict, stage_context: dict):
-        self._authenticate()
-
+    def _publish(self, logger: TestLogger, stage_context: dict):
         self.publisher = PublisherClient(channel=grpc.insecure_channel(target=self.host)) if self.host else PublisherClient()
 
-        project = recursive_replace_variables(test_context, stage_context, self.project)
-        topic = recursive_replace_variables(test_context, stage_context, self.topic)
-        topic_path = self.publisher.topic_path(project, topic)
-        message = recursive_replace_variables(test_context, stage_context, self.message)
-        attributes = recursive_replace_variables(test_context, stage_context, self.attributes) if self.attributes else {}
+        topic_path = self.publisher.topic_path(self.project, self.topic)
+        attributes = self.attributes if self.attributes else {}
 
-        self._log_debug(logger, topic=topic_path, attributes=attributes, message=message)
-        future = self.publisher.publish(topic=topic_path, data=message.encode(), **attributes)
+        self._log_debug(logger, topic=topic_path, attributes=attributes, message=self.message)
+        future = self.publisher.publish(topic=topic_path, data=self.message.encode(), **attributes)
 
         stage_context['message_id'] = future.result()
 
-    def _subscribe(self, logger: TestLogger, test_context: dict, stage_context: dict):
-        self._authenticate()
-
+    def _subscribe(self, logger: TestLogger, stage_context: dict):
         self.subscriber = SubscriberClient(channel=grpc.insecure_channel(target=self.host)) if self.host else SubscriberClient()
 
-        project = recursive_replace_variables(test_context, stage_context, self.project)
-        subscription = recursive_replace_variables(test_context, stage_context, self.subscription)
-        subscription_path = self.subscriber.subscription_path(project, subscription)
+        subscription_path = self.subscriber.subscription_path(self.project, self.subscription)
 
         self._log_debug(logger, subscription=subscription_path, ack=self.ack)
         response = self.subscriber.pull(subscription=subscription_path, max_messages=1)
@@ -160,24 +144,20 @@ class PubSubAction(Action):
             if self.ack:
                 self.subscriber.acknowledge(subscription_path, [message.ack_id])
 
-    def _topics(self, logger: TestLogger, test_context: dict, stage_context: dict):
-        self._authenticate()
-
+    def _topics(self, logger: TestLogger, stage_context: dict):
         self.publisher = PublisherClient(channel=grpc.insecure_channel(target=self.host)) if self.host else PublisherClient()
 
-        project = recursive_replace_variables(test_context, stage_context, self.project)
-        project_path = self.publisher.project_path(project)
+        project_path = self.publisher.project_path(self.project)
         topics = self.publisher.list_topics(project_path)
 
         topic_prefix = project_path + '/topics/'
-        stage_context['topics'] = [topic.name[len(topic_prefix):] for topic in topics]
+        prefix_len = len(topic_prefix)
+        stage_context['topics'] = [topic.name[prefix_len:] for topic in topics]
 
-    def _subscriptions(self, logger: TestLogger, test_context: dict, stage_context: dict):
-        self._authenticate()
-
+    def _subscriptions(self, logger: TestLogger, stage_context: dict):
         self.subscriber = SubscriberClient(channel=grpc.insecure_channel(target=self.host)) if self.host else SubscriberClient()
 
-        project = recursive_replace_variables(test_context, stage_context, self.project)
+        project = self.project
         project_path = self.subscriber.project_path(project)
         subscriptions = self.subscriber.list_subscriptions(project_path)
 
