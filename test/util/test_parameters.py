@@ -165,7 +165,7 @@ class TestStringMethods(TestCase):
     def test_files_re_flag_single_multiple(self):
         load_command_arguments()
 
-        self.assertEqual('**/test*.yaml', test_file_regular_expression())
+        self.assertEqual('**/folker_test*.yaml', test_file_regular_expression())
 
     @patch('sys.argv', ['method', '--FILE=asd'])
     def test_files_re_flag_long_simple_single(self):

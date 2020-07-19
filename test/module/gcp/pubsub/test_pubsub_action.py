@@ -109,7 +109,7 @@ class TestPubSubAction(TestCase):
         MockPublisher.return_value.publish.return_value = future
         future.result.return_value = 'message-id'
 
-        test_context, stage_context = self.action.execute(logger, test_context={}, stage_context={})
+        test_context, stage_context = self.action.execute(logger, {}, {})
 
         self.assertEqual({}, test_context)
         self.assertTrue('elapsed_time' in stage_context)
@@ -135,7 +135,7 @@ class TestPubSubAction(TestCase):
         received_message.message.message_id = 'message-id'
         received_message.message.data.decode.return_value = 'a-message'
 
-        test_context, stage_context = self.action.execute(logger, test_context={}, stage_context={})
+        test_context, stage_context = self.action.execute(logger, {}, {})
 
         self.assertEqual({}, test_context)
         self.assertTrue('elapsed_time' in stage_context)
@@ -163,7 +163,7 @@ class TestPubSubAction(TestCase):
         received_message.message.message_id = 'message-id'
         received_message.message.data.decode.return_value = 'a-message'
 
-        test_context, stage_context = self.action.execute(logger, test_context={}, stage_context={})
+        test_context, stage_context = self.action.execute(logger, {}, {})
 
         self.assertEqual({}, test_context)
         self.assertTrue('elapsed_time' in stage_context)

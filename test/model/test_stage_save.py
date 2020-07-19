@@ -1,7 +1,7 @@
 from unittest import TestCase
 
+from folker.model.entity import StageSave
 from folker.model.error.variables import VariableReferenceResolutionException
-from folker.model.stage.save import StageSave
 
 
 class TestStageSave(TestCase):

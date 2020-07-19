@@ -5,15 +5,14 @@ import yaml
 from folker import templates, stage_templates, profiles
 from folker.load.schemas import TestSchema, ProfileSchema
 from folker.logger.logger import SystemLogger
-from folker.model.test import Test
-from folker.util.parameters import test_file_regular_expression, parameterised_test_files, template_file_regular_expression, \
-    profile_file_regular_expression
+from folker.model.entity import Test
+from folker.util.parameters import test_file_regular_expression, parameterised_test_files
 
 
 def load_and_initialize_template_files(logger: SystemLogger) -> [Test]:
     schema = TestSchema()
     logger.loading_template_files()
-    schemas = load_schemas(logger, template_file_regular_expression(), schema, template=True)
+    schemas = load_schemas(logger, '**/folker_template*.yaml', schema, template=True)
 
     for schema in schemas:
         templates[schema.id] = schema
@@ -27,6 +26,7 @@ def load_test_files(logger: SystemLogger) -> [Test]:
     schema = TestSchema()
     logger.loading_test_files()
     test_file_re = test_file_regular_expression()
+    # schemas = load_schemas(logger, '**/folker_test*.yaml', schema)
     schemas = load_schemas(logger, test_file_re, schema)
 
     return schemas
@@ -84,7 +84,7 @@ def load_definition(file_path, schema):
 def load_profile_files(logger: SystemLogger):
     schema = ProfileSchema()
     logger.loading_profile_files()
-    schemas = load_schemas(logger, profile_file_regular_expression(), schema, template=True)
+    schemas = load_schemas(logger, '**/folker_profile*.yaml', schema, template=True)
 
     for schema in schemas:
         profiles[schema.name] = schema.context

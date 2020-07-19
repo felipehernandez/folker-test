@@ -49,9 +49,10 @@ class TestRestAction(TestCase):
         mocked_response.text = 'response_text'
         mocked_response.json.return_value = 'response_json'
 
-        test_context, stage_context = self.action.execute(logger, test_context={}, stage_context={})
+        test_context, stage_context = self.action.execute(logger, {}, {})
 
         self.assertEqual({}, test_context)
+        self.assertTrue('elapsed_time' in stage_context)
         self.assertEqual(200, stage_context['status_code'])
         self.assertEqual({}, stage_context['headers'])
         self.assertEqual(mocked_response, stage_context['response'])
