@@ -27,7 +27,7 @@ class TestVoidAction(TestCase):
 
         self.action.message = 'Hello world'
 
-        test_context, stage_context = self.action.execute(logger, test_context={}, stage_context={})
+        test_context, stage_context = self.action.execute(logger, {}, {})
 
         self.assertEqual({}, test_context)
         self.assertTrue('elapsed_time' in stage_context)

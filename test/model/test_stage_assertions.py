@@ -1,8 +1,8 @@
 from unittest import TestCase
 
 from folker.logger.console_parallel_test_logger import ConsoleParallelTestLogger
+from folker.model.entity import StageAssertions
 from folker.model.error.assertions import TestFailException, UnresolvableAssertionException, MalformedAssertionException
-from folker.model.stage.assertions import StageAssertions
 
 
 class TestStageAssertions(TestCase):

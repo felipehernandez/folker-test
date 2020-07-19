@@ -2,7 +2,7 @@ from logging import Logger
 from unittest import TestCase
 from unittest.mock import Mock
 
-from folker.model.stage.log import StageLog
+from folker.model.entity import StageLog
 
 
 class TestStageLog(TestCase):

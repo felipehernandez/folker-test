@@ -1,6 +1,10 @@
+import time
+from copy import deepcopy
+
 from folker.logger.logger import TestLogger
-from folker.model.stage.action import Action
-from folker.util.decorator import timed_action, resolvable_variables, loggable
+from folker.model.entity import Action
+from folker.model.error.load import InvalidSchemaDefinitionException
+from folker.util.variable import replace_variables
 
 
 class PrintAction(Action):
@@ -10,15 +14,28 @@ class PrintAction(Action):
         super().__init__()
         self.message = message
 
-    def mandatory_fields(self):
-        return [
-            'message'
-        ]
+    def __copy__(self):
+        return deepcopy(self)
 
-    @loggable
-    @resolvable_variables
-    @timed_action
+    def enrich(self, template: 'PrintAction'):
+        self._set_attribute_if_missing(template, 'message')
+
+    def validate(self):
+        missing_fields = []
+
+        if not hasattr(self, 'message') or not self.message:
+            missing_fields.append('action.message')
+
+        if len(missing_fields) > 0:
+            raise InvalidSchemaDefinitionException(missing_fields=missing_fields)
+
     def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
-        logger.message(self.message)
+        start = time.time()
+
+        message = replace_variables(test_context, stage_context, self.message)
+        logger.message(message)
+
+        end = time.time()
+        stage_context['elapsed_time'] = int((end - start) * 1000)
 
         return test_context, stage_context

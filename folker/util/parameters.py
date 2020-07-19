@@ -10,7 +10,7 @@ def _resolve_command_option_key(command: str) -> str:
         '-l': 'log', '--log': 'log',
         '-c': 'context', '--context': 'context',
         '-f': 'file', '--file': 'file',
-        '-F': 'test_file_re', '--FILE': 'test_file_re',
+        '-F': 'file_re', '--FILE': 'file_re',
         '-p': 'profile', '--profile': 'profile',
         '-n': 'number'
     }[command]
@@ -24,7 +24,7 @@ def _merge_parameter(key: str, old_value, new_value: str):
         pair = new_value.split(':')
         merge[pair[0]] = pair[1]
         return merge
-    else:  # ['debug', 'trace', 'log', 'test_file_re', 'profile', 'number']
+    else:  # ['debug', 'trace', 'log', 'file_re', 'profile', 'number']
         return new_value
 
 
@@ -41,14 +41,7 @@ def usage():
     print('-nX                                                          checks the total number of tests executed')
 
 
-RE_TEST = 'test*.yaml'
-RE_TEMPLATE = 'template*.yaml'
-RE_PROFILE = 'profile*.yaml'
-command_options = {
-    'test_file_re': RE_TEST,
-    'template_file_re': RE_TEMPLATE,
-    'tprofile_file_re': RE_PROFILE
-}
+command_options = {}
 
 
 def load_command_arguments():
@@ -85,15 +78,7 @@ def capture_parameters_context():
 
 
 def test_file_regular_expression():
-    return '**/{}'.format(command_options.get('test_file_re', RE_TEST))
-
-
-def template_file_regular_expression():
-    return '**/{}'.format(command_options.get('template_file_re', RE_TEMPLATE))
-
-
-def profile_file_regular_expression():
-    return '**/{}'.format(command_options.get('profile_file_re', RE_PROFILE))
+    return '**/{}'.format(command_options.get('file_re', 'folker_test*.yaml'))
 
 
 def parameterised_test_files():
