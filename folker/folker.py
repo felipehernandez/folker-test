@@ -3,7 +3,7 @@ from folker.executor.sequential_executor import SequentialExecutor
 from folker.load.files import load_test_files, load_and_initialize_template_files, load_profile_files
 from folker.load.protos import generate_protos
 from folker.logger import logger_factory
-from folker.model.entity import Test
+from folker.model.test import Test
 from folker.model.error.folker import TestSuiteResultException, TestSuiteNumberExecutionsException
 from folker.util.parameters import load_command_arguments, parameterised_tags, parameterised_number_of_tests
 

@@ -3,7 +3,7 @@ from collections import Iterable
 import grpc
 
 from folker.logger.logger import TestLogger
-from folker.model.entity import Action
+from folker.model.stage.action import Action
 from folker.util.decorator import timed_action, resolvable_variables, loggable
 
 

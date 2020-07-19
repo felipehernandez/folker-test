@@ -5,7 +5,7 @@ from google.protobuf import json_format
 from google.protobuf.json_format import MessageToJson, MessageToDict
 
 from folker.logger.logger import TestLogger
-from folker.model.entity import Action
+from folker.model.stage.action import Action
 from folker.model.error.load import InvalidSchemaDefinitionException
 from folker.util.decorator import timed_action, resolvable_variables, loggable
 

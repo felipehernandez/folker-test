@@ -24,6 +24,11 @@ stages:
       entity:
         test: search
 
+  - name: wait
+    action:
+      type: WAIT
+      time: 1
+
   - name: get entities
     action:
       type: DATASTORE

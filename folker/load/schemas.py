@@ -1,7 +1,8 @@
 from marshmallow import Schema, fields, post_load, pre_load
 from marshmallow_oneofschema import OneOfSchema
 
-from folker.model.entity import Test, Stage, Profile
+from folker.model.profile import Profile
+from folker.model.test import Test, Stage
 
 
 class ActionSchema(OneOfSchema):
