@@ -49,7 +49,7 @@ class StageAssertions(StageStep):
         updated_assertion, variables = map_variables(test_context, stage_context, assertion)
 
         try:
-            result = eval(updated_assertion)
+            result = eval(updated_assertion, {'variables': variables})
         except Exception as e:
             logger.assertion_error(assertion=assertion, exception=e)
             raise UnresolvableAssertionException(assertion=assertion)

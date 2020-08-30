@@ -28,7 +28,7 @@ class StageSave(StageStep):
             variable = replace_variables(test_context, stage_context, variable)
             try:
                 updated_saving, variables = map_variables(test_context, stage_context, saving)
-                saving_value = eval(updated_saving)
+                saving_value = eval(updated_saving, {'variables': variables})
             except Exception as e:
                 saving_value = replace_variables(test_context={}, stage_context=stage_context, text=saving)
 
