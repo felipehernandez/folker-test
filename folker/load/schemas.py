@@ -21,11 +21,14 @@ class StageSchema(Schema):
 
     @pre_load
     def parse_id(self, in_data, **kwargs):
-        if 'id' not in in_data:
-            return in_data
-        id_str_value = in_data['id']
-        if str(id_str_value).isdigit():
-            in_data['id'] = str(id_str_value)
+        if 'id' in in_data:
+            id_str_value = in_data['id']
+            if str(id_str_value).isdigit():
+                in_data['id'] = str(id_str_value)
+
+        if 'action' not in in_data:
+            in_data['action'] = {'type': 'VOID'}
+
         return in_data
 
     @post_load
