@@ -8,8 +8,9 @@ from google.cloud.pubsub_v1 import PublisherClient, SubscriberClient
 from google.cloud.pubsub_v1.proto.pubsub_pb2 import PubsubMessage
 
 from folker.logger.logger import TestLogger
-from folker.model.stage.action import Action
+from folker.model.context import Context
 from folker.model.error.load import InvalidSchemaDefinitionException
+from folker.model.stage.action import Action
 from folker.util.decorator import timed_action, resolvable_variables, loggable
 
 
@@ -102,7 +103,7 @@ class PubSubAction(Action):
     @loggable
     @resolvable_variables
     @timed_action
-    def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
+    def execute(self, logger: TestLogger, context: Context) -> Context:
         self._authenticate()
 
         {
@@ -110,11 +111,11 @@ class PubSubAction(Action):
             PubSubMethod.SUBSCRIBE: self._subscribe,
             PubSubMethod.TOPICS: self._topics,
             PubSubMethod.SUBSCRIPTIONS: self._subscriptions
-        }.get(self.method)(logger, stage_context)
+        }.get(self.method)(logger, context)
 
-        return test_context, stage_context
+        return context
 
-    def _publish(self, logger: TestLogger, stage_context: dict):
+    def _publish(self, logger: TestLogger, context: Context):
         self.publisher = PublisherClient(channel=grpc.insecure_channel(target=self.host)) if self.host else PublisherClient()
 
         topic_path = self.publisher.topic_path(self.project, self.topic)
@@ -123,9 +124,9 @@ class PubSubAction(Action):
         self._log_debug(logger, topic=topic_path, attributes=attributes, message=self.message)
         future = self.publisher.publish(topic=topic_path, data=self.message.encode(), **attributes)
 
-        stage_context['message_id'] = future.result()
+        context.save_on_stage('message_id', future.result())
 
-    def _subscribe(self, logger: TestLogger, stage_context: dict):
+    def _subscribe(self, logger: TestLogger, context: Context):
         self.subscriber = SubscriberClient(channel=grpc.insecure_channel(target=self.host)) if self.host else SubscriberClient()
 
         subscription_path = self.subscriber.subscription_path(self.project, self.subscription)
@@ -135,16 +136,16 @@ class PubSubAction(Action):
 
         for message in response.received_messages:
             message: PubsubMessage
-            stage_context['ack_id'] = message.ack_id
-            stage_context['message_id'] = message.message.message_id
-            stage_context['publish_time'] = message.message.publish_time
-            stage_context['attributes'] = message.message.attributes
-            stage_context['message_content'] = message.message.data.decode('UTF-8')
+            context.save_on_stage('ack_id', message.ack_id)
+            context.save_on_stage('message_id', message.message.message_id)
+            context.save_on_stage('publish_time', message.message.publish_time)
+            context.save_on_stage('attributes', message.message.attributes)
+            context.save_on_stage('message_content', message.message.data.decode('UTF-8'))
 
             if self.ack:
                 self.subscriber.acknowledge(subscription_path, [message.ack_id])
 
-    def _topics(self, logger: TestLogger, stage_context: dict):
+    def _topics(self, logger: TestLogger, context: Context):
         self.publisher = PublisherClient(channel=grpc.insecure_channel(target=self.host)) if self.host else PublisherClient()
 
         project_path = self.publisher.project_path(self.project)
@@ -152,9 +153,9 @@ class PubSubAction(Action):
 
         topic_prefix = project_path + '/topics/'
         prefix_len = len(topic_prefix)
-        stage_context['topics'] = [topic.name[prefix_len:] for topic in topics]
+        context.save_on_stage('topics', [topic.name[prefix_len:] for topic in topics])
 
-    def _subscriptions(self, logger: TestLogger, stage_context: dict):
+    def _subscriptions(self, logger: TestLogger, context: Context):
         self.subscriber = SubscriberClient(channel=grpc.insecure_channel(target=self.host)) if self.host else SubscriberClient()
 
         project = self.project
@@ -162,7 +163,7 @@ class PubSubAction(Action):
         subscriptions = self.subscriber.list_subscriptions(project_path)
 
         subscription_prefix = project_path + '/subscriptions/'
-        stage_context['subscriptions'] = [subscription.name[len(subscription_prefix):] for subscription in subscriptions]
+        context.save_on_stage('subscriptions', [subscription.name[len(subscription_prefix):] for subscription in subscriptions])
 
     def _authenticate(self):
         credentials_path = os.getcwd() + '/credentials/gcp/gcp-credentials.json'

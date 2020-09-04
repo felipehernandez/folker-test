@@ -1,9 +1,12 @@
 from abc import ABC, abstractmethod
 
 from folker.logger.logger import TestLogger
+from folker.model.context import Context
 from folker.model.error.error import SourceException
 from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.util.variable import build_contexts, replace_variables
+
+
+# from folker.util.variable import build_contexts, replace_variables
 
 
 class StageStep(ABC):
@@ -93,23 +96,25 @@ class Stage:
         if self.assertions is not None:
             self.assertions.validate()
 
-    def execute(self, logger: TestLogger, test_context: dict):
-        contexts = build_contexts(test_context, {}, self.foreach)
-        for context in contexts:
-            test_context = self._execute(logger, test_context, context)
-        return test_context
+    def execute(self, logger: TestLogger, context: Context):
+        contexts = context.replicate_on_stage(self.foreach)
+        for stage_context in contexts:
+            stage_context.test_variables = context.test_variables
+            stage_context = self._execute(logger, stage_context)
+            context.test_variables = stage_context.test_variables
+        return context
 
-    def _execute(self, logger: TestLogger, test_context: dict, stage_context: dict):
-        name = replace_variables(test_context, stage_context, self.name)
-        logger.stage_start(name, test_context, stage_context)
+    def _execute(self, logger: TestLogger, context: Context):
+        name = context.replace_variables(self.name)
+        logger.stage_start(name, context)
 
         try:
-            test_context, stage_context = self.action.execute(logger=logger, test_context=test_context, stage_context=stage_context)
-            test_context, stage_context = self.save.execute(logger=logger, test_context=test_context, stage_context=stage_context)
-            test_context, stage_context = self.log.execute(logger=logger, test_context=test_context, stage_context=stage_context)
-            test_context, stage_context = self.assertions.execute(logger=logger, test_context=test_context, stage_context=stage_context)
+            context = self.action.execute(logger=logger, context=context)
+            context = self.save.execute(logger=logger, context=context)
+            context = self.log.execute(logger=logger, context=context)
+            context = self.assertions.execute(logger=logger, context=context)
         except SourceException as e:
             e.details['stage'] = self
             raise e
 
-        return test_context
+        return context

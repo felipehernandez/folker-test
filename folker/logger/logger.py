@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from folker.model.context import Context
 from folker.model.error.error import SourceException
 
 
@@ -96,7 +97,7 @@ class SystemLogger(ABC):
     def assert_execution_result(self, total, success, failures): pass
 
     @abstractmethod
-    def assert_number_tests_executed(self,  expected: int, executed: int): pass
+    def assert_number_tests_executed(self, expected: int, executed: int): pass
 
 
 class TestLogger(ABC):
@@ -113,14 +114,14 @@ class TestLogger(ABC):
 
     # Stage
     @abstractmethod
-    def stage_start(self, stage_name: str, test_context: dict, stage_context: dict): pass
+    def stage_start(self, stage_name: str, context: Context): pass
 
     # Action
     @abstractmethod
-    def action_prelude(self, action: dict, test_context: dict, stage_context: dict): pass
+    def action_prelude(self, action: dict, context: Context): pass
 
     @abstractmethod
-    def action_conclusion(self, action: dict, test_context: dict, stage_context: dict): pass
+    def action_conclusion(self, action: dict, context: Context): pass
 
     @abstractmethod
     def message(self, message): pass

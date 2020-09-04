@@ -1,6 +1,6 @@
 from folker.logger.logger import TestLogger
+from folker.model.context import Context
 from folker.model.stage.stage import StageStep
-from folker.util.variable import replace_variables
 
 
 class StageLog(StageStep):
@@ -18,8 +18,8 @@ class StageLog(StageStep):
     def validate(self):
         pass
 
-    def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
+    def execute(self, logger: TestLogger, context: Context) -> Context:
         for log in self.logs:
-            logger.log_text(replace_variables(test_context, stage_context, log))
+            logger.log_text(context.replace_variables(log))
 
-        return test_context, stage_context
+        return context

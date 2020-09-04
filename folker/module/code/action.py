@@ -1,4 +1,5 @@
 from folker.logger.logger import TestLogger
+from folker.model.context import Context
 from folker.model.stage.action import Action
 from folker.util.decorator import timed_action, resolvable_variables, loggable
 
@@ -27,11 +28,11 @@ class CodeAction(Action):
     @loggable
     @resolvable_variables
     @timed_action
-    def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
+    def execute(self, logger: TestLogger, context: Context) -> Context:
         module = __import__(self.module, fromlist=[self.method])
         method = getattr(module, self.method)
         result = method(**self.parameters)
 
-        stage_context['result'] = result
+        context.save_on_stage('result', result)
 
-        return test_context, stage_context
+        return context

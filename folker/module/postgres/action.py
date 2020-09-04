@@ -3,8 +3,9 @@ from enum import Enum, auto
 import psycopg2
 
 from folker.logger.logger import TestLogger
-from folker.model.stage.action import Action
+from folker.model.context import Context
 from folker.model.error.load import InvalidSchemaDefinitionException
+from folker.model.stage.action import Action
 from folker.util.decorator import timed_action, resolvable_variables, loggable
 
 
@@ -70,7 +71,7 @@ class PostgresAction(Action):
     @loggable
     @resolvable_variables
     @timed_action
-    def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
+    def execute(self, logger: TestLogger, context: Context) -> Context:
         try:
             connection = psycopg2.connect(user=self.user,
                                           password=self.password,
@@ -91,12 +92,12 @@ class PostgresAction(Action):
                     }
                     for record in records
                 ]
-                stage_context['result'] = result
+                context.save_on_stage('result', result)
             else:
                 connection.commit()
         except (Exception, psycopg2.Error) as error:
             logger.action_error(str(error))
-            stage_context['error'] = error
+            context.save_on_stage('error', error)
         finally:
             # closing database connection.
             if (connection):
@@ -104,4 +105,4 @@ class PostgresAction(Action):
                 connection.close()
                 logger.action_debug('Disconnected from {}:{}/{} as {}'.format(self.host, self.port, self.database, self.user))
 
-        return test_context, stage_context
+        return context

@@ -3,6 +3,7 @@ from enum import Enum
 
 from folker import is_debug
 from folker.logger.logger import TestLogger, ColorLogger
+from folker.model.context import Context
 from folker.model.error.error import SourceException
 
 
@@ -26,24 +27,24 @@ class ConsoleTestLogger(TestLogger, ColorLogger):
         print(self.report)
 
     # Stage
-    def stage_start(self, stage_name: str, test_context: dict, stage_context: dict):
+    def stage_start(self, stage_name: str, context: Context):
         self._log(self.COLOR_HIGH_YELLOW, 'Stage: {name}'.format(name=stage_name))
 
     # Action
-    def action_prelude(self, action: dict, test_context: dict, stage_context: dict):
+    def action_prelude(self, action: dict, context: Context):
         self._log(self.COLOR_GREY, 'PRELUDE')
         self._log(self.COLOR_GREY, json.dumps({'ACTION': self._to_serialized(action),
-                                               'TEST CONTEXT': self._to_serialized(test_context),
-                                               'STAGE CONTEXT': self._to_serialized(stage_context)
+                                               'TEST CONTEXT': self._to_serialized(context.test_variables),
+                                               'STAGE CONTEXT': self._to_serialized(context.stage_variables)
                                                },
                                               sort_keys=True,
                                               indent=4))
 
-    def action_conclusion(self, action: dict, test_context: dict, stage_context: dict):
+    def action_conclusion(self, action: dict, context: Context):
         self._log(self.COLOR_GREY, 'CONCLUSION')
         self._log(self.COLOR_GREY, json.dumps({'ACTION': self._to_serialized(action),
-                                               'TEST CONTEXT': self._to_serialized(test_context),
-                                               'STAGE CONTEXT': self._to_serialized(stage_context)
+                                               'TEST CONTEXT': self._to_serialized(context.test_variables),
+                                               'STAGE CONTEXT': self._to_serialized(context.stage_variables)
                                                },
                                               sort_keys=True,
                                               indent=4))

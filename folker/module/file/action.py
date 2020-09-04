@@ -2,8 +2,9 @@ import os
 from enum import Enum, auto
 
 from folker.logger.logger import TestLogger
-from folker.model.stage.action import Action
+from folker.model.context import Context
 from folker.model.error.load import InvalidSchemaDefinitionException
+from folker.model.stage.action import Action
 from folker.util.decorator import timed_action, resolvable_variables, loggable
 
 
@@ -49,38 +50,38 @@ class FileAction(Action):
     @loggable
     @resolvable_variables
     @timed_action
-    def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
+    def execute(self, logger: TestLogger, context: Context) -> Context:
         {
             FileMethod.WRITE: self._write,
             FileMethod.READ: self._read,
             FileMethod.DELETE: self._delete,
-        }[self.method](logger, test_context, stage_context)
+        }[self.method](logger, context)
 
-        return test_context, stage_context
+        return context
 
-    def _write(self, logger: TestLogger, test_context: dict, stage_context: dict):
+    def _write(self, logger: TestLogger, context: Context):
         try:
             file = open(self.file, 'w')
             file.write(self.content)
             file.close()
         except Exception as e:
             logger.action_error(str(e))
-            stage_context['error'] = e
+            context.save_on_stage('error', e)
 
-        return test_context, stage_context
+        return context
 
-    def _read(self, logger: TestLogger, test_context: dict, stage_context: dict):
+    def _read(self, logger: TestLogger, context: Context):
         try:
             file = open(self.file, 'r')
-            stage_context['content'] = file.read()
+            context.save_on_stage('content', file.read())
             file.close()
         except Exception as e:
             logger.action_error(str(e))
-            stage_context['error'] = e
+            context.save_on_stage('error', e)
 
-        return test_context, stage_context
+        return context
 
-    def _delete(self, logger: TestLogger, test_context: dict, stage_context: dict):
+    def _delete(self, logger: TestLogger, context):
         try:
             if os.path.exists(self.file):
                 os.remove(self.file)
@@ -88,6 +89,6 @@ class FileAction(Action):
                 logger.action_warn("File {} did not exists".format(self.file))
         except Exception as e:
             logger.action_error(str(e))
-            stage_context['error'] = e
+            context.save_on_stage('error', e)
 
-        return test_context, stage_context
+        return context

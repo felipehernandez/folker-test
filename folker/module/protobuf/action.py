@@ -5,8 +5,9 @@ from google.protobuf import json_format
 from google.protobuf.json_format import MessageToJson, MessageToDict
 
 from folker.logger.logger import TestLogger
-from folker.model.stage.action import Action
+from folker.model.context import Context
 from folker.model.error.load import InvalidSchemaDefinitionException
+from folker.model.stage.action import Action
 from folker.util.decorator import timed_action, resolvable_variables, loggable
 
 
@@ -62,28 +63,28 @@ class ProtobufAction(Action):
     @loggable
     @resolvable_variables
     @timed_action
-    def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
+    def execute(self, logger: TestLogger, context: Context) -> Context:
         try:
             {
                 ProtobufMethod.LOAD: self._load,
                 ProtobufMethod.CREATE: self._create
-            }[self.method](stage_context)
+            }[self.method](context)
 
         except Exception as e:
             logger.action_error(str(e))
-            stage_context['error'] = e
+            context.save_on_stage('error', e)
 
-        return test_context, stage_context
+        return context
 
-    def _create(self, stage_context):
+    def _create(self, context: Context):
         mod = __import__(self.package, fromlist=[self.clazz])
         Proto = getattr(mod, self.clazz)
         parsed_object = json_format.Parse(json.dumps(self.data), Proto(), ignore_unknown_fields=False)
 
-        stage_context['proto_object'] = parsed_object
-        stage_context['proto_serialize'] = str(parsed_object.SerializeToString(), 'utf-8')
+        context.save_on_stage('proto_object', parsed_object)
+        context.save_on_stage('proto_serialize', str(parsed_object.SerializeToString(), 'utf-8'))
 
-    def _load(self, stage_context):
+    def _load(self, context: Context):
         proto_package = self.package
         proto_class = self.clazz
         message = self.message
@@ -93,6 +94,6 @@ class ProtobufAction(Action):
         loaded_object = Proto()
         loaded_object.ParseFromString(message.encode())
 
-        stage_context['proto_object'] = loaded_object
-        stage_context['proto_json'] = MessageToJson(loaded_object)
-        stage_context['proto_dict'] = MessageToDict(loaded_object)
+        context.save_on_stage('proto_object', loaded_object)
+        context.save_on_stage('proto_json', MessageToJson(loaded_object))
+        context.save_on_stage('proto_dict', MessageToDict(loaded_object))

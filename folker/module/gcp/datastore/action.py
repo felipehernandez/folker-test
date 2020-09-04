@@ -6,8 +6,9 @@ from enum import Enum, auto
 from google.cloud import datastore
 
 from folker.logger.logger import TestLogger
-from folker.model.stage.action import Action
+from folker.model.context import Context
 from folker.model.error.load import InvalidSchemaDefinitionException
+from folker.model.stage.action import Action
 from folker.util.decorator import timed_action, resolvable_variables, loggable
 
 
@@ -90,7 +91,7 @@ class DatastoreAction(Action):
     @loggable
     @resolvable_variables
     @timed_action
-    def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
+    def execute(self, logger: TestLogger, context: Context) -> Context:
         self._authenticate(logger)
 
         datastore_client = datastore.Client(project=self.project)
@@ -101,9 +102,9 @@ class DatastoreAction(Action):
             DatastoreMethod.DELETE: self._delete,
             DatastoreMethod.QUERY: self._query,
             DatastoreMethod.BULK_DELETE: self._bulk_delete,
-        }.get(self.method)(logger, stage_context, datastore_client)
+        }.get(self.method)(logger, context, datastore_client)
 
-        return test_context, stage_context
+        return context
 
     def _authenticate(self, logger: TestLogger):
         credentials_path = os.getcwd() + 'credentials/gcp/gcp-credentials.json'
@@ -122,32 +123,32 @@ class DatastoreAction(Action):
         id_or_name = self.key.get('id') if self.key.get('id') else self.key.get('name')
         return datastore_client.key(self.key.get('kind'), id_or_name)
 
-    def _put(self, logger: TestLogger, stage_context: dict, datastore_client):
+    def _put(self, logger: TestLogger, context: Context, datastore_client):
         key = self._key(datastore_client)
         entity = datastore.Entity(key=key)
         entity.update(self.entity)
 
         datastore_client.put(entity)
 
-    def _get(self, logger: TestLogger, stage_context: dict, datastore_client):
+    def _get(self, logger: TestLogger, context: Context, datastore_client):
         key = self._key(datastore_client)
         entity = datastore_client.get(key)
 
         if entity:
-            stage_context['key'] = dict()
-            stage_context['key']['kind'] = entity.key.kind
-            stage_context['key']['id'] = entity.key.id
-            stage_context['key']['name'] = entity.key.name
-            stage_context['entity'] = entity.copy()
+            context.save_on_stage('key', dict())
+            context.save_on_stage('key.kind', entity.key.kind)
+            context.save_on_stage('key.id', entity.key.id)
+            context.save_on_stage('key.name', entity.key.name)
+            context.save_on_stage('entity', entity.copy())
         else:
-            stage_context['key'] = None
-            stage_context['entity'] = None
+            context.save_on_stage('key', None)
+            context.save_on_stage('entity', None)
 
-    def _delete(self, logger: TestLogger, stage_context: dict, datastore_client):
+    def _delete(self, logger: TestLogger, context: Context, datastore_client):
         key = self._key(datastore_client)
         datastore_client.delete(key)
 
-    def _bulk_delete(self, logger: TestLogger, stage_context: dict, datastore_client):
+    def _bulk_delete(self, logger: TestLogger, context: Context, datastore_client):
         id_or_names = self.key.get('ids') if self.key.get('ids') else self.key.get('names')
         keyss = [datastore_client.key(self.key.get('kind'), id_or_name) for id_or_name in id_or_names]
         total_keys_size = len(keyss)
@@ -156,11 +157,11 @@ class DatastoreAction(Action):
             datastore_client.delete_multi(keys)
             logger.action_debug('Bulk deleted {} items of {}'.format(len(keys), total_keys_size))
 
-    def _query(self, logger: TestLogger, stage_context: dict, datastore_client):
+    def _query(self, logger: TestLogger, context: Context, datastore_client):
         query = datastore_client.query(kind=self.key.get('kind'))
         result = [entity for entity in query.fetch()]
 
-        stage_context['result'] = result
+        context.save_on_stage('result', result)
 
     @staticmethod
     def _log_debug(logger: TestLogger, **parameters):
