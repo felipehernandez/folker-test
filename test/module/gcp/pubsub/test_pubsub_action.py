@@ -1,6 +1,7 @@
 from unittest import TestCase
 from unittest.mock import patch, Mock
 
+from folker.model.context import Context
 from folker.model.error.load import InvalidSchemaDefinitionException
 from folker.module.gcp.pubsub.action import PubSubAction, PubSubMethod
 
@@ -109,11 +110,11 @@ class TestPubSubAction(TestCase):
         MockPublisher.return_value.publish.return_value = future
         future.result.return_value = 'message-id'
 
-        test_context, stage_context = self.action.execute(logger, test_context={}, stage_context={})
+        context = self.action.execute(logger, context=Context())
 
-        self.assertEqual({}, test_context)
-        self.assertTrue('elapsed_time' in stage_context)
-        self.assertEqual('message-id', stage_context['message_id'])
+        self.assertEqual({}, context.test_variables)
+        self.assertTrue('elapsed_time' in context.stage_variables)
+        self.assertEqual('message-id', context.stage_variables['message_id'])
         MockPublisher.return_value.publish.assert_called_with(topic='topic-path', data='Hello world'.encode())
 
     @patch('os.path.exists')
@@ -135,13 +136,13 @@ class TestPubSubAction(TestCase):
         received_message.message.message_id = 'message-id'
         received_message.message.data.decode.return_value = 'a-message'
 
-        test_context, stage_context = self.action.execute(logger, test_context={}, stage_context={})
+        context = self.action.execute(logger, context=Context())
 
-        self.assertEqual({}, test_context)
-        self.assertTrue('elapsed_time' in stage_context)
-        self.assertEqual('ack-id', stage_context['ack_id'])
-        self.assertEqual('message-id', stage_context['message_id'])
-        self.assertEqual('a-message', stage_context['message_content'])
+        self.assertEqual({}, context.test_variables)
+        self.assertTrue('elapsed_time' in context.stage_variables)
+        self.assertEqual('ack-id', context.stage_variables['ack_id'])
+        self.assertEqual('message-id', context.stage_variables['message_id'])
+        self.assertEqual('a-message', context.stage_variables['message_content'])
         MockSubscriber.return_value.acknowledge.assert_called_with('subscription-path', ['ack-id'])
 
     @patch('os.path.exists')
@@ -163,11 +164,11 @@ class TestPubSubAction(TestCase):
         received_message.message.message_id = 'message-id'
         received_message.message.data.decode.return_value = 'a-message'
 
-        test_context, stage_context = self.action.execute(logger, test_context={}, stage_context={})
+        context = self.action.execute(logger, context=Context())
 
-        self.assertEqual({}, test_context)
-        self.assertTrue('elapsed_time' in stage_context)
-        self.assertEqual('ack-id', stage_context['ack_id'])
-        self.assertEqual('message-id', stage_context['message_id'])
-        self.assertEqual('a-message', stage_context['message_content'])
+        self.assertEqual({}, context.test_variables)
+        self.assertTrue('elapsed_time' in context.stage_variables)
+        self.assertEqual('ack-id', context.stage_variables['ack_id'])
+        self.assertEqual('message-id', context.stage_variables['message_id'])
+        self.assertEqual('a-message', context.stage_variables['message_content'])
         self.assertFalse(MockSubscriber.return_value.acknowledge.assert_not_called())

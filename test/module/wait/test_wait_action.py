@@ -1,6 +1,7 @@
 from unittest import TestCase
 from unittest.mock import Mock
 
+from folker.model.context import Context
 from folker.model.error.load import InvalidSchemaDefinitionException
 from folker.module.wait.action import WaitAction
 
@@ -27,8 +28,8 @@ class TestWaitAction(TestCase):
 
         self.action.time = 0.1
 
-        test_context, stage_context = self.action.execute(logger, test_context={}, stage_context={})
+        context = self.action.execute(logger, context=Context())
 
-        self.assertEqual({}, test_context)
-        self.assertTrue('elapsed_time' in stage_context)
-        self.assertTrue(stage_context['elapsed_time'] >= 100)
+        self.assertEqual({}, context.test_variables)
+        self.assertTrue('elapsed_time' in context.stage_variables)
+        self.assertTrue(context.stage_variables['elapsed_time'] >= 100)

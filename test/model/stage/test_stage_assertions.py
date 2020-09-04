@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from folker.logger.console_parallel_test_logger import ConsoleParallelTestLogger
+from folker.model.context import Context
 from folker.model.error.assertions import TestFailException, UnresolvableAssertionException, MalformedAssertionException
 from folker.model.stage.assertions import StageAssertions
 
@@ -14,32 +15,32 @@ class TestStageAssertions(TestCase):
         self.logger = ConsoleParallelTestLogger()
 
     def test_given_no_assertions_then_no_execution(self):
-        test_context, stage_context = self.stage.execute(self.logger, {}, {})
+        context = self.stage.execute(self.logger, Context())
 
-        self.assertEqual({}, test_context)
-        self.assertEqual({}, stage_context)
+        self.assertEqual({}, context.test_variables)
+        self.assertEqual({}, context.stage_variables)
 
     def test_given_correct_passing_assertion_then_success(self):
         self.stage.assertions = ['1 + 1 == 2']
 
-        test_context, stage_context = self.stage.execute(self.logger, {}, {})
+        context = self.stage.execute(self.logger, Context())
 
-        self.assertEqual({}, test_context)
-        self.assertEqual({}, stage_context)
+        self.assertEqual({}, context.test_variables)
+        self.assertEqual({}, context.stage_variables)
 
     def test_given_correct_passing_assertion_with_variables_then_success(self):
         self.stage.assertions = ['${value} + 1 == 2']
 
-        test_context, stage_context = self.stage.execute(self.logger, {'value': 1}, {})
+        context = self.stage.execute(self.logger, Context({'value': 1}))
 
-        self.assertEqual({'value': 1}, test_context)
-        self.assertEqual({}, stage_context)
+        self.assertEqual({'value': 1}, context.test_variables)
+        self.assertEqual({}, context.stage_variables)
 
     def test_given_correct_failing_assertion_then_failure(self):
         self.stage.assertions = ['1 + 1 == 3']
 
         try:
-            self.stage.execute(self.logger, {}, {})
+            self.stage.execute(self.logger, Context())
             raise AssertionError('Should not get here')
         except TestFailException as test_fail_exception:
             self.assertEqual('AssertExecutor', test_fail_exception.source)
@@ -51,7 +52,7 @@ class TestStageAssertions(TestCase):
         self.stage.assertions = ['${value} + 1 == 3']
 
         try:
-            self.stage.execute(self.logger, {'value': 1}, {})
+            self.stage.execute(self.logger, Context({'value': 1}))
             raise AssertionError('Should not get here')
         except TestFailException as test_fail_exception:
             self.assertEqual('AssertExecutor', test_fail_exception.source)
@@ -63,7 +64,7 @@ class TestStageAssertions(TestCase):
         self.stage.assertions = ['1 + 1']
 
         try:
-            self.stage.execute(self.logger, {'value': 1}, {})
+            self.stage.execute(self.logger, Context({'value': 1}))
             raise AssertionError('Should not get here')
         except MalformedAssertionException as test_fail_exception:
             self.assertEqual('AssertExecutor', test_fail_exception.source)
@@ -75,7 +76,7 @@ class TestStageAssertions(TestCase):
         self.stage.assertions = ['1 + == 2']
 
         try:
-            self.stage.execute(self.logger, {'value': 1}, {})
+            self.stage.execute(self.logger, Context({'value': 1}))
             raise AssertionError('Should not get here')
         except UnresolvableAssertionException as test_fail_exception:
             self.assertEqual('AssertExecutor', test_fail_exception.source)
