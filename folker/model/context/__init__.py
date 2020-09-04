@@ -1,8 +1,14 @@
 import collections
+import re
 from copy import deepcopy
 
 from folker.model.error.variables import VariableReferenceResolutionException
-from folker.util.variable import contains_variable_reference
+
+
+def contains_variable_reference(text):
+    if not isinstance(text, str):
+        return []
+    return re.findall('\${([^{}]+)}', text)
 
 
 def _resolve_variable_reference(context: dict, path: str) -> str:
