@@ -41,6 +41,7 @@ class FileParallelTestLogger(TestLogger, FileLogger):
     def action_prelude(self, action: dict, context: Context):
         self._log('PRELUDE')
         self._log(json.dumps({'ACTION': self._to_serialized(action),
+                              'SECRETS': self._ofuscate_secrets(self._to_serialized(context.secrets)),
                               'TEST CONTEXT': self._to_serialized(context.test_variables),
                               'STAGE CONTEXT': self._to_serialized(context.stage_variables)
                               },
@@ -50,11 +51,15 @@ class FileParallelTestLogger(TestLogger, FileLogger):
     def action_conclusion(self, action: dict, context: Context):
         self._log('CONCLUSION')
         self._log(json.dumps({'ACTION': self._to_serialized(action),
+                              'SECRETS': self._ofuscate_secrets(self._to_serialized(context.secrets)),
                               'TEST CONTEXT': self._to_serialized(context.test_variables),
                               'STAGE CONTEXT': self._to_serialized(context.stage_variables)
                               },
                              sort_keys=True,
                              indent=4))
+
+    def _ofuscate_secrets(self, secrets: dict):
+        return {key: '*' * len(value) for key, value in secrets.items()}
 
     def _to_serialized(self, dictionary: dict):
         serialized = {}
