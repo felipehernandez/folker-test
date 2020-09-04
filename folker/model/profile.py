@@ -1,4 +1,4 @@
-class Profile(dict):
+class Profile:
     name: str
     context: dict
     secrets: dict

@@ -8,3 +8,8 @@ stages:
     action:
       type: PRINT
       message: ${variable1}
+
+  - name: print secrets
+    action:
+      type: PRINT
+      message: ${secret1}
