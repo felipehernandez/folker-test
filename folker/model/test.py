@@ -1,9 +1,8 @@
 from folker.logger.logger import TestLogger
+from folker.model.context import Context, EMPTY_CONTEXT
 from folker.model.error.error import SourceException
 from folker.model.error.load import InvalidSchemaDefinitionException
 from folker.model.stage.stage import Stage
-from folker.util.parameters import capture_parameters_context
-from folker.util.variable import replace_variables, build_contexts
 
 
 class Test:
@@ -50,10 +49,10 @@ class Test:
                 message = '{}.{}'.format(self.name, e.details['wrong_fields'][0])
                 raise InvalidSchemaDefinitionException(wrong_fields=[message])
 
-    def execute(self, logger: TestLogger, test_context: dict = None):
-        if test_context is None:
-            test_context = dict()
-        execution_contexts = build_contexts(capture_parameters_context(), test_context, self.foreach)
+    def execute(self, logger: TestLogger, context: Context = None):
+        if context is None:
+            context = EMPTY_CONTEXT()
+        execution_contexts = context.replicate_on_test(self.foreach)
         executions_result = True
 
         for execution_context in execution_contexts:
@@ -61,12 +60,13 @@ class Test:
 
         return executions_result
 
-    def _execute(self, logger: TestLogger, test_context: dict):
-        name = replace_variables(test_context, {}, self.name)
+    def _execute(self, logger: TestLogger, context: Context):
+        name = context.replace_variables(self.name)
         logger.test_start(name, self.description)
         try:
             for stage in self.stages:
-                test_context = stage.execute(logger, test_context)
+                context = stage.execute(logger, context)
+                context.end_stage()
         except SourceException as e:
             logger.test_finish_error(e)
             return False

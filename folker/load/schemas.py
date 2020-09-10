@@ -57,6 +57,7 @@ class TestSchema(Schema):
 class ProfileSchema(Schema):
     name = fields.String()
     context = fields.Mapping()
+    secrets = fields.Mapping()
 
     @post_load
     def make_profile(self, data, **kwargs):

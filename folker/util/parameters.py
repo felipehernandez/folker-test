@@ -9,6 +9,7 @@ def _resolve_command_option_key(command: str) -> str:
         '-t': 'tags', '--tags': 'tags',
         '-l': 'log', '--log': 'log',
         '-c': 'context', '--context': 'context',
+        '-s': 'secrets', '--secrets': 'secrets',
         '-f': 'file', '--file': 'file',
         '-F': 'test_file_re', '--FILE': 'test_file_re',
         '-p': 'profile', '--profile': 'profile',
@@ -19,7 +20,7 @@ def _resolve_command_option_key(command: str) -> str:
 def _merge_parameter(key: str, old_value, new_value: str):
     if key in ['tags', 'file']:
         return new_value if not old_value else old_value + ',' + new_value
-    if key in ['context']:
+    if key in ['context', 'secrets']:
         merge = old_value if old_value else {}
         pair = new_value.split(':')
         merge[pair[0]] = pair[1]
@@ -33,6 +34,7 @@ def usage():
     print('                           --trace                           trace')
     print('-lXXX.XX                   --log=XXX.XX                      log to file XXX.XX')
     print('-ckey:value                --context=key:value               add to context key=value')
+    print('-skey:value                --secrets=key:value               add to context key=value')
     print('-ftest_file[,test_file]    --file=test_file[,test_file]      execute all tests whose file name are listed. Use quotes ("") if neccesary')
     print(
         '-Ftest_file_re             --FILE=test_file_re               execute all tests whose file name match the regular expression. Use quotes ("") if neccesary')
@@ -56,8 +58,8 @@ def load_command_arguments():
         return
     try:
         opts, args = getopt.getopt(sys.argv[1:],
-                                   'dt:l:c:f:F:p:n:',
-                                   ['debug', 'trace', 'log=', 'context=', 'file=', 'FILE=', 'tags=', 'profile='])
+                                   'dt:l:c:s:f:F:p:n:',
+                                   ['debug', 'trace', 'log=', 'context=', 'secrets=', 'file=', 'FILE=', 'tags=', 'profile='])
         for command_option in opts:
             key = _resolve_command_option_key(command_option[0])
             command_options[key] = _merge_parameter(key, command_options.get(key), command_option[1])
@@ -82,6 +84,10 @@ def log_to_file():
 
 def capture_parameters_context():
     return command_options.get('context', {})
+
+
+def capture_parameters_secrets():
+    return command_options.get('secrets ', {})
 
 
 def test_file_regular_expression():

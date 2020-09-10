@@ -1,9 +1,9 @@
 from copy import copy
 
 from folker.logger.logger import TestLogger
+from folker.model.context import Context
 from folker.model.error.assertions import UnresolvableAssertionException, MalformedAssertionException, TestFailException
 from folker.model.stage.stage import StageStep
-from folker.util.variable import map_variables
 
 
 class StageAssertions(StageStep):
@@ -24,17 +24,17 @@ class StageAssertions(StageStep):
     def __copy__(self):
         return copy(self)
 
-    def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
+    def execute(self, logger: TestLogger, context: Context) -> Context:
         assertion_definitions = self.assertions
 
         if len(assertion_definitions) == 0:
-            return test_context, stage_context
+            return context
 
         executed, success, failures = 0, 0, []
         for assertion_definition in assertion_definitions:
             executed += 1
 
-            assert_result = self._assert_individual(logger, assertion_definition, test_context, stage_context)
+            assert_result = self._assert_individual(logger, assertion_definition, context)
 
             if assert_result:
                 success += 1
@@ -43,10 +43,10 @@ class StageAssertions(StageStep):
 
         self._wrap_up_test(logger, executed, success, failures)
 
-        return test_context, stage_context
+        return context
 
-    def _assert_individual(self, logger: TestLogger, assertion: str, test_context: dict, stage_context: dict) -> (bool, dict):
-        updated_assertion, variables = map_variables(test_context, stage_context, assertion)
+    def _assert_individual(self, logger: TestLogger, assertion: str, context: Context) -> (bool, dict):
+        updated_assertion, variables = context.map_variables(assertion)
 
         try:
             result = eval(updated_assertion, {'variables': variables})

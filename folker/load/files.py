@@ -87,6 +87,6 @@ def load_profile_files(logger: SystemLogger):
     schemas = load_schemas(logger, profile_file_regular_expression(), schema, template=True)
 
     for schema in schemas:
-        profiles[schema.name] = schema.context
+        profiles[schema.name] = schema
 
     return profiles

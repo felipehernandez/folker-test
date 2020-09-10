@@ -4,8 +4,9 @@ from enum import Enum, auto
 import requests
 
 from folker.logger.logger import TestLogger
-from folker.model.stage.action import Action
+from folker.model.context import Context
 from folker.model.error.load import InvalidSchemaDefinitionException
+from folker.model.stage.action import Action
 from folker.util.decorator import timed_action, resolvable_variables, loggable
 
 
@@ -63,7 +64,7 @@ class RestAction(Action):
     @loggable
     @resolvable_variables
     @timed_action
-    def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
+    def execute(self, logger: TestLogger, context: Context) -> Context:
         try:
             call_parameters = self._build_request_parameters()
             self._log_debug(logger=logger, method=self.method.name, **call_parameters)
@@ -76,23 +77,23 @@ class RestAction(Action):
                 RestMethod.PATCH: requests.patch
             }[self.method](**call_parameters)
 
-            stage_context['status_code'] = response.status_code
-            stage_context['headers'] = response.headers
-            stage_context['response'] = response
-            stage_context['response_text'] = response.text
+            context.save_on_stage('status_code', response.status_code)
+            context.save_on_stage('headers', response.headers)
+            context.save_on_stage('response', response)
+            context.save_on_stage('response_text', response.text)
             try:
                 self._log_debug(logger=logger,
                                 status_code=response.status_code,
                                 response=response.text)
-                stage_context['response_json'] = response.json()
+                context.save_on_stage('response_json', response.json())
             except:
                 pass
 
         except Exception as e:
             logger.action_error(str(e))
-            stage_context['error'] = e
+            context.save_on_stage('error', e)
 
-        return test_context, stage_context
+        return context
 
     def _build_request_parameters(self):
         call_parameters = {'url': self._build_url(), 'headers': self.headers}

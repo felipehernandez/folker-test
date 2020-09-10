@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from copy import deepcopy
 
 from folker.logger.logger import TestLogger
+from folker.model.context import Context
 from folker.model.error.load import InvalidSchemaDefinitionException
 from folker.model.stage.stage import StageStep
 
@@ -38,5 +39,5 @@ class Action(StageStep, ABC):
         return missing_fields
 
     @abstractmethod
-    def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
+    def execute(self, logger: TestLogger, context: Context) -> Context:
         pass

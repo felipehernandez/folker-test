@@ -2,6 +2,7 @@ import json
 
 from folker import is_debug, is_trace
 from folker.logger.logger import TestLogger, FileLogger
+from folker.model.context import Context
 from folker.model.error.error import SourceException
 
 
@@ -28,15 +29,50 @@ class FileSequentialTestLogger(TestLogger, FileLogger):
         self._write_to_file()
 
     # Stage
-    def stage_start(self, stage_name: str, test_context: dict, stage_context: dict):
+    def stage_start(self, stage_name: str, context: Context):
         self._log('Stage: {name}'.format(name=stage_name))
 
         if is_trace():
-            self._log('CONTEXT: {}'.format(test_context))
-            self._log('TEST CONTEXT: {}'.format(test_context))
-            self._log('STAGE CONTEXT: {}'.format(stage_context))
+            self._log('TEST CONTEXT: {}'.format(context.test_variables))
+            self._log('STAGE CONTEXT: {}'.format(context.stage_variables))
 
     # Action
+    def action_prelude(self, action: dict, context: Context):
+        self._log('PRELUDE')
+        self._log(json.dumps({'ACTION': self._to_serialized(action),
+                              'SECRETS': self._ofuscate_secrets(self._to_serialized(context.secrets)),
+                              'TEST CONTEXT': self._to_serialized(context.test_variables),
+                              'STAGE CONTEXT': self._to_serialized(context.stage_variables)
+                              },
+                             sort_keys=True,
+                             indent=4))
+
+    def action_conclusion(self, action: dict, context: Context):
+        self._log('CONCLUSION')
+        self._log(json.dumps({'ACTION': self._to_serialized(action),
+                              'SECRETS': self._ofuscate_secrets(self._to_serialized(context.secrets)),
+                              'TEST CONTEXT': self._to_serialized(context.test_variables),
+                              'STAGE CONTEXT': self._to_serialized(context.stage_variables)
+                              },
+                             sort_keys=True,
+                             indent=4))
+
+    def _ofuscate_secrets(self, secrets: dict):
+        return {key: '*' * len(value) for key, value in secrets.items()}
+
+    def _to_serialized(self, dictionary: dict):
+        serialized = {}
+        for key, value in dictionary.items():
+            if isinstance(value, Enum):
+                serialized[key] = value.name
+            else:
+                try:
+                    json.dumps(value)
+                    serialized[key] = value
+                except:
+                    serialized[key] = str(value)
+        return serialized
+
     def action_executed(self, stage_context: dict):
         if is_trace():
             self._log('STAGE CONTEXT: {}'.format(stage_context))
@@ -49,6 +85,9 @@ class FileSequentialTestLogger(TestLogger, FileLogger):
             self._log(message)
 
     def action_error(self, message):
+        self._log(message)
+
+    def action_warn(self, message):
         self._log(message)
 
     # Log

@@ -2,6 +2,7 @@ import sys
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
+from folker.model.context import Context
 from folker.model.error.load import InvalidSchemaDefinitionException
 from folker.module.grpc.action import GrpcAction
 
@@ -91,14 +92,12 @@ class TestGrpcAction(TestCase):
         mocked_response = Mock(return_value='returned_value')
         mocked_method.return_value = mocked_response
 
-        test_context, stage_context = self.action.execute(logger,
-                                                          test_context={},
-                                                          stage_context={})
+        context = self.action.execute(logger, context=Context())
 
         mocked_grpc.assert_called_with('a_host')
         mocked_stub.assert_called_with(mocked_channel)
         mocked_method.assert_called_with('data_value')
-        self.assertEqual(mocked_response, stage_context['response'])
+        self.assertEqual(mocked_response, context.stage_variables['response'])
 
     @patch('grpc.insecure_channel')
     def test_execution_get_list(self, mocked_grpc):
@@ -122,11 +121,9 @@ class TestGrpcAction(TestCase):
         mocked_response.__iter__ = Mock(return_value=iter(['item1', 'item2']))
         mocked_method.return_value = mocked_response
 
-        test_context, stage_context = self.action.execute(logger,
-                                                          test_context={},
-                                                          stage_context={})
+        context = self.action.execute(logger, context=Context())
 
         mocked_grpc.assert_called_with('a_host')
         mocked_stub.assert_called_with(mocked_channel)
         mocked_method.assert_called_with('data_value')
-        self.assertEqual(['item1', 'item2'], stage_context['response'])
+        self.assertEqual(['item1', 'item2'], context.stage_variables['response'])

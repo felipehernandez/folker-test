@@ -3,6 +3,7 @@ from unittest.mock import patch, Mock
 
 import requests
 
+from folker.model.context import Context
 from folker.model.error.load import InvalidSchemaDefinitionException
 from folker.module.rest.action import RestAction, RestMethod
 
@@ -49,11 +50,11 @@ class TestRestAction(TestCase):
         mocked_response.text = 'response_text'
         mocked_response.json.return_value = 'response_json'
 
-        test_context, stage_context = self.action.execute(logger, test_context={}, stage_context={})
+        context = self.action.execute(logger, context=Context())
 
-        self.assertEqual({}, test_context)
-        self.assertEqual(200, stage_context['status_code'])
-        self.assertEqual({}, stage_context['headers'])
-        self.assertEqual(mocked_response, stage_context['response'])
-        self.assertEqual('response_text', stage_context['response_text'])
-        self.assertEqual('response_json', stage_context['response_json'])
+        self.assertEqual({}, context.test_variables)
+        self.assertEqual(200, context.stage_variables['status_code'])
+        self.assertEqual({}, context.stage_variables['headers'])
+        self.assertEqual(mocked_response, context.stage_variables['response'])
+        self.assertEqual('response_text', context.stage_variables['response_text'])
+        self.assertEqual('response_json', context.stage_variables['response_json'])

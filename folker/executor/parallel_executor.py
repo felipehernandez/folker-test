@@ -1,20 +1,27 @@
-import copy
 from multiprocessing.pool import Pool
 from os import cpu_count
 
 from folker import profiles
+from folker.executor.sequential_executor import DEFAULT_PROFILE
 from folker.logger import logger_factory
 from folker.logger.logger_factory import LoggerType
+from folker.model.context import Context
 from folker.model.test import Test
-from folker.util.parameters import capture_parameters_context, parameterised_profile
+from folker.util.parameters import capture_parameters_context, parameterised_profile, capture_parameters_secrets
 
 
 def _test_execution(test: Test):
-    test_context = {
-        **(profiles.get(parameterised_profile(), {})),
-        **(capture_parameters_context())
-    }
-    return test.execute(logger_factory.build_test_logger(LoggerType.PARALLEL), copy.deepcopy(test_context)), test.name
+    profile = profiles.get(parameterised_profile(), DEFAULT_PROFILE)
+    context = Context(
+        test_variables={
+            **(profile.context),
+            **(capture_parameters_context())
+        },
+        secrets={
+            **(profile.secrets),
+            **(capture_parameters_secrets())
+        })
+    return test.execute(logger_factory.build_test_logger(LoggerType.PARALLEL), context), test.name
 
 
 class ParallelExecutor:
