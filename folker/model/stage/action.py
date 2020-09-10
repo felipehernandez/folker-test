@@ -4,7 +4,7 @@ from copy import deepcopy
 from folker.logger.logger import TestLogger
 from folker.model.context import Context
 from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.model.stage.stage import StageStep
+from folker.model.stage import StageStep
 
 
 class Action(StageStep, ABC):

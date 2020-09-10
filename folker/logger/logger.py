@@ -87,7 +87,8 @@ class SystemLogger(ABC):
     def loading_proto_file(self, filename): pass
 
     @abstractmethod
-    def loading_proto_file_error(self, file_name: str, proto_command: str, exception: Exception): pass
+    def loading_proto_file_error(self, file_name: str, proto_command: str, exception: Exception):
+        pass
 
     @abstractmethod
     def loading_proto_files_completed(self, files): pass

@@ -1,7 +1,7 @@
 import importlib
 import os
 
-from folker.util.parameters import is_debug, is_trace, load_command_arguments
+from folker.util.parameters import is_debug, is_trace
 
 profiles, templates, stage_templates = {}, {}, {}
 

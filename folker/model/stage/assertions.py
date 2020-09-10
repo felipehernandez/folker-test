@@ -2,8 +2,10 @@ from copy import copy
 
 from folker.logger.logger import TestLogger
 from folker.model.context import Context
-from folker.model.error.assertions import UnresolvableAssertionException, MalformedAssertionException, TestFailException
-from folker.model.stage.stage import StageStep
+from folker.model.error.assertions import UnresolvableAssertionException, \
+    MalformedAssertionException, \
+    TestFailException
+from folker.model.stage import StageStep
 
 
 class StageAssertions(StageStep):
@@ -45,7 +47,8 @@ class StageAssertions(StageStep):
 
         return context
 
-    def _assert_individual(self, logger: TestLogger, assertion: str, context: Context) -> (bool, dict):
+    def _assert_individual(self, logger: TestLogger, assertion: str, context: Context) \
+            -> (bool, dict):
         updated_assertion, variables = context.map_variables(assertion)
 
         try:

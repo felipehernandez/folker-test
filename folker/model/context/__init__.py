@@ -171,7 +171,8 @@ class Context:
         for element in reversed(path):
             variable_value = {element: variable_value}
 
-        self.test_variables[variable_root] = self._merge_dictionaries(self.test_variables.get(variable_root, {}), variable_value)
+        self.test_variables[variable_root] = \
+            self._merge_dictionaries(self.test_variables.get(variable_root, {}), variable_value)
 
     def _merge_dictionaries(self, stable: dict, new_values: dict):
         if len(new_values) == 0:
@@ -197,7 +198,8 @@ class Context:
         for element in reversed(path):
             variable_value = {element: variable_value}
 
-        self.stage_variables[variable_root] = self._merge_dictionaries(self.stage_variables.get(variable_root, {}), variable_value)
+        self.stage_variables[variable_root] = \
+            self._merge_dictionaries(self.stage_variables.get(variable_root, {}), variable_value)
 
     def end_stage(self):
         self.stage_variables = {}

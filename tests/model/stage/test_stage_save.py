@@ -38,7 +38,8 @@ class TestStageSave(TestCase):
     def test_given_referenced_saves_then_update_test_context(self):
         self.stage.save = {'save_in': '${referenced_value_to_save}'}
 
-        context = self.stage.execute(None, Context({}, {'referenced_value_to_save': 'value_to_save'}))
+        context = self.stage.execute(None,
+                                     Context({}, {'referenced_value_to_save': 'value_to_save'}))
 
         self.assertEqual({'save_in': 'value_to_save'}, context.test_variables)
         self.assertEqual({'referenced_value_to_save': 'value_to_save'}, context.stage_variables)

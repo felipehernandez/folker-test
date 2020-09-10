@@ -91,7 +91,8 @@ class TestPubSubAction(TestCase):
         with self.assertRaises(InvalidSchemaDefinitionException) as execution_context:
             self.action.validate()
 
-        self.assertTrue('action.subscription' in execution_context.exception.details['missing_fields'])
+        self.assertTrue('action.subscription'
+                        in execution_context.exception.details['missing_fields'])
 
     @patch('os.path.exists')
     @patch('folker.module.gcp.pubsub.action.SubscriberClient')
@@ -115,7 +116,8 @@ class TestPubSubAction(TestCase):
         self.assertEqual({}, context.test_variables)
         self.assertTrue('elapsed_time' in context.stage_variables)
         self.assertEqual('message-id', context.stage_variables['message_id'])
-        MockPublisher.return_value.publish.assert_called_with(topic='topic-path', data='Hello world'.encode())
+        MockPublisher.return_value.publish.assert_called_with(topic='topic-path',
+                                                              data='Hello world'.encode())
 
     @patch('os.path.exists')
     @patch('folker.module.gcp.pubsub.action.SubscriberClient')

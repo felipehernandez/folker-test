@@ -1,126 +1,136 @@
-import getopt
-import sys
+import click
 
+DEBUG_KEY = 'debug'
+TRACE_KEY = 'trace'
+TAGS_KEY = 'tags'
+PROFILE_KEY = 'profile'
+CONTEXT_KEY = 'context'
+SECRETS_KEY = 'secrets'
+LOG_KEY = 'log'
+NUMBER_KEY = 'number'
+FILES_KEY = 'files'
+TEST_FILE_RE_KEY = 'test_file_re'
+TEMPLATE_FILE_RE_KEY = 'template_file_re'
+PROFILE_FILE_RE_KEY = 'profile_file_re'
 
-def _resolve_command_option_key(command: str) -> str:
-    return {
-        '-d': 'debug', '--debug': 'debug',
-        '--trace': 'trace',
-        '-t': 'tags', '--tags': 'tags',
-        '-l': 'log', '--log': 'log',
-        '-c': 'context', '--context': 'context',
-        '-s': 'secrets', '--secrets': 'secrets',
-        '-f': 'file', '--file': 'file',
-        '-F': 'test_file_re', '--FILE': 'test_file_re',
-        '-p': 'profile', '--profile': 'profile',
-        '-n': 'number'
-    }[command]
+RE_TEST_DEFAULT = 'test*.yaml'
+RE_TEMPLATE_DEFAULT = 'template*.yaml'
+RE_PROFILE_DEFAULT = 'profile*.yaml'
 
-
-def _merge_parameter(key: str, old_value, new_value: str):
-    if key in ['tags', 'file']:
-        return new_value if not old_value else old_value + ',' + new_value
-    if key in ['context', 'secrets']:
-        merge = old_value if old_value else {}
-        pair = new_value.split(':')
-        merge[pair[0]] = pair[1]
-        return merge
-    else:  # ['debug', 'trace', 'log', 'test_file_re', 'profile', 'number']
-        return new_value
-
-
-def usage():
-    print('-d                         --debug                           debug')
-    print('                           --trace                           trace')
-    print('-lXXX.XX                   --log=XXX.XX                      log to file XXX.XX')
-    print('-ckey:value                --context=key:value               add to context key=value')
-    print('-skey:value                --secrets=key:value               add to context key=value')
-    print('-ftest_file[,test_file]    --file=test_file[,test_file]      execute all tests whose file name are listed. Use quotes ("") if neccesary')
-    print(
-        '-Ftest_file_re             --FILE=test_file_re               execute all tests whose file name match the regular expression. Use quotes ("") if neccesary')
-    print('-ttag[,tag]                --tags=tag,tags]                  execute all tests with specified tags')
-    print('-pprofile                  --profile=profile                 loads a profile file to load context data')
-    print('-nX                                                          checks the total number of tests executed')
-
-
-RE_TEST = 'test*.yaml'
-RE_TEMPLATE = 'template*.yaml'
-RE_PROFILE = 'profile*.yaml'
 command_options = {
-    'test_file_re': RE_TEST,
-    'template_file_re': RE_TEMPLATE,
-    'tprofile_file_re': RE_PROFILE
+    TEST_FILE_RE_KEY: RE_TEST_DEFAULT,
+    TEMPLATE_FILE_RE_KEY: RE_TEMPLATE_DEFAULT,
+    PROFILE_FILE_RE_KEY: RE_PROFILE_DEFAULT
 }
 
 
-def load_command_arguments():
-    if len(sys.argv) == 1:
-        return
-    try:
-        opts, args = getopt.getopt(sys.argv[1:],
-                                   'dt:l:c:s:f:F:p:n:',
-                                   ['debug', 'trace', 'log=', 'context=', 'secrets=', 'file=', 'FILE=', 'tags=', 'profile='])
-        for command_option in opts:
-            key = _resolve_command_option_key(command_option[0])
-            command_options[key] = _merge_parameter(key, command_options.get(key), command_option[1])
-    except getopt.GetoptError as err:
-        # print help information and exit:
-        print(err)  # will print something like "option -a not recognized"
-        usage()
-        sys.exit(2)
-
-
 def is_debug():
-    return 'debug' in command_options or is_trace()
+    return command_options.get(DEBUG_KEY, False) or is_trace()
 
 
 def is_trace():
-    return 'trace' in command_options
-
-
-def log_to_file():
-    return command_options.get('log', None)
-
-
-def capture_parameters_context():
-    return command_options.get('context', {})
-
-
-def capture_parameters_secrets():
-    return command_options.get('secrets ', {})
-
-
-def test_file_regular_expression():
-    return '**/{}'.format(command_options.get('test_file_re', RE_TEST))
-
-
-def template_file_regular_expression():
-    return '**/{}'.format(command_options.get('template_file_re', RE_TEMPLATE))
-
-
-def profile_file_regular_expression():
-    return '**/{}'.format(command_options.get('profile_file_re', RE_PROFILE))
-
-
-def parameterised_test_files():
-    files = command_options.get('file', None)
-    if files is None:
-        return []
-    else:
-        return files.split(',')
+    return command_options.get(TRACE_KEY, False)
 
 
 def parameterised_tags():
-    files = command_options.get('tags', None)
-    if files is None:
-        return []
-    else:
-        return files.split(',')
+    return command_options.get(TAGS_KEY, [])
 
 
 def parameterised_profile():
-    return command_options.get('profile', None)
+    return command_options.get(PROFILE_KEY, None)
+
+
+def capture_parameters_context():
+    return command_options.get(CONTEXT_KEY, {})
+
+
+def capture_parameters_secrets():
+    return command_options.get(SECRETS_KEY, {})
+
+
+def log_to_file():
+    return command_options.get(LOG_KEY, None)
 
 
 def parameterised_number_of_tests():
-    return command_options.get('number', None)
+    return command_options.get(NUMBER_KEY, None)
+
+
+def parameterised_test_files():
+    return command_options.get(FILES_KEY, [])
+
+
+def test_file_regular_expression():
+    re = command_options.get(TEST_FILE_RE_KEY)
+    if not re:
+        re = RE_TEST_DEFAULT
+    return '**/{}'.format(re)
+
+
+def template_file_regular_expression():
+    re = command_options.get(TEMPLATE_FILE_RE_KEY)
+    if not re:
+        re = RE_TEMPLATE_DEFAULT
+    return '**/{}'.format(re)
+
+
+def profile_file_regular_expression():
+    re = command_options.get(PROFILE_FILE_RE_KEY)
+    if not re:
+        re = RE_PROFILE_DEFAULT
+    return '**/{}'.format(re)
+
+
+def parameterised(func):
+    @click.command()
+    @click.option('-d', '--debug', DEBUG_KEY,
+                  is_flag=True,
+                  default=False,
+                  show_default=True,
+                  help='Run in DEBUG mode')
+    @click.option('--trace', TRACE_KEY,
+                  is_flag=True,
+                  default=False,
+                  show_default=True,
+                  help='Run in TRACE mode')
+    @click.option('-t', '--tags', TAGS_KEY,
+                  multiple=True,
+                  help='Run all tests with specified tags')
+    @click.option('-p', '--profile', PROFILE_KEY,
+                  help='Use a profile to initialise context and secrets')
+    @click.option('-c', '--context', CONTEXT_KEY,
+                  type=(str, str),
+                  multiple=True,
+                  help='Add to context key value')
+    @click.option('-s', '--secret', SECRETS_KEY,
+                  type=(str, str),
+                  multiple=True,
+                  help='Add to secret key value')
+    @click.option('-l', '--log', LOG_KEY,
+                  help='Log to file XXX.XX')
+    @click.option('-n', NUMBER_KEY,
+                  type=int,
+                  help='Assert the total number of executed tests')
+    @click.option('-f', '--file', FILES_KEY,
+                  multiple=True,
+                  help='Run all tests whose file name are listed. Use quotes ("") if necessary')
+    @click.option('-F', '--FILE', TEST_FILE_RE_KEY,
+                  default=RE_TEST_DEFAULT,
+                  show_default=True,
+                  help='Run all tests whose file name match the regular expression')
+    @click.pass_context
+    def wrapper(ctx, *args, **kargs):
+        command_options[DEBUG_KEY] = kargs[DEBUG_KEY]
+        command_options[TRACE_KEY] = kargs[TRACE_KEY]
+        command_options[TAGS_KEY] = [tag for tag in kargs[TAGS_KEY]]
+        command_options[PROFILE_KEY] = kargs[PROFILE_KEY]
+        command_options[CONTEXT_KEY] = {key: value for key, value in kargs[CONTEXT_KEY]}
+        command_options[SECRETS_KEY] = {key: value for key, value in kargs[SECRETS_KEY]}
+        command_options[LOG_KEY] = kargs[LOG_KEY]
+        command_options[NUMBER_KEY] = kargs[NUMBER_KEY]
+        command_options[FILES_KEY] = [file for file in kargs[FILES_KEY]]
+        command_options[TEST_FILE_RE_KEY] = kargs[TEST_FILE_RE_KEY]
+
+        return func(*args, **kargs)
+
+    return wrapper

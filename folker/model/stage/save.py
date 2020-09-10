@@ -2,7 +2,7 @@ from copy import copy
 
 from folker.logger.logger import TestLogger
 from folker.model.context import Context
-from folker.model.stage.stage import StageStep
+from folker.model.stage import StageStep
 
 
 class StageSave(StageStep):

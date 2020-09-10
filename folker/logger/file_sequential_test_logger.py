@@ -1,4 +1,5 @@
 import json
+from enum import Enum
 
 from folker import is_debug, is_trace
 from folker.logger.logger import TestLogger, FileLogger
@@ -40,7 +41,8 @@ class FileSequentialTestLogger(TestLogger, FileLogger):
     def action_prelude(self, action: dict, context: Context):
         self._log('PRELUDE')
         self._log(json.dumps({'ACTION': self._to_serialized(action),
-                              'SECRETS': self._ofuscate_secrets(self._to_serialized(context.secrets)),
+                              'SECRETS': self._ofuscate_secrets(
+                                  self._to_serialized(context.secrets)),
                               'TEST CONTEXT': self._to_serialized(context.test_variables),
                               'STAGE CONTEXT': self._to_serialized(context.stage_variables)
                               },
@@ -50,7 +52,8 @@ class FileSequentialTestLogger(TestLogger, FileLogger):
     def action_conclusion(self, action: dict, context: Context):
         self._log('CONCLUSION')
         self._log(json.dumps({'ACTION': self._to_serialized(action),
-                              'SECRETS': self._ofuscate_secrets(self._to_serialized(context.secrets)),
+                              'SECRETS': self._ofuscate_secrets(
+                                  self._to_serialized(context.secrets)),
                               'TEST CONTEXT': self._to_serialized(context.test_variables),
                               'STAGE CONTEXT': self._to_serialized(context.stage_variables)
                               },
@@ -108,6 +111,10 @@ class FileSequentialTestLogger(TestLogger, FileLogger):
 
     def assert_test_result(self, total, success, failures):
         if success is not total:
-            self._log('\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success, failures, total))
+            self._log('\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success,
+                                                                               failures,
+                                                                               total))
         elif is_debug():
-            self._log('\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success, failures, total))
+            self._log('\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success,
+                                                                               failures,
+                                                                               total))

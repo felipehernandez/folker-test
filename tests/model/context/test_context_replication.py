@@ -12,7 +12,8 @@ class TestContextReplication(TestCase):
 
         self.assertEqual(1, len(generated_contexts))
         self.assertDictEqual(original_context.test_variables, generated_contexts[0].test_variables)
-        self.assertDictEqual(original_context.stage_variables, generated_contexts[0].stage_variables)
+        self.assertDictEqual(original_context.stage_variables,
+                             generated_contexts[0].stage_variables)
         self.assertDictEqual(original_context.secrets, generated_contexts[0].secrets)
 
     def test_given_empty_context_when_replicate_test_with_one_variables_then_contexts(self):
@@ -23,13 +24,17 @@ class TestContextReplication(TestCase):
         self.assertEqual(2, len(generated_contexts))
 
         contexts_0 = generated_contexts[0]
-        self.assertDictEqual({**original_context.test_variables, 'variable': 1, 'variable_index': 0},
+        self.assertDictEqual({**original_context.test_variables,
+                              'variable': 1,
+                              'variable_index': 0},
                              contexts_0.test_variables)
         self.assertDictEqual(original_context.stage_variables, contexts_0.stage_variables)
         self.assertDictEqual(original_context.secrets, contexts_0.secrets)
 
         contexts_1 = generated_contexts[1]
-        self.assertDictEqual({**original_context.test_variables, 'variable': 2, 'variable_index': 1},
+        self.assertDictEqual({**original_context.test_variables,
+                              'variable': 2,
+                              'variable_index': 1},
                              contexts_1.test_variables)
         self.assertDictEqual(original_context.stage_variables, contexts_1.stage_variables)
         self.assertDictEqual(original_context.secrets, contexts_1.secrets)
@@ -37,7 +42,8 @@ class TestContextReplication(TestCase):
     def test_given_empty_context_when_replicate_test_with_two_variables_then_contexts(self):
         original_context = Context(test_variables={}, stage_variables={}, secrets={})
 
-        generated_contexts = original_context.replicate_on_test({'variable': [1, 2], 'variable2': ['a', 'b']})
+        generated_contexts = original_context.replicate_on_test({'variable': [1, 2],
+                                                                 'variable2': ['a', 'b']})
 
         self.assertEqual(4, len(generated_contexts))
 
@@ -82,7 +88,8 @@ class TestContextReplication(TestCase):
                                    stage_variables={'stage_vble': 'stage_value'},
                                    secrets={'secret_vble': 'secret_value'})
 
-        generated_contexts = original_context.replicate_on_test({'variable': [1, 2], 'variable2': ['a', 'b']})
+        generated_contexts = original_context.replicate_on_test({'variable': [1, 2],
+                                                                 'variable2': ['a', 'b']})
 
         self.assertEqual(4, len(generated_contexts))
 
@@ -131,12 +138,16 @@ class TestContextReplication(TestCase):
 
         contexts_0 = generated_contexts[0]
         self.assertDictEqual(original_context.test_variables, contexts_0.test_variables)
-        self.assertDictEqual({**original_context.stage_variables, 'variable': 1, 'variable_index': 0},
+        self.assertDictEqual({**original_context.stage_variables,
+                              'variable': 1,
+                              'variable_index': 0},
                              contexts_0.stage_variables)
         self.assertDictEqual(original_context.secrets, contexts_0.secrets)
 
         contexts_1 = generated_contexts[1]
         self.assertDictEqual(original_context.test_variables, contexts_1.test_variables)
-        self.assertDictEqual({**original_context.stage_variables, 'variable': 2, 'variable_index': 1},
+        self.assertDictEqual({**original_context.stage_variables,
+                              'variable': 2,
+                              'variable_index': 1},
                              contexts_1.stage_variables)
         self.assertDictEqual(original_context.secrets, contexts_1.secrets)

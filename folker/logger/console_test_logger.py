@@ -37,23 +37,27 @@ class ConsoleTestLogger(TestLogger, ColorLogger):
     # Action
     def action_prelude(self, action: dict, context: Context):
         self._log(self.COLOR_GREY, 'PRELUDE')
-        self._log(self.COLOR_GREY, json.dumps({'ACTION': self._to_serialized(action),
-                                               'SECRETS': self._ofuscate_secrets(self._to_serialized(context.secrets)),
-                                               'TEST CONTEXT': self._to_serialized(context.test_variables),
-                                               'STAGE CONTEXT': self._to_serialized(context.stage_variables)
-                                               },
-                                              sort_keys=True,
-                                              indent=4))
+        self._log(self.COLOR_GREY,
+                  json.dumps({'ACTION': self._to_serialized(action),
+                              'SECRETS': self._ofuscate_secrets(
+                                  self._to_serialized(context.secrets)),
+                              'TEST CONTEXT': self._to_serialized(context.test_variables),
+                              'STAGE CONTEXT': self._to_serialized(context.stage_variables)
+                              },
+                             sort_keys=True,
+                             indent=4))
 
     def action_conclusion(self, action: dict, context: Context):
         self._log(self.COLOR_GREY, 'CONCLUSION')
-        self._log(self.COLOR_GREY, json.dumps({'ACTION': self._to_serialized(action),
-                                               'SECRETS': self._ofuscate_secrets(self._to_serialized(context.secrets)),
-                                               'TEST CONTEXT': self._to_serialized(context.test_variables),
-                                               'STAGE CONTEXT': self._to_serialized(context.stage_variables)
-                                               },
-                                              sort_keys=True,
-                                              indent=4))
+        self._log(self.COLOR_GREY,
+                  json.dumps({'ACTION': self._to_serialized(action),
+                              'SECRETS': self._ofuscate_secrets(
+                                  self._to_serialized(context.secrets)),
+                              'TEST CONTEXT': self._to_serialized(context.test_variables),
+                              'STAGE CONTEXT': self._to_serialized(context.stage_variables)
+                              },
+                             sort_keys=True,
+                             indent=4))
 
     def _ofuscate_secrets(self, secrets: dict):
         return {key: '*' * len(value) for key, value in secrets.items()}
@@ -102,9 +106,15 @@ class ConsoleTestLogger(TestLogger, ColorLogger):
 
     def assert_test_result(self, total, success, failures):
         if success is not total:
-            self._log(self.COLOR_HIGH_RED, '\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success, failures, total))
+            self._log(self.COLOR_HIGH_RED,
+                      '\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success,
+                                                                               failures,
+                                                                               total))
         elif is_debug():
-            self._log(self.COLOR_CYAN, '\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success, failures, total))
+            self._log(self.COLOR_CYAN,
+                      '\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success,
+                                                                               failures,
+                                                                               total))
 
     # Util
     def _log(self, color, text, end=None):

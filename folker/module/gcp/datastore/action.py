@@ -71,8 +71,9 @@ class DatastoreAction(Action):
     def validate_specific(self, missing_fields):
         if self.key.get('kind') is None:
             missing_fields.append('action.key.kind')
-        if self.method in [DatastoreMethod.PUT, DatastoreMethod.GET, DatastoreMethod.DELETE] and \
-                self.key.get('id') is None and self.key.get('name') is None:
+        if self.method in [DatastoreMethod.PUT, DatastoreMethod.GET, DatastoreMethod.DELETE] \
+                and self.key.get('id') is None \
+                and self.key.get('name') is None:
             missing_fields.append('action.key.id')
             missing_fields.append('action.key.name')
         if hasattr(self, 'method') and DatastoreMethod.PUT is self.method:
@@ -150,7 +151,8 @@ class DatastoreAction(Action):
 
     def _bulk_delete(self, logger: TestLogger, context: Context, datastore_client):
         id_or_names = self.key.get('ids') if self.key.get('ids') else self.key.get('names')
-        keyss = [datastore_client.key(self.key.get('kind'), id_or_name) for id_or_name in id_or_names]
+        keyss = [datastore_client.key(self.key.get('kind'), id_or_name)
+                 for id_or_name in id_or_names]
         total_keys_size = len(keyss)
 
         for keys in _divide_chunks(keyss, 500):
