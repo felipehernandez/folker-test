@@ -93,7 +93,7 @@ def parameterised(func):
                   default=False,
                   show_default=True,
                   help='Run in TRACE mode')
-    @click.option('-t', '--tags', TAGS_KEY,
+    @click.option('-t', '--tag', TAGS_KEY,
                   multiple=True,
                   help='Run all tests with specified tags')
     @click.option('-p', '--profile', PROFILE_KEY,
