@@ -1,4 +1,4 @@
-from folker import is_debug, is_trace
+from folker.parameters import is_debug, is_trace
 from folker.logger.logger import SystemLogger, FileLogger
 
 

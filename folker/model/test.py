@@ -1,5 +1,5 @@
-from folker.logger.logger import TestLogger
-from folker.model.context import Context, EMPTY_CONTEXT
+from folker.logger import TestLogger
+from folker.model.context import Context
 from folker.model.error.error import SourceException
 from folker.model.error.load import InvalidSchemaDefinitionException
 from folker.model.stage.stage import Stage
@@ -51,7 +51,7 @@ class Test:
 
     def execute(self, logger: TestLogger, context: Context = None):
         if context is None:
-            context = EMPTY_CONTEXT()
+            context = Context.EMPTY_CONTEXT()
         execution_contexts = context.replicate_on_test(self.foreach)
         executions_result = True
 

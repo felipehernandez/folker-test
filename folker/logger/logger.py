@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-from folker.model.context import Context
-from folker.model.error.error import SourceException
+from folker.model import Context
+from folker.model.error import SourceException
 
 
 class ColorLogger(ABC):

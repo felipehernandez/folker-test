@@ -2,12 +2,13 @@ from multiprocessing.pool import Pool
 from os import cpu_count
 
 from folker import profiles
-from folker.executor.sequential_executor import DEFAULT_PROFILE
-from folker.logger import logger_factory
-from folker.logger.logger_factory import LoggerType
-from folker.model.context import Context
-from folker.model.test import Test
-from folker.util.parameters import capture_parameters_context, parameterised_profile, capture_parameters_secrets
+from folker.executor import DEFAULT_PROFILE
+from folker.logger import logger_factory, LoggerType
+from folker.model import Context
+from folker.model import Test
+from folker.parameters import capture_parameters_context, \
+    parameterised_profile, \
+    capture_parameters_secrets
 
 
 def _test_execution(test: Test):

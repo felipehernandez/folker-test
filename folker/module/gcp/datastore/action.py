@@ -5,11 +5,11 @@ from enum import Enum, auto
 
 from google.cloud import datastore
 
-from folker.logger.logger import TestLogger
-from folker.model.context import Context
-from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.model.stage.action import Action
-from folker.util.decorator import timed_action, resolvable_variables, loggable
+from folker.logger import TestLogger
+from folker.model import Context
+from folker.model.error import InvalidSchemaDefinitionException
+from folker.model import Action
+from folker.decorator import timed_action, resolvable_variables, loggable
 
 
 class DatastoreMethod(Enum):

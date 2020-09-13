@@ -1,13 +1,13 @@
-from folker.executor.parallel_executor import ParallelExecutor
-from folker.executor.sequential_executor import SequentialExecutor
+from folker.executor import ParallelExecutor
+from folker.executor import SequentialExecutor
 from folker.load.files import load_test_files, \
     load_and_initialize_template_files, \
     load_profile_files
 from folker.load.protos import generate_protos
 from folker.logger import logger_factory
-from folker.model.error.folker import TestSuiteResultException, TestSuiteNumberExecutionsException
-from folker.model.test import Test
-from folker.util.parameters import parameterised_tags, \
+from folker.model import Test
+from folker.model.error import TestSuiteResultException, TestSuiteNumberExecutionsException
+from folker.parameters import parameterised_tags, \
     parameterised_number_of_tests, \
     parameterised
 

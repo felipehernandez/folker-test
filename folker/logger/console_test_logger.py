@@ -1,10 +1,11 @@
 import json
 from enum import Enum
 
-from folker import is_debug, is_trace
-from folker.logger.logger import TestLogger, ColorLogger
-from folker.model.context import Context
-from folker.model.error.error import SourceException
+from folker.parameters import is_debug, is_trace
+from folker.logger import TestLogger
+from folker.logger.logger import ColorLogger
+from folker.model import Context
+from folker.model.error import SourceException
 
 
 class ConsoleTestLogger(TestLogger, ColorLogger):

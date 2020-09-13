@@ -2,7 +2,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from folker import is_debug, is_trace
-from folker.util.parameters import command_options, \
+from folker.parameters.parameters import command_options, \
     capture_parameters_context, \
     parameterised_tags, \
     parameterised_test_files, \

@@ -1,5 +1,6 @@
-from folker import is_debug, is_trace
-from folker.logger.logger import ColorLogger, SystemLogger
+from folker.logger import SystemLogger
+from folker.logger.logger import ColorLogger
+from folker.parameters import is_debug, is_trace
 
 
 class ConsoleSystemLogger(SystemLogger, ColorLogger):

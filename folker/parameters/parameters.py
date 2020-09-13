@@ -119,7 +119,7 @@ def parameterised(func):
                   show_default=True,
                   help='Run all tests whose file name match the regular expression')
     @click.pass_context
-    def wrapper(ctx, *args, **kargs):
+    def wrapper(ctx=None, *args, **kargs):
         command_options[DEBUG_KEY] = kargs[DEBUG_KEY]
         command_options[TRACE_KEY] = kargs[TRACE_KEY]
         command_options[TAGS_KEY] = [tag for tag in kargs[TAGS_KEY]]

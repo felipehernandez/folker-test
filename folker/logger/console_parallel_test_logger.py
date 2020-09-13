@@ -1,5 +1,5 @@
 from folker.logger.console_test_logger import ConsoleTestLogger
-from folker.model.error.error import SourceException
+from folker.model.error import SourceException
 
 
 class ConsoleParallelTestLogger(ConsoleTestLogger):

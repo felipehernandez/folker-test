@@ -7,11 +7,11 @@ import grpc
 from google.cloud.pubsub_v1 import PublisherClient, SubscriberClient
 from google.cloud.pubsub_v1.proto.pubsub_pb2 import PubsubMessage
 
-from folker.logger.logger import TestLogger
-from folker.model.context import Context
-from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.model.stage.action import Action
-from folker.util.decorator import timed_action, resolvable_variables, loggable
+from folker.logger import TestLogger
+from folker.model import Context
+from folker.model.error import InvalidSchemaDefinitionException
+from folker.model import Action
+from folker.decorator import timed_action, resolvable_variables, loggable
 
 
 class PubSubMethod(Enum):
