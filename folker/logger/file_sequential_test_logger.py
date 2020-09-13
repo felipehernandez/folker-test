@@ -1,3 +1,4 @@
+import json
 
 from folker.logger.file_test_logger import FileTestLogger
 
@@ -23,4 +24,3 @@ class FileSequentialTestLogger(FileTestLogger):
             self._log('\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success,
                                                                                failures,
                                                                                total))
-            

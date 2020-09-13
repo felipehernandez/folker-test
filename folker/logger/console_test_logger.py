@@ -1,11 +1,11 @@
 import json
 from enum import Enum
 
-from folker.parameters import is_debug, is_trace
 from folker.logger import TestLogger
 from folker.logger.logger import ColorLogger
 from folker.model import Context
 from folker.model.error import SourceException
+from folker.parameters import is_debug, is_trace
 
 
 class ConsoleTestLogger(TestLogger, ColorLogger):
@@ -47,7 +47,7 @@ class ConsoleTestLogger(TestLogger, ColorLogger):
         self._log(self.COLOR_GREY, 'PRELUDE')
         self._log(self.COLOR_GREY,
                   json.dumps({'ACTION': self._to_serialized(action),
-                              'SECRETS': self._ofuscate_secrets(
+                              'SECRETS': self._obfuscate_secrets(
                                   self._to_serialized(context.secrets)),
                               'TEST CONTEXT': self._to_serialized(context.test_variables),
                               'STAGE CONTEXT': self._to_serialized(context.stage_variables)
@@ -59,7 +59,7 @@ class ConsoleTestLogger(TestLogger, ColorLogger):
         self._log(self.COLOR_GREY, 'CONCLUSION')
         self._log(self.COLOR_GREY,
                   json.dumps({'ACTION': self._to_serialized(action),
-                              'SECRETS': self._ofuscate_secrets(
+                              'SECRETS': self._obfuscate_secrets(
                                   self._to_serialized(context.secrets)),
                               'TEST CONTEXT': self._to_serialized(context.test_variables),
                               'STAGE CONTEXT': self._to_serialized(context.stage_variables)
@@ -67,7 +67,7 @@ class ConsoleTestLogger(TestLogger, ColorLogger):
                              sort_keys=True,
                              indent=4))
 
-    def _ofuscate_secrets(self, secrets: dict):
+    def _obfuscate_secrets(self, secrets: dict):
         return {key: '*' * len(value) for key, value in secrets.items()}
 
     def _to_serialized(self, dictionary: dict):
