@@ -1,24 +1,7 @@
-from abc import ABC, abstractmethod
-
 from folker.logger.logger import TestLogger
 from folker.model.context import Context
 from folker.model.error.error import SourceException
 from folker.model.error.load import InvalidSchemaDefinitionException
-
-
-# from folker.util.variable import build_contexts, replace_variables
-
-
-class StageStep(ABC):
-    @abstractmethod
-    def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict): pass
-
-    @abstractmethod
-    def enrich(self, template): pass
-
-    @abstractmethod
-    def validate(self): pass
-
 
 from folker.model.stage.action import Action
 from folker.model.stage.assertions import StageAssertions
@@ -87,7 +70,9 @@ class Stage:
         if self.action is not None:
             self.action.validate()
         else:
-            fields_message = '{}[name].action'.format(self.name) if self.name else '{}[id].action'.format(self.id)
+            fields_message = '{}[name].action'.format(self.name) \
+                if self.name \
+                else '{}[id].action'.format(self.id)
             raise InvalidSchemaDefinitionException(wrong_fields=[fields_message])
         if self.save is not None:
             self.save.validate()

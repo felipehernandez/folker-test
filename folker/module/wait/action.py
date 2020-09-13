@@ -1,9 +1,9 @@
 import time
 
-from folker.logger.logger import TestLogger
-from folker.model.context import Context
-from folker.model.stage.action import Action
-from folker.util.decorator import timed_action, resolvable_variables, loggable
+from folker.decorator import loggable, resolvable_variables, timed_action
+from folker.logger import TestLogger
+from folker.model import Action
+from folker.model import Context
 
 
 class WaitAction(Action):

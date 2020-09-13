@@ -2,7 +2,9 @@ from unittest import TestCase
 
 from folker.logger.console_parallel_test_logger import ConsoleParallelTestLogger
 from folker.model.context import Context
-from folker.model.error.assertions import TestFailException, UnresolvableAssertionException, MalformedAssertionException
+from folker.model.error.assertions import TestFailException, \
+    UnresolvableAssertionException, \
+    MalformedAssertionException
 from folker.model.stage.assertions import StageAssertions
 
 
@@ -69,7 +71,8 @@ class TestStageAssertions(TestCase):
         except MalformedAssertionException as test_fail_exception:
             self.assertEqual('AssertExecutor', test_fail_exception.source)
             self.assertEqual('Malformed assertion', test_fail_exception.error)
-            self.assertEqual('Assertion does not resolve to a True/False value', test_fail_exception.cause)
+            self.assertEqual('Assertion does not resolve to a True/False value',
+                             test_fail_exception.cause)
             self.assertTrue('1 + 1' in test_fail_exception.details['assertion'])
 
     def test_given_malformed_assertion_then_malformed(self):

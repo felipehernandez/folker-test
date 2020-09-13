@@ -7,11 +7,11 @@ import grpc
 from google.cloud.pubsub_v1 import PublisherClient, SubscriberClient
 from google.cloud.pubsub_v1.proto.pubsub_pb2 import PubsubMessage
 
-from folker.logger.logger import TestLogger
-from folker.model.context import Context
-from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.model.stage.action import Action
-from folker.util.decorator import timed_action, resolvable_variables, loggable
+from folker.logger import TestLogger
+from folker.model import Context
+from folker.model.error import InvalidSchemaDefinitionException
+from folker.model import Action
+from folker.decorator import timed_action, resolvable_variables, loggable
 
 
 class PubSubMethod(Enum):
@@ -116,7 +116,9 @@ class PubSubAction(Action):
         return context
 
     def _publish(self, logger: TestLogger, context: Context):
-        self.publisher = PublisherClient(channel=grpc.insecure_channel(target=self.host)) if self.host else PublisherClient()
+        self.publisher = PublisherClient(channel=grpc.insecure_channel(target=self.host)) \
+            if self.host \
+            else PublisherClient()
 
         topic_path = self.publisher.topic_path(self.project, self.topic)
         attributes = self.attributes if self.attributes else {}
@@ -127,7 +129,9 @@ class PubSubAction(Action):
         context.save_on_stage('message_id', future.result())
 
     def _subscribe(self, logger: TestLogger, context: Context):
-        self.subscriber = SubscriberClient(channel=grpc.insecure_channel(target=self.host)) if self.host else SubscriberClient()
+        self.subscriber = SubscriberClient(channel=grpc.insecure_channel(target=self.host)) \
+            if self.host \
+            else SubscriberClient()
 
         subscription_path = self.subscriber.subscription_path(self.project, self.subscription)
 
@@ -146,7 +150,9 @@ class PubSubAction(Action):
                 self.subscriber.acknowledge(subscription_path, [message.ack_id])
 
     def _topics(self, logger: TestLogger, context: Context):
-        self.publisher = PublisherClient(channel=grpc.insecure_channel(target=self.host)) if self.host else PublisherClient()
+        self.publisher = PublisherClient(channel=grpc.insecure_channel(target=self.host)) \
+            if self.host \
+            else PublisherClient()
 
         project_path = self.publisher.project_path(self.project)
         topics = self.publisher.list_topics(project_path)
@@ -156,14 +162,18 @@ class PubSubAction(Action):
         context.save_on_stage('topics', [topic.name[prefix_len:] for topic in topics])
 
     def _subscriptions(self, logger: TestLogger, context: Context):
-        self.subscriber = SubscriberClient(channel=grpc.insecure_channel(target=self.host)) if self.host else SubscriberClient()
+        self.subscriber = SubscriberClient(channel=grpc.insecure_channel(target=self.host)) \
+            if self.host \
+            else SubscriberClient()
 
         project = self.project
         project_path = self.subscriber.project_path(project)
         subscriptions = self.subscriber.list_subscriptions(project_path)
 
         subscription_prefix = project_path + '/subscriptions/'
-        context.save_on_stage('subscriptions', [subscription.name[len(subscription_prefix):] for subscription in subscriptions])
+        context.save_on_stage('subscriptions',
+                              [subscription.name[len(subscription_prefix):]
+                               for subscription in subscriptions])
 
     def _authenticate(self):
         credentials_path = os.getcwd() + '/credentials/gcp/gcp-credentials.json'

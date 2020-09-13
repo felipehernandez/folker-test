@@ -1,4 +1,4 @@
-from folker import is_debug, is_trace
+from folker.parameters import is_debug, is_trace
 from folker.logger.logger import SystemLogger, FileLogger
 
 
@@ -48,7 +48,9 @@ class FileSystemLogger(SystemLogger, FileLogger):
             self._log('Skipped Proto file: {filename}'.format(filename=filename))
 
     def loading_proto_file_error(self, file_name: str, proto_command: str, exception: Exception):
-        self._log('Error loading proto file {} [{}]: {}'.format(file_name, proto_command, str(exception)))
+        self._log('Error loading proto file {} [{}]: {}'.format(file_name,
+                                                                proto_command,
+                                                                str(exception)))
 
     def loading_proto_files_completed(self, files):
         if is_debug():
@@ -59,9 +61,11 @@ class FileSystemLogger(SystemLogger, FileLogger):
 
     # Wrap up
     def assert_execution_result(self, total, success, failures):
-        self._log('\n#################################################################################################')
+        self._log('\n' + '#' * 100)
         self._log('RESULTS:')
-        self._log('Tests: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(len(success), len(failures), total))
+        self._log('Tests: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(len(success),
+                                                                       len(failures),
+                                                                       total))
 
         for passed in success:
             self._log('\t{}'.format(passed))

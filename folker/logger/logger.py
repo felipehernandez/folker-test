@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-from folker.model.context import Context
-from folker.model.error.error import SourceException
+from folker.model import Context
+from folker.model.error import SourceException
 
 
 class ColorLogger(ABC):
@@ -87,7 +87,8 @@ class SystemLogger(ABC):
     def loading_proto_file(self, filename): pass
 
     @abstractmethod
-    def loading_proto_file_error(self, file_name: str, proto_command: str, exception: Exception): pass
+    def loading_proto_file_error(self, file_name: str, proto_command: str, exception: Exception):
+        pass
 
     @abstractmethod
     def loading_proto_files_completed(self, files): pass

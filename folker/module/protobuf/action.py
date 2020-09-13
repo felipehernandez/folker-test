@@ -4,11 +4,11 @@ from enum import Enum, auto
 from google.protobuf import json_format
 from google.protobuf.json_format import MessageToJson, MessageToDict
 
-from folker.logger.logger import TestLogger
-from folker.model.context import Context
-from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.model.stage.action import Action
-from folker.util.decorator import timed_action, resolvable_variables, loggable
+from folker.logger import TestLogger
+from folker.model import Context
+from folker.model.error import InvalidSchemaDefinitionException
+from folker.model import Action
+from folker.decorator import timed_action, resolvable_variables, loggable
 
 
 class ProtobufMethod(Enum):
@@ -53,9 +53,13 @@ class ProtobufAction(Action):
         if not hasattr(self, 'clazz') or not self.__getattribute__('clazz'):
             missing_fields.append('action.class')
 
-        if hasattr(self, 'method') and self.method == ProtobufMethod.CREATE and (not hasattr(self, 'data') or not self.data):
+        if hasattr(self, 'method') \
+                and self.method == ProtobufMethod.CREATE \
+                and (not hasattr(self, 'data') or not self.data):
             missing_fields.append('action.data')
-        if hasattr(self, 'method') and self.method == ProtobufMethod.LOAD and (not hasattr(self, 'message') or not self.message):
+        if hasattr(self, 'method') \
+                and self.method == ProtobufMethod.LOAD \
+                and (not hasattr(self, 'message') or not self.message):
             missing_fields.append('action.message')
 
         return missing_fields
@@ -79,7 +83,9 @@ class ProtobufAction(Action):
     def _create(self, context: Context):
         mod = __import__(self.package, fromlist=[self.clazz])
         Proto = getattr(mod, self.clazz)
-        parsed_object = json_format.Parse(json.dumps(self.data), Proto(), ignore_unknown_fields=False)
+        parsed_object = json_format.Parse(json.dumps(self.data),
+                                          Proto(),
+                                          ignore_unknown_fields=False)
 
         context.save_on_stage('proto_object', parsed_object)
         context.save_on_stage('proto_serialize', str(parsed_object.SerializeToString(), 'utf-8'))
