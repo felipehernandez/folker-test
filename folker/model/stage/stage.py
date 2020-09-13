@@ -13,6 +13,7 @@ class Stage:
     id: str
     name: str
 
+    condition: str
     foreach: dict
 
     action: Action
@@ -24,6 +25,7 @@ class Stage:
     def __init__(self,
                  id: str = None,
                  name: str = None,
+                 condition: str = None,
                  foreach: dict = {},
                  action: Action = None,
                  log: [str] = None,
@@ -34,6 +36,7 @@ class Stage:
         self.id = id
         self.name = name
 
+        self.condition = condition
         self.foreach = foreach
 
         self.action = action
@@ -45,6 +48,8 @@ class Stage:
         if self.name is None:
             self.name = template.name
 
+        if self.condition is None:
+            self.condition = template.condition
         if self.foreach != {}:
             new_data = {**self.foreach, **template.foreach}
             self.foreach = new_data
@@ -82,12 +87,25 @@ class Stage:
             self.assertions.validate()
 
     def execute(self, logger: TestLogger, context: Context):
+        if self.skip_stage_execution(context):
+            logger.stage_skip(context.replace_variables(self.name), context)
+            return context
+
         contexts = context.replicate_on_stage(self.foreach)
         for stage_context in contexts:
             stage_context.test_variables = context.test_variables
             stage_context = self._execute(logger, stage_context)
             context.test_variables = stage_context.test_variables
         return context
+
+    def skip_stage_execution(self, context: Context):
+        if self.condition is None:
+            return False
+        updated_assertion, variables = context.map_variables(self.condition)
+        try:
+            return not eval(updated_assertion, {'variables': variables})
+        except Exception as e:
+            return True
 
     def _execute(self, logger: TestLogger, context: Context):
         name = context.replace_variables(self.name)

@@ -1,5 +1,5 @@
-from folker.parameters import is_debug, is_trace
 from folker.logger.logger import SystemLogger, FileLogger
+from folker.parameters import is_debug, is_trace
 
 
 class FileSystemLogger(SystemLogger, FileLogger):
