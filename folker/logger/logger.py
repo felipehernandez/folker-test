@@ -45,14 +45,19 @@ class FileLogger(ABC):
         self.report = []
 
     # Util
+    def _delayed_log(self, text, end=None):
+        self.report.append(text + (end if end else '\n'))
+
     def _log(self, text, end=None):
         self.report.append(text + (end if end else '\n'))
+        self._write_to_file()
 
     def _write_to_file(self):
         f = open(self.file_name, 'a+')
         for report_entry in self.report:
             f.write(report_entry)
         f.close()
+        self.report = []
 
 
 class SystemLogger(ABC):
@@ -116,6 +121,9 @@ class TestLogger(ABC):
     # Stage
     @abstractmethod
     def stage_start(self, stage_name: str, context: Context): pass
+
+    @abstractmethod
+    def stage_skip(self, stage_name: str, context: Context): pass
 
     # Action
     @abstractmethod
