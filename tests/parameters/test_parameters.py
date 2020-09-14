@@ -105,6 +105,18 @@ class TestStringMethods(TestCase):
 
         self.assertEqual(['asd'], parameterised_tags())
 
+    @patch('sys.argv', ['method', '-t', 'asd,asd2'])
+    def test_tag_flag_simple_multiple(self):
+        load_command_arguments(standalone_mode=False)
+
+        self.assertEqual(['asd', 'asd2'], parameterised_tags())
+
+    @patch('sys.argv', ['method', '-t', 'asd,asd2', '-t', 'asd3'])
+    def test_tag_flag_simple_multiple2(self):
+        load_command_arguments(standalone_mode=False)
+
+        self.assertEqual(['asd', 'asd2', 'asd3'], parameterised_tags())
+
     @patch('sys.argv', ['method', '-t', 'asd', '-t', 'asd2'])
     def test_tag_flag_multiple_single(self):
         load_command_arguments(standalone_mode=False)

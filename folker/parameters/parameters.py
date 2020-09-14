@@ -122,7 +122,10 @@ def parameterised(func):
     def wrapper(ctx=None, *args, **kargs):
         command_options[DEBUG_KEY] = kargs[DEBUG_KEY]
         command_options[TRACE_KEY] = kargs[TRACE_KEY]
-        command_options[TAGS_KEY] = [tag for tag in kargs[TAGS_KEY]]
+        command_options[TAGS_KEY] = [tag
+                                     for tag_group in kargs[TAGS_KEY]
+                                     for tag in tag_group.split(',')
+                                     ]
         command_options[PROFILE_KEY] = kargs[PROFILE_KEY]
         command_options[CONTEXT_KEY] = {key: value for key, value in kargs[CONTEXT_KEY]}
         command_options[SECRETS_KEY] = {key: value for key, value in kargs[SECRETS_KEY]}
