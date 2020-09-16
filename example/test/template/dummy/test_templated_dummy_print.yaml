@@ -11,3 +11,5 @@ stages:
     action:
       type: PRINT
       message: Hello world again!
+    assert:
+      - "${variable} == 2"

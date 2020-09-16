@@ -5,7 +5,7 @@ from folker.logger import TestLogger
 from folker.logger.logger import ColorLogger
 from folker.model import Context
 from folker.model.error import SourceException
-from folker.parameters import is_debug, is_trace
+from folker.parameters import is_debug
 
 
 class ConsoleTestLogger(TestLogger, ColorLogger):
@@ -31,16 +31,8 @@ class ConsoleTestLogger(TestLogger, ColorLogger):
     def stage_start(self, stage_name: str, context: Context):
         self._log(self.COLOR_HIGH_YELLOW, 'Stage: {name}'.format(name=stage_name))
 
-        if is_trace():
-            self._log(self.COLOR_GREY, 'TEST CONTEXT: {}'.format(context.test_variables))
-            self._log(self.COLOR_GREY, 'STAGE CONTEXT: {}'.format(context.stage_variables))
-
     def stage_skip(self, stage_name: str, context: Context):
         self._log(self.COLOR_YELLOW, 'Stage: {name} <SKIPPED>'.format(name=stage_name))
-
-        if is_trace():
-            self._log(self.COLOR_GREY, 'TEST CONTEXT: {}'.format(context.test_variables))
-            self._log(self.COLOR_GREY, 'STAGE CONTEXT: {}'.format(context.stage_variables))
 
     # Action
     def action_prelude(self, action: dict, context: Context):

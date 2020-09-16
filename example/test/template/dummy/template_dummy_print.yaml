@@ -7,3 +7,5 @@ stages:
     action:
       type: PRINT
       message: Hello world!
+    save:
+      variable: 2

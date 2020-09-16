@@ -55,7 +55,9 @@ class Stage:
             self.foreach = new_data
 
         if self.action:
-            self.action.enrich(template.action)
+            enriched_action = template.action.__copy__()
+            enriched_action.enrich(self.action)
+            self.action = enriched_action
         else:
             self.action = template.action.__copy__()
         if self.save:

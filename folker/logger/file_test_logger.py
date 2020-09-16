@@ -30,16 +30,8 @@ class FileTestLogger(TestLogger, FileLogger):
     def stage_start(self, stage_name: str, context: Context):
         self._log('Stage: {name}'.format(name=stage_name))
 
-        if is_trace():
-            self._log('TEST CONTEXT: {}'.format(context.test_variables))
-            self._log('STAGE CONTEXT: {}'.format(context.stage_variables))
-
     def stage_skip(self, stage_name: str, context: Context):
         self._log('Stage: {name} <SKIPPED>'.format(name=stage_name))
-
-        if is_trace():
-            self._log('TEST CONTEXT: {}'.format(context.test_variables))
-            self._log('STAGE CONTEXT: {}'.format(context.stage_variables))
 
     # Action
     def action_prelude(self, action: dict, context: Context):

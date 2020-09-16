@@ -21,3 +21,4 @@ stages:
       - ${key}
     assert:
       - '${key} == "value"'
+      - "${used} == 1"
