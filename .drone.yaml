@@ -23,7 +23,7 @@ steps:
       - cp -a ./example/credentials/* /credentials
       - cd /
       - sleep 5 # time for mockserver to start
-      - python3 folker.py -p test-profile -n 26 --trace
+      - python3 folker.py -p test-profile -n 27 --trace
       - python3 folker.py -t dummy -t print -n 2 --trace
       - python3 folker.py -t dummy -t print --trace
 
