@@ -6,7 +6,8 @@ steps:
     image: python:3.8-slim
     commands:
       - pip install -r requirements.txt
-      - python3 -m unittest -v
+      - coverage run -m pytest -vv
+      - coverage report -m
 
   - name: integration-test
     image: python:3.8-slim

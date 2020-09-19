@@ -1,17 +1,21 @@
 import sys
-from unittest import TestCase
 from unittest.mock import Mock, patch
+
+import pytest
+from pytest import raises
 
 from folker.model.context import Context
 from folker.model.error.load import InvalidSchemaDefinitionException
 from folker.module.grpc.action import GrpcAction
 
 
-class TestGrpcAction(TestCase):
+class TestGrpcAction:
     action: GrpcAction
 
-    def setUp(self) -> None:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.action = GrpcAction()
+        yield
 
     def test_validate_correct(self):
         self.action.host = 'a_host'
@@ -36,40 +40,40 @@ class TestGrpcAction(TestCase):
         self.action.stub = 'a_stub'
         self.action.method = 'a_method'
 
-        with self.assertRaises(InvalidSchemaDefinitionException) as execution_context:
+        with raises(InvalidSchemaDefinitionException) as execution_context:
             self.action.validate()
 
-        self.assertTrue('action.host' in execution_context.exception.details['missing_fields'])
+        assert 'action.host' in execution_context.value.details['missing_fields']
 
     def test_validate_missing_attribute_package(self):
         self.action.host = 'a_host'
         self.action.stub = 'a_stub'
         self.action.method = 'a_method'
 
-        with self.assertRaises(InvalidSchemaDefinitionException) as execution_context:
+        with raises(InvalidSchemaDefinitionException) as execution_context:
             self.action.validate()
 
-        self.assertTrue('action.package' in execution_context.exception.details['missing_fields'])
+        assert 'action.package' in execution_context.value.details['missing_fields']
 
     def test_validate_missing_attribute_stub(self):
         self.action.host = 'a_host'
         self.action.package = 'a_package'
         self.action.method = 'a_method'
 
-        with self.assertRaises(InvalidSchemaDefinitionException) as execution_context:
+        with raises(InvalidSchemaDefinitionException) as execution_context:
             self.action.validate()
 
-        self.assertTrue('action.stub' in execution_context.exception.details['missing_fields'])
+        assert 'action.stub' in execution_context.value.details['missing_fields']
 
     def test_validate_missing_attribute_method(self):
         self.action.host = 'a_host'
         self.action.package = 'a_package'
         self.action.stub = 'a_stub'
 
-        with self.assertRaises(InvalidSchemaDefinitionException) as execution_context:
+        with raises(InvalidSchemaDefinitionException) as execution_context:
             self.action.validate()
 
-        self.assertTrue('action.method' in execution_context.exception.details['missing_fields'])
+        assert 'action.method' in execution_context.value.details['missing_fields']
 
     @patch('grpc.insecure_channel')
     def test_execution_get(self, mocked_grpc):
@@ -97,7 +101,7 @@ class TestGrpcAction(TestCase):
         mocked_grpc.assert_called_with('a_host')
         mocked_stub.assert_called_with(mocked_channel)
         mocked_method.assert_called_with('data_value')
-        self.assertEqual(mocked_response, context.stage_variables['response'])
+        assert mocked_response == context.stage_variables['response']
 
     @patch('grpc.insecure_channel')
     def test_execution_get_list(self, mocked_grpc):
@@ -126,4 +130,4 @@ class TestGrpcAction(TestCase):
         mocked_grpc.assert_called_with('a_host')
         mocked_stub.assert_called_with(mocked_channel)
         mocked_method.assert_called_with('data_value')
-        self.assertEqual(['item1', 'item2'], context.stage_variables['response'])
+        assert ['item1', 'item2'] == context.stage_variables['response']

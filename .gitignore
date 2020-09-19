@@ -8,6 +8,8 @@ build/
 dist/
 jarvis.egg-info
 credentials/*
+.pytest_cache
+reports
 
 # File extensions
 *.class
@@ -17,7 +19,8 @@ credentials/*
 #Specific files
 .project
 .classpath
-kubernetes.yaml
+.coverage
+example/protos/*.py
 
 # OS
 .DS_Store
