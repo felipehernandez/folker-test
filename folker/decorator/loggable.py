@@ -2,7 +2,7 @@ from folker.parameters import is_trace
 from folker.logger import TestLogger
 
 
-def loggable(func):
+def loggable_action(func):
     def wrapper(self, *args, **kargs):
         if is_trace():
             logger: TestLogger = kargs['logger']
@@ -12,7 +12,7 @@ def loggable(func):
 
         if is_trace():
             logger: TestLogger = kargs['logger']
-            logger.action_conclusion(action=self.__dict__, context=kargs['context'])
+            logger.action_conclusion(action=self.__dict__, context=context)
 
         return context
 

@@ -1,6 +1,6 @@
 import time
 
-from folker.decorator import loggable, resolvable_variables, timed_action
+from folker.decorator import loggable_action, resolvable_variables, timed_action
 from folker.logger import TestLogger
 from folker.model import Action
 from folker.model import Context
@@ -16,7 +16,7 @@ class WaitAction(Action):
     def mandatory_fields(self) -> [str]:
         return ['time']
 
-    @loggable
+    @loggable_action
     @resolvable_variables
     @timed_action
     def execute(self, logger: TestLogger, context: Context) -> Context:

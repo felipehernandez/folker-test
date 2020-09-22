@@ -66,7 +66,7 @@ class Test:
         try:
             for stage in self.stages:
                 context = stage.execute(logger, context)
-                context.end_stage()
+                context.close_stage()
         except SourceException as e:
             logger.test_finish_error(e)
             return False

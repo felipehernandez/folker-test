@@ -142,3 +142,25 @@ class TestContextReplication:
                                                     'variable': 2,
                                                     'variable_index': 1},
                           expected_secrets=original_context.secrets)
+
+    def test_given_empty_context_when_replicate_test_with_string_variables_then_contexts(self):
+        original_context = Context(test_variables={},
+                                   stage_variables={},
+                                   secrets={})
+
+        generated_contexts = original_context.replicate_on_test({'variable': ['alpha', 'beta']})
+
+        assert 2 == len(generated_contexts)
+
+        _compare_contexts(generated_contexts[0],
+                          expected_test_variables={**original_context.test_variables,
+                                                   'variable': 'alpha',
+                                                   'variable_index': 0},
+                          expected_stage_variables=original_context.stage_variables,
+                          expected_secrets=original_context.secrets)
+        _compare_contexts(generated_contexts[1],
+                          expected_test_variables={**original_context.test_variables,
+                                                   'variable': 'beta',
+                                                   'variable_index': 1},
+                          expected_stage_variables=original_context.stage_variables,
+                          expected_secrets=original_context.secrets)

@@ -8,7 +8,7 @@ from folker.logger import TestLogger
 from folker.model import Context
 from folker.model.error import InvalidSchemaDefinitionException
 from folker.model import Action
-from folker.decorator import timed_action, resolvable_variables, loggable
+from folker.decorator import timed_action, resolvable_variables, loggable_action
 
 
 class ProtobufMethod(Enum):
@@ -64,7 +64,7 @@ class ProtobufAction(Action):
 
         return missing_fields
 
-    @loggable
+    @loggable_action
     @resolvable_variables
     @timed_action
     def execute(self, logger: TestLogger, context: Context) -> Context:

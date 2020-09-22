@@ -2,7 +2,7 @@ from folker.model.context import Context
 from folker.model.error.variables import VariableReferenceResolutionException
 
 
-class TestContextReplication():
+class TestContextReplication:
 
     def test_given_context_when_missing_simple_variables_reference_then_ex(self):
         context = Context(test_variables={},
