@@ -160,6 +160,35 @@ def test_stage_conditional_execution_false(mocker):
     assert result.stage_variables == initial_context.stage_variables
 
 
+def test_stage_conditional_execution_error(mocker):
+    mocked_action = mocker.patch('folker.model.stage.StageAction')
+    mocked_save = mocker.patch('folker.model.stage.StageSave')
+    mocked_log = mocker.patch('folker.model.stage.StageLog')
+    mocked_assertions = mocker.patch('folker.model.stage.StageAssertions')
+
+    stage = Stage()
+    stage.action = mocked_action
+    stage.save = mocked_save
+    stage.log = mocked_log
+    stage.assertions = mocked_assertions
+    stage.condition = True
+
+    mocked_logger = mocker.patch('folker.logger.TestLogger')
+    initial_context = Context({'key': 'initial'})
+    asserted_context = Context({'key': 'asserted'})
+
+    mocked_action.execute.side_effect = mock_response('initial', Context({'key': 'actioned'}))
+    mocked_save.execute.side_effect = mock_response('actioned', Context({'key': 'saved'}))
+    mocked_log.execute.side_effect = mock_response('saved', Context({'key': 'logged'}))
+    mocked_assertions.execute.side_effect = mock_response('logged', asserted_context)
+
+    result = stage.execute(logger=mocked_logger, context=initial_context)
+
+    assert result.secrets == initial_context.secrets
+    assert result.test_variables == initial_context.test_variables
+    assert result.stage_variables == initial_context.stage_variables
+
+
 def test_stage_error_from_action(mocker):
     mocked_action = mocker.patch('folker.model.stage.StageAction')
 

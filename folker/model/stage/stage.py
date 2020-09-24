@@ -2,11 +2,10 @@ from folker.logger.logger import TestLogger
 from folker.model.context import Context
 from folker.model.error.error import SourceException
 from folker.model.error.load import InvalidSchemaDefinitionException
-
-from folker.model.stage.stageaction import StageAction
 from folker.model.stage.assertions import StageAssertions
 from folker.model.stage.log import StageLog
 from folker.model.stage.save import StageSave
+from folker.model.stage.stageaction import StageAction
 
 
 class Stage:
@@ -81,12 +80,6 @@ class Stage:
                 if self.name \
                 else '{}[id].action'.format(self.id)
             raise InvalidSchemaDefinitionException(wrong_fields=[fields_message])
-        if self.save is not None:
-            self.save.validate()
-        if self.log is not None:
-            self.log.validate()
-        if self.assertions is not None:
-            self.assertions.validate()
 
     def execute(self, logger: TestLogger, context: Context):
         if self.skip_stage_execution(context):
