@@ -5,15 +5,15 @@ from pytest import raises
 
 from folker.model.context import Context
 from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.module.wait.action import WaitAction
+from folker.module.wait.action import WaitStageAction
 
 
 class TestWaitAction:
-    action: WaitAction
+    action: WaitStageAction
 
     @pytest.fixture(autouse=True)
     def setup(self):
-        self.action = WaitAction()
+        self.action = WaitStageAction()
         yield
 
     def test_validate_missing_time(self):

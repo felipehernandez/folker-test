@@ -76,3 +76,21 @@ class TestStageSave:
 
         assert {'save': {'in': {'1': 1, '2': 2}}} == context.test_variables
         assert {} == context.stage_variables
+
+    def test_enrich(self):
+        stage = StageSave(save={'key1': 'log1'})
+        template_stage = StageSave(save={'key2': 'log2'})
+
+        stage.enrich(template_stage)
+
+        assert stage.save == {'key1': 'log1', 'key2': 'log2'}
+
+    def test_validate(self):
+        stage = StageSave()
+
+        stage.validate()
+
+    def test_validate_empty(self):
+        stage = StageSave(save={'key1': 'log1'})
+
+        stage.validate()

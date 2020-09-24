@@ -1,4 +1,5 @@
 from folker.decorator import timed_action
+from folker.model import Context
 
 
 def test_timed_action(mocker):
@@ -8,10 +9,9 @@ def test_timed_action(mocker):
     def called_method(self, *args, **kargs):
         return kargs['context']
 
-    original_context = mocker.patch('folker.model.Context')
-    spy_save_on_stage = mocker.spy(original_context, 'save_on_stage')
+    original_context = Context()
 
     result = called_method(self=None, context=original_context)
 
-    spy_save_on_stage.assert_called_once_with('elapsed_time', 1000)
+    assert 1000 == original_context.stage_variables.get('elapsed_time')
     assert original_context == result

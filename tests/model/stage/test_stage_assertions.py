@@ -87,3 +87,21 @@ class TestStageAssertions:
             assert 'Malformed assertion' == test_fail_exception.error
             assert 'Assertion does not compile' == test_fail_exception.cause
             assert '1 + == 2' in test_fail_exception.details['assertion']
+
+    def test_enrich(self):
+        stage = StageAssertions(assertions=['assertion1'])
+        template_stage = StageAssertions(assertions=['assertion2'])
+
+        stage.enrich(template_stage)
+
+        assert stage.assertions == ['assertion1', 'assertion2']
+
+    def test_validate(self):
+        stage = StageAssertions()
+
+        stage.validate()
+
+    def test_validate_empty(self):
+        stage = StageAssertions(assertions=['assertion1'])
+
+        stage.validate()

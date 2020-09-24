@@ -11,7 +11,7 @@ test:
 
 test-report:
 	coverage run -m pytest -vv
-	coverage html -d reports/coverage --title=report --skip-covered --skip-empty
+	coverage html -d reports/coverage --title=report --omit="*/lib/python*"
 
 lint:
 	pylint folker

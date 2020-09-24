@@ -8,7 +8,7 @@ from google.cloud import datastore
 from folker.logger import TestLogger
 from folker.model import Context
 from folker.model.error import InvalidSchemaDefinitionException
-from folker.model import Action
+from folker.model import StageAction
 from folker.decorator import timed_action, resolvable_variables, loggable_action
 
 
@@ -25,7 +25,7 @@ def _divide_chunks(l, chunk_size):
         yield l[i:i + chunk_size]
 
 
-class DatastoreAction(Action):
+class DatastoreStageAction(StageAction):
     method: DatastoreMethod
 
     host: str

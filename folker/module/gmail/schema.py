@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields, post_load
 
-from folker.module.gmail.action import GmailAction
-from folker.module.rest.action import RestAction
+from folker.module.gmail.action import GmailStageAction
+from folker.module.rest.action import RestStageAction
 
 
 class GmailActionSchema(Schema):
@@ -18,4 +18,4 @@ class GmailActionSchema(Schema):
 
     @post_load
     def make_action(self, data, **kwargs):
-        return GmailAction(**data)
+        return GmailStageAction(**data)

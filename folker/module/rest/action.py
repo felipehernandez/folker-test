@@ -6,7 +6,7 @@ import requests
 from folker.logger import TestLogger
 from folker.model import Context
 from folker.model.error import InvalidSchemaDefinitionException
-from folker.model import Action
+from folker.model import StageAction
 from folker.decorator import timed_action, resolvable_variables, loggable_action
 
 
@@ -18,7 +18,7 @@ class RestMethod(Enum):
     PATCH = auto()
 
 
-class RestAction(Action):
+class RestStageAction(StageAction):
     method: RestMethod
     host: str
     uri: str

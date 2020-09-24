@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, post_load
 
-from folker.module.file.action import FileAction
+from folker.module.file.action import FileStageAction
 
 
 class FileActionSchema(Schema):
@@ -12,4 +12,4 @@ class FileActionSchema(Schema):
 
     @post_load
     def make_action(self, data, **kwargs):
-        return FileAction(**data)
+        return FileStageAction(**data)

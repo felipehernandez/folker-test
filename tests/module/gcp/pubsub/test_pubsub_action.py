@@ -5,15 +5,15 @@ from pytest import raises
 
 from folker.model.context import Context
 from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.module.gcp.pubsub.action import PubSubAction, PubSubMethod
+from folker.module.gcp.pubsub.action import PubSubStageAction, PubSubMethod
 
 
 class TestPubSubAction:
-    action: PubSubAction
+    action: PubSubStageAction
 
     @pytest.fixture(autouse=True)
     def setup(self):
-        self.action = PubSubAction()
+        self.action = PubSubStageAction()
         yield
 
     def test_validate_correct_publish(self):

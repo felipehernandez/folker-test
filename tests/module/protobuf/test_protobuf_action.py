@@ -2,15 +2,15 @@ import pytest
 from pytest import raises
 
 from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.module.protobuf.action import ProtobufAction, ProtobufMethod
+from folker.module.protobuf.action import ProtobufStageAction, ProtobufMethod
 
 
 class TestProtobufAction:
-    action: ProtobufAction
+    action: ProtobufStageAction
 
     @pytest.fixture(autouse=True)
     def setup(self):
-        self.action = ProtobufAction()
+        self.action = ProtobufStageAction()
         yield
 
     def test_validate_correct_create(self):

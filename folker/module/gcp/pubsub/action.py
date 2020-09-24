@@ -10,7 +10,7 @@ from google.cloud.pubsub_v1.proto.pubsub_pb2 import PubsubMessage
 from folker.logger import TestLogger
 from folker.model import Context
 from folker.model.error import InvalidSchemaDefinitionException
-from folker.model import Action
+from folker.model import StageAction
 from folker.decorator import timed_action, resolvable_variables, loggable_action
 
 
@@ -21,7 +21,7 @@ class PubSubMethod(Enum):
     SUBSCRIPTIONS = auto()
 
 
-class PubSubAction(Action):
+class PubSubStageAction(StageAction):
     method: PubSubMethod
 
     host: str

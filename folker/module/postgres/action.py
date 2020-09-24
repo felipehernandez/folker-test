@@ -5,7 +5,7 @@ import psycopg2
 from folker.logger import TestLogger
 from folker.model import Context
 from folker.model.error import InvalidSchemaDefinitionException
-from folker.model import Action
+from folker.model import StageAction
 from folker.decorator import timed_action, resolvable_variables, loggable_action
 
 
@@ -25,7 +25,7 @@ IS_FETCH = {
 }
 
 
-class PostgresAction(Action):
+class PostgresStageAction(StageAction):
     method: PostgresMethod
     host: str
     port: str

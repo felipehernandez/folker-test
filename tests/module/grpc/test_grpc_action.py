@@ -6,15 +6,15 @@ from pytest import raises
 
 from folker.model.context import Context
 from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.module.grpc.action import GrpcAction
+from folker.module.grpc.action import GrpcStageAction
 
 
 class TestGrpcAction:
-    action: GrpcAction
+    action: GrpcStageAction
 
     @pytest.fixture(autouse=True)
     def setup(self):
-        self.action = GrpcAction()
+        self.action = GrpcStageAction()
         yield
 
     def test_validate_correct(self):

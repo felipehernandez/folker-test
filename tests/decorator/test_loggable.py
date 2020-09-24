@@ -1,6 +1,6 @@
 from folker.decorator import loggable_action
 from folker.model import Context
-from folker.module.void.action import VoidAction
+from folker.module.void.action import VoidStageAction
 
 
 def test_loggable_when_trace(mocker):
@@ -10,7 +10,7 @@ def test_loggable_when_trace(mocker):
     def called_method(self, *args, **kargs):
         return returned_context
 
-    action = VoidAction()
+    action = VoidStageAction()
     original_context = Context()
     mock_test_logger = mocker.patch('folker.logger.TestLogger')
 
@@ -34,7 +34,7 @@ def test_loggable_when_not_trace(mocker):
     def called_method(self, *args, **kargs):
         return returned_context
 
-    action = VoidAction()
+    action = VoidStageAction()
     original_context = Context()
     mock_test_logger = mocker.patch('folker.logger.TestLogger')
 

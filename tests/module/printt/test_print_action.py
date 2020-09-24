@@ -5,15 +5,15 @@ from pytest import raises
 
 from folker.model.context import Context
 from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.module.printt.action import PrintAction
+from folker.module.printt.action import PrintStageAction
 
 
 class TestVoidAction:
-    action: PrintAction
+    action: PrintStageAction
 
     @pytest.fixture(autouse=True)
     def setup(self):
-        self.action = PrintAction()
+        self.action = PrintStageAction()
         yield
 
     def test_validate_missing_message(self):

@@ -6,15 +6,15 @@ from pytest import raises
 
 from folker.model.context import Context
 from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.module.rest.action import RestAction, RestMethod
+from folker.module.rest.action import RestStageAction, RestMethod
 
 
 class TestRestAction:
-    action: RestAction
+    action: RestStageAction
 
     @pytest.fixture(autouse=True)
     def setup(self):
-        self.action = RestAction()
+        self.action = RestStageAction()
         yield
 
     def test_validate_correct(self):

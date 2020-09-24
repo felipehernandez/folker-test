@@ -177,8 +177,6 @@ class Context:
         return context
 
     def _merge_dictionaries(self, stable: dict, new_values: dict):
-        if len(new_values) == 0:
-            return stable
         for k, v in new_values.items():
             if (k in stable and isinstance(stable[k], dict)
                     and isinstance(new_values[k], collections.Mapping)):
@@ -187,5 +185,5 @@ class Context:
                 stable[k] = new_values[k]
         return stable
 
-    def close_stage(self):
+    def finalise_stage(self):
         self.stage_variables = {}

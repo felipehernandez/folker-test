@@ -4,7 +4,7 @@ from enum import Enum, auto
 from folker.logger import TestLogger
 from folker.model import Context
 from folker.model.error import InvalidSchemaDefinitionException
-from folker.model import Action
+from folker.model import StageAction
 from folker.decorator import timed_action, resolvable_variables, loggable_action
 
 
@@ -14,7 +14,7 @@ class FileMethod(Enum):
     DELETE = auto()
 
 
-class FileAction(Action):
+class FileStageAction(StageAction):
     method: FileMethod
     file: str
     content: str

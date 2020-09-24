@@ -46,3 +46,21 @@ class TestStageLog:
         self.stage.execute(self.logger, Context({'reference': 'text'}, {}))
 
         self.logger.log_text.assert_called_with('text')
+
+    def test_enrich(self):
+        stage = StageLog(logs=['log1'])
+        template_stage = StageLog(logs=['log2'])
+
+        stage.enrich(template_stage)
+
+        assert stage.logs == ['log1', 'log2']
+
+    def test_validate(self):
+        stage = StageLog()
+
+        stage.validate()
+
+    def test_validate_empty(self):
+        stage = StageLog(logs=['log1'])
+
+        stage.validate()

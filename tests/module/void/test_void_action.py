@@ -1,14 +1,14 @@
 import pytest
 
-from folker.module.void.action import VoidAction
+from folker.module.void.action import VoidStageAction
 
 
 class TestVoidAction:
-    action: VoidAction
+    action: VoidStageAction
 
     @pytest.fixture(autouse=True)
     def setup(self):
-        self.action = VoidAction()
+        self.action = VoidStageAction()
         yield
 
     def test_validate(self):

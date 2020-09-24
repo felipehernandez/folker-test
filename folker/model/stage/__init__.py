@@ -15,7 +15,7 @@ class StageStep(ABC):
     def validate(self): pass
 
 
-from .action import Action
+from .stageaction import StageAction
 from .assertions import StageAssertions
 from .log import StageLog
 from .save import StageSave

@@ -3,11 +3,11 @@ from gql.transport.requests import RequestsHTTPTransport
 
 from folker.logger import TestLogger
 from folker.model import Context
-from folker.model import Action
+from folker.model import StageAction
 from folker.decorator import timed_action, resolvable_variables, loggable_action
 
 
-class GraphQLAction(Action):
+class GraphQLStageAction(StageAction):
     host: str
 
     uri: str

@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, post_load
 
-from folker.module.graphql.action import GraphQLAction
+from folker.module.graphql.action import GraphQLStageAction
 
 
 class GraphQLActionSchema(Schema):
@@ -14,4 +14,4 @@ class GraphQLActionSchema(Schema):
 
     @post_load
     def make_action(self, data, **kwargs):
-        return GraphQLAction(**data)
+        return GraphQLStageAction(**data)
