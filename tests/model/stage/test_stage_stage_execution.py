@@ -65,7 +65,8 @@ def test_stage_fail(mocker):
     with pytest.raises(TestFailException) as test_fail_exception:
         stage.execute(logger=mocked_logger, context=initial_context)
 
-        assert test_fail_exception.failure_messages == ['failure']
+    assert test_fail_exception.value.details['errors'] == ['failure']
+    assert test_fail_exception.value.details['stage'] == stage
 
 
 def test_stage_foreach(mocker):
@@ -203,7 +204,7 @@ def test_stage_error_from_action(mocker):
     with pytest.raises(SourceException) as raised_exception:
         stage.execute(logger=mocked_logger, context=initial_context)
 
-        assert raised_exception.details['stage'] == stage
+    assert raised_exception.value.details['stage'] == stage
 
 
 def test_stage_unresolvable_assertion_exception_from_assertions(mocker):
@@ -230,7 +231,7 @@ def test_stage_unresolvable_assertion_exception_from_assertions(mocker):
     with pytest.raises(UnresolvableAssertionException) as raised_exception:
         stage.execute(logger=mocked_logger, context=initial_context)
 
-        assert raised_exception.assertion == 'malformed_assertion'
+    assert raised_exception.value.details['assertion'] == 'unresolvable_assertion'
 
 
 def test_stage_malformed_assertion_exception_from_assertions(mocker):
@@ -257,4 +258,4 @@ def test_stage_malformed_assertion_exception_from_assertions(mocker):
     with pytest.raises(MalformedAssertionException) as raised_exception:
         stage.execute(logger=mocked_logger, context=initial_context)
 
-        assert raised_exception.assertion == 'malformed_assertion'
+    assert raised_exception.value.details['assertion'] == 'malformed_assertion'

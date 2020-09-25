@@ -18,7 +18,7 @@ class Test:
 
     def __init__(self,
                  id: str = None,
-                 name: str = 'UNDEFINED',
+                 name: str = None,
                  description: str = None,
                  parallel: bool = False,
                  foreach: dict = {},
@@ -36,7 +36,7 @@ class Test:
 
     def validate(self):
         missing_fields = []
-        if self.name == None:
+        if self.name is None:
             missing_fields.append('test.name')
 
         if len(missing_fields) > 0:

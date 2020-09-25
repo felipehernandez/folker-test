@@ -3,7 +3,7 @@ import os
 from copy import deepcopy
 from enum import Enum, auto
 
-from google.cloud import datastore
+from google.cloud.datastore import Client, Entity
 
 from folker.logger import TestLogger
 from folker.model import Context
@@ -95,7 +95,7 @@ class DatastoreStageAction(StageAction):
     def execute(self, logger: TestLogger, context: Context) -> Context:
         self._authenticate(logger)
 
-        datastore_client = datastore.Client(project=self.project)
+        datastore_client = Client(project=self.project)
 
         {
             DatastoreMethod.PUT: self._put,
@@ -126,7 +126,7 @@ class DatastoreStageAction(StageAction):
 
     def _put(self, logger: TestLogger, context: Context, datastore_client):
         key = self._key(datastore_client)
-        entity = datastore.Entity(key=key)
+        entity = Entity(key=key)
         entity.update(self.entity)
 
         datastore_client.put(entity)

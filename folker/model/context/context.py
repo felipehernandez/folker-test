@@ -58,6 +58,21 @@ class Context:
     def __copy__(self):
         return deepcopy(self)
 
+    def __eq__(self, other):
+        return isinstance(other, Context) \
+               and self.secrets == other.secrets \
+               and self.test_variables == other.test_variables \
+               and self.stage_variables == other.stage_variables
+
+    def __str__(self):
+        return '{secrets}-{test_variables}-{stage_variables}' \
+            .format(secrets=str(self.secrets),
+                    test_variables=str(self.test_variables),
+                    stage_variables=str(self.stage_variables))
+
+    def __repr__(self):
+        return self.__str__()
+
     @staticmethod
     def EMPTY_CONTEXT():
         return Context({}, {}, {})

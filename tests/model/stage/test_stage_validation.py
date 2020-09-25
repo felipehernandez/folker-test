@@ -4,7 +4,7 @@ from folker.model import Stage
 from folker.model.error import InvalidSchemaDefinitionException
 
 
-def test_stage_validation_named_missing_action(mocker):
+def test_stage_validation_named_missing_action():
     stage = Stage(name='StageName')
 
     with pytest.raises(InvalidSchemaDefinitionException) as raised_exception:
@@ -13,7 +13,7 @@ def test_stage_validation_named_missing_action(mocker):
         assert raised_exception.wrong_fields == ['StageName[name].action']
 
 
-def test_stage_validation_ided_missing_action(mocker):
+def test_stage_validation_ided_missing_action():
     stage = Stage(id='StageId')
 
     with pytest.raises(InvalidSchemaDefinitionException) as raised_exception:
