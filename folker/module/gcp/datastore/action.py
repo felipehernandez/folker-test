@@ -5,11 +5,11 @@ from enum import Enum, auto
 
 from google.cloud.datastore import Client, Entity
 
+from folker.decorator import timed_action, resolvable_variables, loggable_action
 from folker.logger import TestLogger
 from folker.model import Context
-from folker.model.error import InvalidSchemaDefinitionException
 from folker.model import StageAction
-from folker.decorator import timed_action, resolvable_variables, loggable_action
+from folker.model.error import InvalidSchemaDefinitionException
 
 
 class DatastoreMethod(Enum):
@@ -45,17 +45,16 @@ class DatastoreStageAction(StageAction):
                  **kargs) -> None:
         super().__init__()
 
-        if method:
-            try:
-                self.method = DatastoreMethod[method]
-            except:
-                raise InvalidSchemaDefinitionException(wrong_fields=['action.method'])
+        try:
+            self.method = DatastoreMethod[method]
+        except:
+            raise InvalidSchemaDefinitionException(wrong_fields=['action.method'])
 
         self.host = host
         self.project = project
         self.credentials_path = credentials
 
-        self.key = key
+        self.key = key if key else {}
         self.entity = entity
 
     def __copy__(self):
@@ -76,7 +75,7 @@ class DatastoreStageAction(StageAction):
                 and self.key.get('name') is None:
             missing_fields.append('action.key.id')
             missing_fields.append('action.key.name')
-        if hasattr(self, 'method') and DatastoreMethod.PUT is self.method:
+        if self.method is DatastoreMethod.PUT:
             missing_fields.extend(self._validate_put_values())
 
         return missing_fields

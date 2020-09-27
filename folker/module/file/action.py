@@ -25,11 +25,10 @@ class FileStageAction(StageAction):
                  content: str = None,
                  **kargs) -> None:
         super().__init__()
-        if type:
-            try:
-                self.method = FileMethod[method]
-            except:
-                raise InvalidSchemaDefinitionException(wrong_fields=['action.method'])
+        try:
+            self.method = FileMethod[method]
+        except:
+            raise InvalidSchemaDefinitionException(wrong_fields=['action.method'])
 
         self.file = file
         self.content = content
