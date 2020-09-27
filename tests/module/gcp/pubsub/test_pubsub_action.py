@@ -1,16 +1,20 @@
-from unittest import TestCase
 from unittest.mock import patch, Mock
+
+import pytest
+from pytest import raises
 
 from folker.model.context import Context
 from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.module.gcp.pubsub.action import PubSubAction, PubSubMethod
+from folker.module.gcp.pubsub.action import PubSubStageAction, PubSubMethod
 
 
-class TestPubSubAction(TestCase):
-    action: PubSubAction
+class TestPubSubAction:
+    action: PubSubStageAction
 
-    def setUp(self) -> None:
-        self.action = PubSubAction()
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.action = PubSubStageAction()
+        yield
 
     def test_validate_correct_publish(self):
         self.action.method = PubSubMethod.PUBLISH
@@ -49,50 +53,50 @@ class TestPubSubAction(TestCase):
         self.action.topic = 'a-topic'
         self.action.message = 'message'
 
-        with self.assertRaises(InvalidSchemaDefinitionException) as execution_context:
+        with raises(InvalidSchemaDefinitionException) as execution_context:
             self.action.validate()
 
-        self.assertTrue('action.method' in execution_context.exception.details['missing_fields'])
+        assert 'action.method' in execution_context.value.details['missing_fields']
 
     def test_validate_missing_attribute_project(self):
         self.action.method = PubSubMethod.PUBLISH
         self.action.topic = 'a-topic'
         self.action.message = 'message'
 
-        with self.assertRaises(InvalidSchemaDefinitionException) as execution_context:
+        with raises(InvalidSchemaDefinitionException) as execution_context:
             self.action.validate()
 
-        self.assertTrue('action.project' in execution_context.exception.details['missing_fields'])
+        assert ('action.project' in execution_context.value.details['missing_fields'])
 
     def test_validate_missing_attribute_topic(self):
         self.action.method = PubSubMethod.PUBLISH
         self.action.project = 'a-project'
         self.action.message = 'message'
 
-        with self.assertRaises(InvalidSchemaDefinitionException) as execution_context:
+        with raises(InvalidSchemaDefinitionException) as execution_context:
             self.action.validate()
 
-        self.assertTrue('action.topic' in execution_context.exception.details['missing_fields'])
+        assert ('action.topic' in execution_context.value.details['missing_fields'])
 
     def test_validate_missing_attribute_message(self):
         self.action.method = PubSubMethod.PUBLISH
         self.action.project = 'a-project'
         self.action.topic = 'a-topic'
 
-        with self.assertRaises(InvalidSchemaDefinitionException) as execution_context:
+        with raises(InvalidSchemaDefinitionException) as execution_context:
             self.action.validate()
 
-        self.assertTrue('action.message' in execution_context.exception.details['missing_fields'])
+        assert ('action.message' in execution_context.value.details['missing_fields'])
 
     def test_validate_missing_attribute_subscription(self):
         self.action.method = PubSubMethod.SUBSCRIBE
         self.action.project = 'a-project'
 
-        with self.assertRaises(InvalidSchemaDefinitionException) as execution_context:
+        with raises(InvalidSchemaDefinitionException) as execution_context:
             self.action.validate()
 
-        self.assertTrue('action.subscription'
-                        in execution_context.exception.details['missing_fields'])
+        assert ('action.subscription'
+                in execution_context.value.details['missing_fields'])
 
     @patch('os.path.exists')
     @patch('folker.module.gcp.pubsub.action.SubscriberClient')
@@ -113,9 +117,9 @@ class TestPubSubAction(TestCase):
 
         context = self.action.execute(logger, context=Context())
 
-        self.assertEqual({}, context.test_variables)
-        self.assertTrue('elapsed_time' in context.stage_variables)
-        self.assertEqual('message-id', context.stage_variables['message_id'])
+        assert {} == context.test_variables
+        assert 'elapsed_time' in context.stage_variables
+        assert 'message-id', context.stage_variables['message_id']
         MockPublisher.return_value.publish.assert_called_with(topic='topic-path',
                                                               data='Hello world'.encode())
 
@@ -140,11 +144,11 @@ class TestPubSubAction(TestCase):
 
         context = self.action.execute(logger, context=Context())
 
-        self.assertEqual({}, context.test_variables)
-        self.assertTrue('elapsed_time' in context.stage_variables)
-        self.assertEqual('ack-id', context.stage_variables['ack_id'])
-        self.assertEqual('message-id', context.stage_variables['message_id'])
-        self.assertEqual('a-message', context.stage_variables['message_content'])
+        assert {} == context.test_variables
+        assert 'elapsed_time' in context.stage_variables
+        assert 'ack-id' == context.stage_variables['ack_id']
+        assert 'message-id' == context.stage_variables['message_id']
+        assert 'a-message' == context.stage_variables['message_content']
         MockSubscriber.return_value.acknowledge.assert_called_with('subscription-path', ['ack-id'])
 
     @patch('os.path.exists')
@@ -168,9 +172,9 @@ class TestPubSubAction(TestCase):
 
         context = self.action.execute(logger, context=Context())
 
-        self.assertEqual({}, context.test_variables)
-        self.assertTrue('elapsed_time' in context.stage_variables)
-        self.assertEqual('ack-id', context.stage_variables['ack_id'])
-        self.assertEqual('message-id', context.stage_variables['message_id'])
-        self.assertEqual('a-message', context.stage_variables['message_content'])
-        self.assertFalse(MockSubscriber.return_value.acknowledge.assert_not_called())
+        assert {} == context.test_variables
+        assert 'elapsed_time' in context.stage_variables
+        assert 'ack-id' == context.stage_variables['ack_id']
+        assert 'message-id' == context.stage_variables['message_id']
+        assert 'a-message' == context.stage_variables['message_content']
+        assert not MockSubscriber.return_value.acknowledge.assert_not_called()

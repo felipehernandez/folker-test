@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod, ABC
 from copy import deepcopy
 
 from folker.logger.logger import TestLogger
@@ -7,11 +7,11 @@ from folker.model.error.load import InvalidSchemaDefinitionException
 from folker.model.stage import StageStep
 
 
-class Action(StageStep, ABC):
+class StageAction(StageStep, ABC):
     def __copy__(self):
         return deepcopy(self)
 
-    def enrich(self, template: 'Action'):
+    def enrich(self, template: 'StageAction'):
         for attribute, value in self.__dict__.items():
             self._set_attribute_if_missing(template, attribute)
 

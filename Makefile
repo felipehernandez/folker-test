@@ -6,7 +6,12 @@ install:
 		pip install -r requirements.txt
 
 test:
-	python3 -m unittest -v
+	coverage run -m pytest -vv
+	coverage report -m
+
+test-report:
+	coverage run -m pytest -vv
+	coverage html -d reports/coverage --title=report --omit="*/lib/python*"
 
 lint:
 	pylint folker

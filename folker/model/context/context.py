@@ -58,6 +58,21 @@ class Context:
     def __copy__(self):
         return deepcopy(self)
 
+    def __eq__(self, other):
+        return isinstance(other, Context) \
+               and self.secrets == other.secrets \
+               and self.test_variables == other.test_variables \
+               and self.stage_variables == other.stage_variables
+
+    def __str__(self):
+        return '{secrets}-{test_variables}-{stage_variables}' \
+            .format(secrets=str(self.secrets),
+                    test_variables=str(self.test_variables),
+                    stage_variables=str(self.stage_variables))
+
+    def __repr__(self):
+        return self.__str__()
+
     @staticmethod
     def EMPTY_CONTEXT():
         return Context({}, {}, {})
@@ -95,10 +110,6 @@ class Context:
         for key in reversed(list(variables.keys())):
             new_contexts = []
             values = variables.get(key)
-            if isinstance(values, str):
-                values = self.extract_value_from_context(values)
-                if isinstance(values, str):
-                    values = [values]
             for index, value in enumerate(values):
                 for base_context in [{**context} for context in replicated_contexts]:
                     new_contexts.append({
@@ -109,15 +120,6 @@ class Context:
             replicated_contexts = new_contexts
 
         return replicated_contexts
-
-    def extract_value_from_context(self, reference):
-        if not isinstance(reference, str):
-            return reference
-        context_value = contains_variable_reference(reference)
-        if len(context_value) == 0:
-            return reference
-
-        return self.resolve_variable_reference(context_value[0])
 
     def resolve_variable_reference(self, variable_reference: str) -> str:
         try:
@@ -163,11 +165,21 @@ class Context:
         return text, variables
 
     def save_on_test(self, variable, value):
+        self.test_variables = self._add_to_variables(context=self.test_variables,
+                                                     variable=variable,
+                                                     value=value)
+
+    def save_on_stage(self, variable, value):
+        self.stage_variables = self._add_to_variables(context=self.stage_variables,
+                                                      variable=variable,
+                                                      value=value)
+
+    def _add_to_variables(self, context, variable, value):
         variable_children = variable.split('.')
 
         if len(variable_children) == 1:
-            self.test_variables[variable] = value
-            return
+            context[variable] = value
+            return context
 
         variable_root = variable_children[0]
         variable_value = {variable_children[-1]: value}
@@ -175,12 +187,11 @@ class Context:
         for element in reversed(path):
             variable_value = {element: variable_value}
 
-        self.test_variables[variable_root] = \
-            self._merge_dictionaries(self.test_variables.get(variable_root, {}), variable_value)
+        context[variable_root] = \
+            self._merge_dictionaries(context.get(variable_root, {}), variable_value)
+        return context
 
     def _merge_dictionaries(self, stable: dict, new_values: dict):
-        if len(new_values) == 0:
-            return stable
         for k, v in new_values.items():
             if (k in stable and isinstance(stable[k], dict)
                     and isinstance(new_values[k], collections.Mapping)):
@@ -189,21 +200,5 @@ class Context:
                 stable[k] = new_values[k]
         return stable
 
-    def save_on_stage(self, variable, value):
-        variable_children = variable.split('.')
-
-        if len(variable_children) == 1:
-            self.stage_variables[variable] = value
-            return
-
-        variable_root = variable_children[0]
-        variable_value = {variable_children[-1]: value}
-        path = variable_children[1:-1]
-        for element in reversed(path):
-            variable_value = {element: variable_value}
-
-        self.stage_variables[variable_root] = \
-            self._merge_dictionaries(self.stage_variables.get(variable_root, {}), variable_value)
-
-    def end_stage(self):
+    def finalise_stage(self):
         self.stage_variables = {}

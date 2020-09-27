@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, post_load
 
-from folker.module.rest.action import RestAction
+from folker.module.rest.action import RestStageAction
 
 
 class RestActionSchema(Schema):
@@ -17,4 +17,4 @@ class RestActionSchema(Schema):
 
     @post_load
     def make_action(self, data, **kwargs):
-        return RestAction(**data)
+        return RestStageAction(**data)

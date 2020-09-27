@@ -2,11 +2,10 @@ from folker.logger.logger import TestLogger
 from folker.model.context import Context
 from folker.model.error.error import SourceException
 from folker.model.error.load import InvalidSchemaDefinitionException
-
-from folker.model.stage.action import Action
 from folker.model.stage.assertions import StageAssertions
 from folker.model.stage.log import StageLog
 from folker.model.stage.save import StageSave
+from folker.model.stage.stageaction import StageAction
 
 
 class Stage:
@@ -16,7 +15,7 @@ class Stage:
     condition: str
     foreach: dict
 
-    action: Action
+    action: StageAction
 
     save: StageSave
     log: StageLog
@@ -27,7 +26,7 @@ class Stage:
                  name: str = None,
                  condition: str = None,
                  foreach: dict = {},
-                 action: Action = None,
+                 action: StageAction = None,
                  log: [str] = None,
                  save: dict = None,
                  assertions: [str] = [],
@@ -81,12 +80,6 @@ class Stage:
                 if self.name \
                 else '{}[id].action'.format(self.id)
             raise InvalidSchemaDefinitionException(wrong_fields=[fields_message])
-        if self.save is not None:
-            self.save.validate()
-        if self.log is not None:
-            self.log.validate()
-        if self.assertions is not None:
-            self.assertions.validate()
 
     def execute(self, logger: TestLogger, context: Context):
         if self.skip_stage_execution(context):
@@ -98,6 +91,8 @@ class Stage:
             stage_context.test_variables = context.test_variables
             stage_context = self._execute(logger, stage_context)
             context.test_variables = stage_context.test_variables
+
+        context.finalise_stage()
         return context
 
     def skip_stage_execution(self, context: Context):
@@ -119,6 +114,8 @@ class Stage:
             context = self.log.execute(logger=logger, context=context)
             context = self.assertions.execute(logger=logger, context=context)
         except SourceException as e:
+            if not e.details:
+                e.details = {}
             e.details['stage'] = self
             raise e
 

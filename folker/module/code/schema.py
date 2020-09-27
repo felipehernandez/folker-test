@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, post_load
 
-from folker.module.code.action import CodeAction
+from folker.module.code.action import CodeStageAction
 
 
 class CodeActionSchema(Schema):
@@ -12,4 +12,4 @@ class CodeActionSchema(Schema):
 
     @post_load
     def make_action(self, data, **kwargs):
-        return CodeAction(**data)
+        return CodeStageAction(**data)

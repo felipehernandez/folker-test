@@ -22,7 +22,7 @@ class StageSchema(Schema):
     assertions = fields.List(cls_or_instance=fields.String, data_key='assert')
 
     @pre_load
-    def parse_id(self, in_data, **kwargs):
+    def pre_process_spec(self, in_data, **kwargs):
         if 'id' in in_data:
             id_str_value = in_data['id']
             if str(id_str_value).isdigit():

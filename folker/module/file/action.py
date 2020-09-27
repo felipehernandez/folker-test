@@ -4,8 +4,8 @@ from enum import Enum, auto
 from folker.logger import TestLogger
 from folker.model import Context
 from folker.model.error import InvalidSchemaDefinitionException
-from folker.model import Action
-from folker.decorator import timed_action, resolvable_variables, loggable
+from folker.model import StageAction
+from folker.decorator import timed_action, resolvable_variables, loggable_action
 
 
 class FileMethod(Enum):
@@ -14,7 +14,7 @@ class FileMethod(Enum):
     DELETE = auto()
 
 
-class FileAction(Action):
+class FileStageAction(StageAction):
     method: FileMethod
     file: str
     content: str
@@ -25,11 +25,10 @@ class FileAction(Action):
                  content: str = None,
                  **kargs) -> None:
         super().__init__()
-        if type:
-            try:
-                self.method = FileMethod[method]
-            except:
-                raise InvalidSchemaDefinitionException(wrong_fields=['action.method'])
+        try:
+            self.method = FileMethod[method]
+        except:
+            raise InvalidSchemaDefinitionException(wrong_fields=['action.method'])
 
         self.file = file
         self.content = content
@@ -47,7 +46,7 @@ class FileAction(Action):
 
         return missing_fields
 
-    @loggable
+    @loggable_action
     @resolvable_variables
     @timed_action
     def execute(self, logger: TestLogger, context: Context) -> Context:

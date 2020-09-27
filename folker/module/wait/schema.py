@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, post_load, pre_load
 
-from folker.module.wait.action import WaitAction
+from folker.module.wait.action import WaitStageAction
 
 
 class WaitActionSchema(Schema):
@@ -9,7 +9,7 @@ class WaitActionSchema(Schema):
     time = fields.String(strict=False)
 
     @pre_load
-    def parse_time(self, in_data, **kwargs):
+    def pre_process_spec(self, in_data, **kwargs):
         if 'time' not in in_data:
             return in_data
         in_data['time'] = str(in_data['time'])
@@ -17,4 +17,4 @@ class WaitActionSchema(Schema):
 
     @post_load
     def make_action(self, data, **kwargs):
-        return WaitAction(**data)
+        return WaitStageAction(**data)

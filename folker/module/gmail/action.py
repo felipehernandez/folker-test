@@ -9,9 +9,9 @@ from apiclient import errors
 from googleapiclient import discovery
 from oauth2client import file
 
-from folker.decorator import timed_action, resolvable_variables, loggable
+from folker.decorator import timed_action, resolvable_variables, loggable_action
 from folker.logger import TestLogger
-from folker.model import Action
+from folker.model import StageAction
 from folker.model import Context
 from folker.model.error import InvalidSchemaDefinitionException
 
@@ -20,7 +20,7 @@ class GmailMethod(Enum):
     SEND = auto()
 
 
-class GmailAction(Action):
+class GmailStageAction(StageAction):
     method: GmailMethod
     credentials_path: str
 
@@ -64,7 +64,7 @@ class GmailAction(Action):
             'subject'
         ]
 
-    @loggable
+    @loggable_action
     @resolvable_variables
     @timed_action
     def execute(self, logger: TestLogger, context: Context) -> Context:

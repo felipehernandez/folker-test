@@ -3,13 +3,13 @@ import os
 from copy import deepcopy
 from enum import Enum, auto
 
-from google.cloud import datastore
+from google.cloud.datastore import Client, Entity
 
+from folker.decorator import timed_action, resolvable_variables, loggable_action
 from folker.logger import TestLogger
 from folker.model import Context
+from folker.model import StageAction
 from folker.model.error import InvalidSchemaDefinitionException
-from folker.model import Action
-from folker.decorator import timed_action, resolvable_variables, loggable
 
 
 class DatastoreMethod(Enum):
@@ -25,7 +25,7 @@ def _divide_chunks(l, chunk_size):
         yield l[i:i + chunk_size]
 
 
-class DatastoreAction(Action):
+class DatastoreStageAction(StageAction):
     method: DatastoreMethod
 
     host: str
@@ -45,17 +45,16 @@ class DatastoreAction(Action):
                  **kargs) -> None:
         super().__init__()
 
-        if method:
-            try:
-                self.method = DatastoreMethod[method]
-            except:
-                raise InvalidSchemaDefinitionException(wrong_fields=['action.method'])
+        try:
+            self.method = DatastoreMethod[method]
+        except:
+            raise InvalidSchemaDefinitionException(wrong_fields=['action.method'])
 
         self.host = host
         self.project = project
         self.credentials_path = credentials
 
-        self.key = key
+        self.key = key if key else {}
         self.entity = entity
 
     def __copy__(self):
@@ -76,7 +75,7 @@ class DatastoreAction(Action):
                 and self.key.get('name') is None:
             missing_fields.append('action.key.id')
             missing_fields.append('action.key.name')
-        if hasattr(self, 'method') and DatastoreMethod.PUT is self.method:
+        if self.method is DatastoreMethod.PUT:
             missing_fields.extend(self._validate_put_values())
 
         return missing_fields
@@ -89,13 +88,13 @@ class DatastoreAction(Action):
 
         return missing_fields
 
-    @loggable
+    @loggable_action
     @resolvable_variables
     @timed_action
     def execute(self, logger: TestLogger, context: Context) -> Context:
         self._authenticate(logger)
 
-        datastore_client = datastore.Client(project=self.project)
+        datastore_client = Client(project=self.project)
 
         {
             DatastoreMethod.PUT: self._put,
@@ -126,7 +125,7 @@ class DatastoreAction(Action):
 
     def _put(self, logger: TestLogger, context: Context, datastore_client):
         key = self._key(datastore_client)
-        entity = datastore.Entity(key=key)
+        entity = Entity(key=key)
         entity.update(self.entity)
 
         datastore_client.put(entity)

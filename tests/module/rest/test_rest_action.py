@@ -1,18 +1,21 @@
-from unittest import TestCase
 from unittest.mock import patch, Mock
 
+import pytest
 import requests
+from pytest import raises
 
 from folker.model.context import Context
 from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.module.rest.action import RestAction, RestMethod
+from folker.module.rest.action import RestStageAction, RestMethod
 
 
-class TestRestAction(TestCase):
-    action: RestAction
+class TestRestAction:
+    action: RestStageAction
 
-    def setUp(self) -> None:
-        self.action = RestAction()
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.action = RestStageAction()
+        yield
 
     def test_validate_correct(self):
         self.action.method = RestMethod.GET
@@ -23,18 +26,18 @@ class TestRestAction(TestCase):
     def test_validate_missing_attribute_method(self):
         self.action.host = 'http://localhost:8080'
 
-        with self.assertRaises(InvalidSchemaDefinitionException) as execution_context:
+        with raises(InvalidSchemaDefinitionException) as execution_context:
             self.action.validate()
 
-        self.assertTrue('action.method' in execution_context.exception.details['missing_fields'])
+        assert 'action.method' in execution_context.value.details['missing_fields']
 
     def test_validate_missing_attribute_host(self):
         self.action.method = RestMethod.GET
 
-        with self.assertRaises(InvalidSchemaDefinitionException) as execution_context:
+        with raises(InvalidSchemaDefinitionException) as execution_context:
             self.action.validate()
 
-        self.assertTrue('action.host' in execution_context.exception.details['missing_fields'])
+        assert 'action.host' in execution_context.value.details['missing_fields']
 
     @patch.object(requests, 'get')
     def test_execution_get(self, requests_get):
@@ -52,9 +55,9 @@ class TestRestAction(TestCase):
 
         context = self.action.execute(logger, context=Context())
 
-        self.assertEqual({}, context.test_variables)
-        self.assertEqual(200, context.stage_variables['status_code'])
-        self.assertEqual({}, context.stage_variables['headers'])
-        self.assertEqual(mocked_response, context.stage_variables['response'])
-        self.assertEqual('response_text', context.stage_variables['response_text'])
-        self.assertEqual('response_json', context.stage_variables['response_json'])
+        assert {} == context.test_variables
+        assert 200 == context.stage_variables['status_code']
+        assert {} == context.stage_variables['headers']
+        assert mocked_response == context.stage_variables['response']
+        assert 'response_text' == context.stage_variables['response_text']
+        assert 'response_json' == context.stage_variables['response_json']

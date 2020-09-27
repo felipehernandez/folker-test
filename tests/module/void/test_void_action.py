@@ -1,13 +1,15 @@
-from unittest import TestCase
+import pytest
 
-from folker.module.void.action import VoidAction
+from folker.module.void.action import VoidStageAction
 
 
-class TestVoidAction(TestCase):
-    action: VoidAction
+class TestVoidAction:
+    action: VoidStageAction
 
-    def setUp(self) -> None:
-        self.action = VoidAction()
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.action = VoidStageAction()
+        yield
 
     def test_validate(self):
         # Should not throw any exception

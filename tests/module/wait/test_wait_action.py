@@ -1,22 +1,26 @@
-from unittest import TestCase
 from unittest.mock import Mock
+
+import pytest
+from pytest import raises
 
 from folker.model.context import Context
 from folker.model.error.load import InvalidSchemaDefinitionException
-from folker.module.wait.action import WaitAction
+from folker.module.wait.action import WaitStageAction
 
 
-class TestWaitAction(TestCase):
-    action: WaitAction
+class TestWaitAction:
+    action: WaitStageAction
 
-    def setUp(self) -> None:
-        self.action = WaitAction()
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.action = WaitStageAction()
+        yield
 
     def test_validate_missing_time(self):
-        with self.assertRaises(InvalidSchemaDefinitionException) as execution_context:
+        with raises(InvalidSchemaDefinitionException) as execution_context:
             self.action.validate()
 
-        self.assertTrue('action.time' in execution_context.exception.details['missing_fields'])
+        assert 'action.time' in execution_context.value.details['missing_fields']
 
     def test_validate_correct(self):
         self.action.time = 3
@@ -30,6 +34,6 @@ class TestWaitAction(TestCase):
 
         context = self.action.execute(logger, context=Context())
 
-        self.assertEqual({}, context.test_variables)
-        self.assertTrue('elapsed_time' in context.stage_variables)
-        self.assertTrue(context.stage_variables['elapsed_time'] >= 100)
+        assert {} == context.test_variables
+        assert 'elapsed_time' in context.stage_variables
+        assert context.stage_variables['elapsed_time'] >= 100

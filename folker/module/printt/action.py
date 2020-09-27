@@ -1,10 +1,10 @@
 from folker.logger import TestLogger
 from folker.model import Context
-from folker.model import Action
-from folker.decorator import timed_action, resolvable_variables, loggable
+from folker.model import StageAction
+from folker.decorator import timed_action, resolvable_variables, loggable_action
 
 
-class PrintAction(Action):
+class PrintStageAction(StageAction):
     message: str
 
     def __init__(self, message: str = None, **kargs) -> None:
@@ -16,7 +16,7 @@ class PrintAction(Action):
             'message'
         ]
 
-    @loggable
+    @loggable_action
     @resolvable_variables
     @timed_action
     def execute(self, logger: TestLogger, context: Context) -> Context:

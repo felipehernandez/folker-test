@@ -7,8 +7,8 @@ from google.protobuf.json_format import MessageToJson, MessageToDict
 from folker.logger import TestLogger
 from folker.model import Context
 from folker.model.error import InvalidSchemaDefinitionException
-from folker.model import Action
-from folker.decorator import timed_action, resolvable_variables, loggable
+from folker.model import StageAction
+from folker.decorator import timed_action, resolvable_variables, loggable_action
 
 
 class ProtobufMethod(Enum):
@@ -16,7 +16,7 @@ class ProtobufMethod(Enum):
     CREATE = auto()
 
 
-class ProtobufAction(Action):
+class ProtobufStageAction(StageAction):
     method: ProtobufMethod
     package: str
     clazz: str
@@ -64,7 +64,7 @@ class ProtobufAction(Action):
 
         return missing_fields
 
-    @loggable
+    @loggable_action
     @resolvable_variables
     @timed_action
     def execute(self, logger: TestLogger, context: Context) -> Context:

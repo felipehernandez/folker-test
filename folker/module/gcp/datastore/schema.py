@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, post_load
 
-from folker.module.gcp.datastore.action import DatastoreAction
+from folker.module.gcp.datastore.action import DatastoreStageAction
 
 
 class DatastoreActionSchema(Schema):
@@ -16,4 +16,4 @@ class DatastoreActionSchema(Schema):
 
     @post_load
     def make_action(self, data, **kwargs):
-        return DatastoreAction(**data)
+        return DatastoreStageAction(**data)

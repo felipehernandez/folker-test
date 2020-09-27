@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, post_load
 
-from folker.module.printt.action import PrintAction
+from folker.module.printt.action import PrintStageAction
 
 
 class PrintActionSchema(Schema):
@@ -10,4 +10,4 @@ class PrintActionSchema(Schema):
 
     @post_load
     def make_action(self, data, **kwargs):
-        return PrintAction(**data)
+        return PrintStageAction(**data)

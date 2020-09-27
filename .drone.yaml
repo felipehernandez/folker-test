@@ -6,7 +6,8 @@ steps:
     image: python:3.8-slim
     commands:
       - pip install -r requirements.txt
-      - python3 -m unittest -v
+      - coverage run -m pytest -vv
+      - coverage report -m
 
   - name: integration-test
     image: python:3.8-slim
@@ -23,7 +24,7 @@ steps:
       - cp -a ./example/credentials/* /credentials
       - cd /
       - sleep 5 # time for mockserver to start
-      - python3 folker.py -p test-profile -n 27 --trace
+      - python3 folker.py -p test-profile -n 28 --trace
       - python3 folker.py -t dummy -t print -n 2 --trace
       - python3 folker.py -t dummy -t print --trace
 
