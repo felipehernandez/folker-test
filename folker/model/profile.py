@@ -10,5 +10,5 @@ class Profile:
                  **kwargs) -> None:
         super().__init__()
         self.name = name
-        self.context = context
-        self.secrets = secrets
+        self.context = context if context else {}
+        self.secrets = secrets if secrets else {}
