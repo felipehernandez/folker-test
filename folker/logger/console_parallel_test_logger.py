@@ -13,11 +13,13 @@ class ConsoleParallelTestLogger(ConsoleTestLogger):
     def test_finish(self):
         self._log(self.COLOR_GREEN, 'Test successful')
         print(self.report)
+        self.report = ''
 
     def test_finish_error(self, e: SourceException):
         self._log(self.COLOR_RED, 'Test unsuccessful')
         self._log(self.COLOR_RED, e)
         print(self.report)
+        self.report = ''
 
     # Util
     def _log(self, color, text, end=None):
