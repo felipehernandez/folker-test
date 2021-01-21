@@ -38,7 +38,7 @@ steps:
       repo: folkertest/folkertest
       tags:
         - beta
-        - "0.3.${DRONE_BUILD_NUMBER}"
+        - "1.0.${DRONE_BUILD_NUMBER}"
     when:
       branch:
         - development
@@ -54,7 +54,7 @@ steps:
       repo: folkertest/folkertest
       tags:
         - latest
-        - "0.3.${DRONE_BUILD_NUMBER}"
+        - "1.0.${DRONE_BUILD_NUMBER}"
     when:
       branch:
         - master
