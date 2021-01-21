@@ -54,6 +54,7 @@ steps:
       branch:
         - master
         - release
+        - support/0.2
       event: push
 
 services:
