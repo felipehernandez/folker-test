@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, post_load, pre_load
 
-from folker.module.postgres.action import PostgresAction
+from folker.module.postgres.action import PostgresStageAction
 
 
 class PostgresActionSchema(Schema):
@@ -23,4 +23,4 @@ class PostgresActionSchema(Schema):
 
     @post_load
     def make_action(self, data, **kwargs):
-        return PostgresAction(**data)
+        return PostgresStageAction(**data)

@@ -1,0 +1,33 @@
+name: File Test
+description: Dummy Test for File Stage
+tags:
+  - dummy
+  - file
+
+stages:
+  - name: setup
+    action:
+      type: VOID
+    save:
+      message: Hello world!
+
+  - name: write file
+    action:
+      type: FILE
+      method: WRITE
+      file: asd.txt
+      content: ${message}
+
+  - name: read file
+    action:
+      type: FILE
+      method: READ
+      file: asd.txt
+    assert:
+      - ${content} == 'Hello world!'
+
+  - name: delete file
+    action:
+      type: FILE
+      method: DELETE
+      file: asd.txt

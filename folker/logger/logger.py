@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
-from folker.model.error.error import SourceException
+from folker.model import Context
+from folker.model.error import SourceException
 
 
 class ColorLogger(ABC):
@@ -44,14 +45,19 @@ class FileLogger(ABC):
         self.report = []
 
     # Util
+    def _delayed_log(self, text, end=None):
+        self.report.append(text + (end if end else '\n'))
+
     def _log(self, text, end=None):
         self.report.append(text + (end if end else '\n'))
+        self._write_to_file()
 
     def _write_to_file(self):
         f = open(self.file_name, 'a+')
         for report_entry in self.report:
             f.write(report_entry)
         f.close()
+        self.report = []
 
 
 class SystemLogger(ABC):
@@ -86,7 +92,8 @@ class SystemLogger(ABC):
     def loading_proto_file(self, filename): pass
 
     @abstractmethod
-    def loading_proto_file_error(self, file_name: str, proto_command: str, exception: Exception): pass
+    def loading_proto_file_error(self, file_name: str, proto_command: str, exception: Exception):
+        pass
 
     @abstractmethod
     def loading_proto_files_completed(self, files): pass
@@ -94,6 +101,9 @@ class SystemLogger(ABC):
     # Wrap up
     @abstractmethod
     def assert_execution_result(self, total, success, failures): pass
+
+    @abstractmethod
+    def assert_number_tests_executed(self, expected: int, executed: int): pass
 
 
 class TestLogger(ABC):
@@ -110,17 +120,26 @@ class TestLogger(ABC):
 
     # Stage
     @abstractmethod
-    def stage_start(self, stage_name: str, test_context: dict, stage_context: dict): pass
+    def stage_start(self, stage_name: str, context: Context): pass
+
+    @abstractmethod
+    def stage_skip(self, stage_name: str, context: Context): pass
 
     # Action
     @abstractmethod
-    def action_executed(self, stage_context: dict): pass
+    def action_prelude(self, action: dict, context: Context): pass
+
+    @abstractmethod
+    def action_conclusion(self, action: dict, context: Context): pass
 
     @abstractmethod
     def message(self, message): pass
 
     @abstractmethod
     def action_error(self, message): pass
+
+    @abstractmethod
+    def action_warn(self, message): pass
 
     @abstractmethod
     def action_debug(self, message): pass

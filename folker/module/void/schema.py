@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, post_load
 
-from folker.module.void.action import VoidAction
+from folker.module.void.action import VoidStageAction
 
 
 class VoidActionSchema(Schema):
@@ -8,4 +8,4 @@ class VoidActionSchema(Schema):
 
     @post_load
     def make_action(self, data, **kwargs):
-        return VoidAction(**data)
+        return VoidStageAction(**data)

@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, post_load
 
-from folker.module.protobuf.action import ProtobufAction
+from folker.module.protobuf.action import ProtobufStageAction
 
 
 class ProtobufActionSchema(Schema):
@@ -14,4 +14,4 @@ class ProtobufActionSchema(Schema):
 
     @post_load
     def make_action(self, data, **kwargs):
-        return ProtobufAction(**data)
+        return ProtobufStageAction(**data)

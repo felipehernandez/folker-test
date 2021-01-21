@@ -1,0 +1,19 @@
+name: Void as default action Test
+description: Dummy Test for Void Stage as default Action
+tags:
+  - dummy
+  - void
+
+stages:
+  - name: void_stage
+    save:
+      test: 'passing'
+    log:
+      - 'Hello world'
+
+  - name: void_stage2
+    log:
+      - ${test}
+    assert:
+      - '1+1 == 2'
+      - ${test} == 'passing'

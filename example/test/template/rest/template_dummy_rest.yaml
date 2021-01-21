@@ -1,0 +1,26 @@
+id: simple_rest_template
+description: Dummy REST template
+
+stages:
+  - id: rest_stage_reference
+    name: Setup mockserver GET
+    action:
+      type: REST
+      method: PUT
+      host: ${mockserver_host}
+      uri: expectation
+      headers:
+        Content-Type: application/json
+      json:
+        httpRequest:
+          method: GET
+          path: /asdGET
+        httpResponse:
+          statusCode: 200
+          headers:
+            - name: content-type
+              values:
+                - application/json
+          body: "{\"method\":\"asdGET\"}"
+    assert:
+      - ${status_code} == 201

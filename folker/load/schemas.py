@@ -1,7 +1,8 @@
 from marshmallow import Schema, fields, post_load, pre_load
 from marshmallow_oneofschema import OneOfSchema
 
-from folker.model.entity import Test, Stage, Profile
+from folker.model import Profile
+from folker.model import Test, Stage
 
 
 class ActionSchema(OneOfSchema):
@@ -12,19 +13,24 @@ class StageSchema(Schema):
     id = fields.String()
     name = fields.String()
 
+    condition = fields.String(data_key='if')
     foreach = fields.Mapping()
+
     action = fields.Nested(ActionSchema)
     save = fields.Mapping()
     log = fields.List(fields.String())
     assertions = fields.List(cls_or_instance=fields.String, data_key='assert')
 
     @pre_load
-    def parse_id(self, in_data, **kwargs):
-        if 'id' not in in_data:
-            return in_data
-        id_str_value = in_data['id']
-        if str(id_str_value).isdigit():
-            in_data['id'] = str(id_str_value)
+    def pre_process_spec(self, in_data, **kwargs):
+        if 'id' in in_data:
+            id_str_value = in_data['id']
+            if str(id_str_value).isdigit():
+                in_data['id'] = str(id_str_value)
+
+        if 'action' not in in_data:
+            in_data['action'] = {'type': 'VOID'}
+
         return in_data
 
     @post_load
@@ -53,6 +59,7 @@ class TestSchema(Schema):
 class ProfileSchema(Schema):
     name = fields.String()
     context = fields.Mapping()
+    secrets = fields.Mapping()
 
     @post_load
     def make_profile(self, data, **kwargs):
