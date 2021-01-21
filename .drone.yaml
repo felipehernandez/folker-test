@@ -38,7 +38,8 @@ steps:
       repo: folkertest/folkertest
       tags:
         - beta
-        - "1.0.${DRONE_BUILD_NUMBER}"
+        - "1.0-beta"
+        - "1.0.${DRONE_BUILD_NUMBER}-beta"
     when:
       branch:
         - development
@@ -54,10 +55,11 @@ steps:
       repo: folkertest/folkertest
       tags:
         - latest
+        - "1.0"
         - "1.0.${DRONE_BUILD_NUMBER}"
     when:
       branch:
-        - master
+        - main
         - release
       event: push
 
