@@ -1,16 +1,19 @@
-from folker.executor.parallel_executor import ParallelExecutor
-from folker.executor.sequential_executor import SequentialExecutor
-from folker.load.files import load_test_files, load_and_initialize_template_files, load_profile_files
+from folker.executor import ParallelExecutor
+from folker.executor import SequentialExecutor
+from folker.load.files import load_test_files, \
+    load_and_initialize_template_files, \
+    load_profile_files
 from folker.load.protos import generate_protos
 from folker.logger import logger_factory
-from folker.model.entity import Test
-from folker.model.error.folker import TestSuiteResultException, TestSuiteNumberExecutionsException
-from folker.util.parameters import load_command_arguments, parameterised_tags, parameterised_number_of_tests
+from folker.model import Test
+from folker.model.error import TestSuiteResultException, TestSuiteNumberExecutionsException
+from folker.parameters import parameterised_tags, \
+    parameterised_number_of_tests, \
+    parameterised
 
 
-def run():
-    load_command_arguments()
-
+@parameterised
+def run(*args, **kargs):
     logger = logger_factory.build_system_logger()
 
     generate_protos(logger)
@@ -34,10 +37,11 @@ def run():
                              cumulative_success=success)
 
     logger.assert_execution_result(executed, sorted(success), sorted(failures))
-    if len(success) is not executed:
-        raise TestSuiteResultException(failures)
     expected_number_of_tests = parameterised_number_of_tests()
-    if expected_number_of_tests and expected_number_of_tests is executed:
+    logger.assert_number_tests_executed(expected_number_of_tests, executed)
+    if len(success) != executed:
+        raise TestSuiteResultException(failures)
+    if expected_number_of_tests and int(expected_number_of_tests) != executed:
         raise TestSuiteNumberExecutionsException(expected_number_of_tests, executed)
 
 

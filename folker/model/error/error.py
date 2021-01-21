@@ -19,7 +19,8 @@ class SourceException(Exception):
     def __str__(self) -> str:
         formatted_details = ''
         for detail in self.details:
-            formatted_details = formatted_details + '\n\t{}: {}'.format(detail, self.details.get(detail).__str__())
+            formatted_details = formatted_details + \
+                                '\n\t{}: {}'.format(detail, self.details.get(detail).__str__())
 
         return '{error} / {cause}\nDetails: {details}'.format(error=self.error,
                                                               cause=self.cause,

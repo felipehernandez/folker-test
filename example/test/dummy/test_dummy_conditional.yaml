@@ -1,0 +1,24 @@
+name: Conditional stage Test
+description: Dummy Test for Void Stage
+tags:
+  - dummy
+  - void
+  - conditional
+
+stages:
+  - name: setup
+    save:
+      value: 1
+
+  - name: conditional stage
+    if: ${value} < 1
+    save:
+      value: ${value} + 1
+
+  - name: normal stage
+    save:
+      value: ${value} + 1
+
+  - name: assertions
+    assert:
+      - ${value} == 2

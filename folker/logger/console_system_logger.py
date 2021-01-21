@@ -1,5 +1,6 @@
-from folker import is_debug, is_trace
-from folker.logger.logger import ColorLogger, SystemLogger
+from folker.logger import SystemLogger
+from folker.logger.logger import ColorLogger
+from folker.parameters import is_debug, is_trace
 
 
 class ConsoleSystemLogger(SystemLogger, ColorLogger):
@@ -22,7 +23,8 @@ class ConsoleSystemLogger(SystemLogger, ColorLogger):
             self._log(self.COLOR_HIGH_YELLOW, 'File: {filename}'.format(filename=filename))
 
     def loading_file_error(self, file_name: str, exception: Exception):
-        self._log(self.COLOR_HIGH_RED, 'Error loading file {}: {}'.format(file_name, str(exception)))
+        self._log(self.COLOR_HIGH_RED, 'Error loading file {}: {}'.format(file_name,
+                                                                          str(exception)))
 
     def loading_files_completed(self, files):
         if is_debug():
@@ -45,7 +47,10 @@ class ConsoleSystemLogger(SystemLogger, ColorLogger):
             self._log(self.COLOR_GREY, 'Skipped Proto file: {filename}'.format(filename=filename))
 
     def loading_proto_file_error(self, file_name: str, proto_command: str, exception: Exception):
-        self._log(self.COLOR_HIGH_RED, 'Error loading proto file {} [{}]: {}'.format(file_name, proto_command, str(exception)))
+        self._log(self.COLOR_HIGH_RED,
+                  'Error loading proto file {} [{}]: {}'.format(file_name,
+                                                                proto_command,
+                                                                str(exception)))
 
     def loading_proto_files_completed(self, files):
         if is_debug():
@@ -56,15 +61,22 @@ class ConsoleSystemLogger(SystemLogger, ColorLogger):
 
     # Wrap up
     def assert_execution_result(self, total, success, failures):
-        self._log(self.COLOR_HIGH_CYAN, '\n#################################################################################################')
+        self._log(self.COLOR_HIGH_CYAN, '\n' + '#' * 100)
         self._log(self.COLOR_HIGH_CYAN, 'RESULTS:')
         print_color = self.COLOR_HIGH_GREEN if len(success) is total else self.COLOR_HIGH_RED
-        self._log(print_color, 'Tests: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(len(success), len(failures), total))
+        self._log(print_color,
+                  'Tests: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(len(success),
+                                                                       len(failures),
+                                                                       total))
 
         for passed in success:
             self._log(self.COLOR_GREEN, '\t{}'.format(passed))
         for fail in failures:
             self._log(self.COLOR_RED, '\t{}'.format(fail))
+
+    def assert_number_tests_executed(self, expected: int, executed: int):
+        if expected and int(expected) != executed:
+            self._log(self.COLOR_RED, 'Expected: {} - Executed: {}'.format(expected, executed))
 
     # Util
     def _log(self, color, text, end=None):

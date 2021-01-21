@@ -1,0 +1,15 @@
+name: Templated test
+description: Templated test
+tags:
+  - template
+  - dummy
+
+stages:
+  - id: print_stage_reference
+
+  - name: print_stage
+    action:
+      type: PRINT
+      message: Hello world again!
+    assert:
+      - "${variable} == 2"

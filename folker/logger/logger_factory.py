@@ -6,7 +6,7 @@ from folker.logger.console_system_logger import ConsoleSystemLogger
 from folker.logger.file_parallel_test_logger import FileParallelTestLogger
 from folker.logger.file_sequential_test_logger import FileSequentialTestLogger
 from folker.logger.file_system_logger import FileSystemLogger
-from folker.util.parameters import log_to_file
+from folker.parameters import log_to_file
 
 
 class LoggerType(Enum):

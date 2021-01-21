@@ -1,0 +1,8 @@
+name: test-profile
+
+context:
+  variable1: value1
+  variable2: value2
+
+secrets:
+  secret1: secret_1_value

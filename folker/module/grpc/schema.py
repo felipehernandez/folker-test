@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, post_load
 
-from folker.module.grpc.action import GrpcAction
+from folker.module.grpc.action import GrpcStageAction
 
 
 class GrpcActionSchema(Schema):
@@ -16,4 +16,4 @@ class GrpcActionSchema(Schema):
 
     @post_load
     def make_action(self, data, **kwargs):
-        return GrpcAction(**data)
+        return GrpcStageAction(**data)

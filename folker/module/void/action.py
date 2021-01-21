@@ -1,22 +1,19 @@
-from copy import deepcopy
+from folker.logger import TestLogger
+from folker.model import Context
+from folker.model import StageAction
+from folker.decorator import timed_action, loggable_action, resolvable_variables
 
-from folker.logger.logger import TestLogger
-from folker.model.entity import Action
 
-
-class VoidAction(Action):
+class VoidStageAction(StageAction):
 
     def __init__(self, **kargs) -> None:
         super().__init__()
 
-    def enrich(self, template: 'VoidAction'):
-        pass
+    def mandatory_fields(self) -> [str]:
+        return []
 
-    def validate(self):
-        pass
-
-    def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
-        return test_context, stage_context
-
-    def __copy__(self):
-        return deepcopy(self)
+    @loggable_action
+    @resolvable_variables
+    @timed_action
+    def execute(self, logger: TestLogger, context: Context) -> Context:
+        return context
