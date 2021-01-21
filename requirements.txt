@@ -2,7 +2,7 @@ certifi==2020.4.5.1
 chardet==3.0.4
 click==7.1.2
 coverage
-google==2.0.3
+google==3.0.0
 google-api-python-client~=1.12.1
 google-auth-httplib2
 google-auth-oauthlib
