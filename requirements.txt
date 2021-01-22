@@ -22,4 +22,4 @@ pyopenssl
 pytest
 pytest-mock
 PyYAML==5.4.1
-requests==2.23.0
+requests==2.25.1
