@@ -4,14 +4,13 @@ from copy import deepcopy
 from enum import Enum, auto
 
 import grpc
-from google.cloud.pubsub_v1 import PublisherClient, SubscriberClient
-from google.cloud.pubsub_v1.proto.pubsub_pb2 import PubsubMessage
+from google.cloud.pubsub import PublisherClient, SubscriberClient
 
+from folker.decorator import timed_action, resolvable_variables, loggable_action
 from folker.logger import TestLogger
 from folker.model import Context
-from folker.model.error import InvalidSchemaDefinitionException
 from folker.model import StageAction
-from folker.decorator import timed_action, resolvable_variables, loggable_action
+from folker.model.error import InvalidSchemaDefinitionException
 
 
 class PubSubMethod(Enum):
@@ -105,7 +104,6 @@ class PubSubStageAction(StageAction):
     @timed_action
     def execute(self, logger: TestLogger, context: Context) -> Context:
         self._authenticate()
-
         {
             PubSubMethod.PUBLISH: self._publish,
             PubSubMethod.SUBSCRIBE: self._subscribe,
@@ -136,10 +134,10 @@ class PubSubStageAction(StageAction):
         subscription_path = self.subscriber.subscription_path(self.project, self.subscription)
 
         self._log_debug(logger, subscription=subscription_path, ack=self.ack)
-        response = self.subscriber.pull(subscription=subscription_path, max_messages=1)
+        response = self.subscriber.pull(request={"subscription": subscription_path,
+                                                 "max_messages": 1})
 
         for message in response.received_messages:
-            message: PubsubMessage
             context.save_on_stage('ack_id', message.ack_id)
             context.save_on_stage('message_id', message.message.message_id)
             context.save_on_stage('publish_time', message.message.publish_time)
@@ -147,15 +145,16 @@ class PubSubStageAction(StageAction):
             context.save_on_stage('message_content', message.message.data.decode('UTF-8'))
 
             if self.ack:
-                self.subscriber.acknowledge(subscription_path, [message.ack_id])
+                self.subscriber.acknowledge(request={"subscription": subscription_path,
+                                                     "ack_ids": [message.ack_id]})
 
     def _topics(self, logger: TestLogger, context: Context):
         self.publisher = PublisherClient(channel=grpc.insecure_channel(target=self.host)) \
             if self.host \
             else PublisherClient()
 
-        project_path = self.publisher.project_path(self.project)
-        topics = self.publisher.list_topics(project_path)
+        project_path = 'projects/{project_id}'.format(project_id=self.project)
+        topics = self.publisher.list_topics(project=project_path)
 
         topic_prefix = project_path + '/topics/'
         prefix_len = len(topic_prefix)
@@ -166,9 +165,8 @@ class PubSubStageAction(StageAction):
             if self.host \
             else SubscriberClient()
 
-        project = self.project
-        project_path = self.subscriber.project_path(project)
-        subscriptions = self.subscriber.list_subscriptions(project_path)
+        project_path = 'projects/{project_id}'.format(project_id=self.project)
+        subscriptions = self.subscriber.list_subscriptions(project=project_path)
 
         subscription_prefix = project_path + '/subscriptions/'
         context.save_on_stage('subscriptions',

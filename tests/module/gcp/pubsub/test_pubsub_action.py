@@ -149,7 +149,8 @@ class TestPubSubAction:
         assert 'ack-id' == context.stage_variables['ack_id']
         assert 'message-id' == context.stage_variables['message_id']
         assert 'a-message' == context.stage_variables['message_content']
-        MockSubscriber.return_value.acknowledge.assert_called_with('subscription-path', ['ack-id'])
+        MockSubscriber.return_value.acknowledge.assert_called_with(
+            request={"subscription": 'subscription-path', "ack_ids": ['ack-id']})
 
     @patch('os.path.exists')
     @patch('folker.module.gcp.pubsub.action.SubscriberClient')
