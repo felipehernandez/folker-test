@@ -17,9 +17,9 @@ stages:
     log:
       - ${elapsed_time}
       - ${proto_object}
-      - ${proto_serialize}
+      - ${proto_serialize_utf8}
     save:
-      proto_serialize: ${proto_serialize}
+      proto_serialize: ${proto_serialize_utf8}
 
   - name: protobuf_load_stage
     action:
