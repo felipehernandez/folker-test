@@ -121,7 +121,7 @@ class TestPubSubAction:
         assert 'elapsed_time' in context.stage_variables
         assert 'message-id', context.stage_variables['message_id']
         MockPublisher.return_value.publish.assert_called_with(topic='topic-path',
-                                                              data='Hello world'.encode())
+                                                              data='Hello world')
 
     @patch('os.path.exists')
     @patch('folker.module.gcp.pubsub.action.SubscriberClient')
