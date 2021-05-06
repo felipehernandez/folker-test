@@ -3,7 +3,7 @@ chardet==4.0.0
 click==7.1.2
 coverage
 google==3.0.0
-google-api-python-client~=1.12.1
+google-api-python-client==2.3.0
 google-auth-httplib2
 google-auth-oauthlib
 google-cloud-pubsub==2.2.0
