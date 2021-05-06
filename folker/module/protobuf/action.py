@@ -4,11 +4,11 @@ from enum import Enum, auto
 from google.protobuf import json_format
 from google.protobuf.json_format import MessageToJson, MessageToDict
 
+from folker.decorator import timed_action, resolvable_variables, loggable_action
 from folker.logger import TestLogger
 from folker.model import Context
-from folker.model.error import InvalidSchemaDefinitionException
 from folker.model import StageAction
-from folker.decorator import timed_action, resolvable_variables, loggable_action
+from folker.model.error import InvalidSchemaDefinitionException
 
 
 class ProtobufMethod(Enum):
@@ -88,7 +88,20 @@ class ProtobufStageAction(StageAction):
                                           ignore_unknown_fields=False)
 
         context.save_on_stage('proto_object', parsed_object)
-        context.save_on_stage('proto_serialize', str(parsed_object.SerializeToString(), 'utf-8'))
+        try:
+            context.save_on_stage('proto_serialize_str', parsed_object.SerializeToString())
+        except:
+            context.save_on_stage('proto_serialize_str', '')
+        try:
+            context.save_on_stage('proto_serialize_json',
+                                  str(MessageToJson(parsed_object)).encode("utf-8"))
+        except:
+            context.save_on_stage('proto_serialize_json', '')
+        try:
+            context.save_on_stage('proto_serialize_utf8',
+                                  str(parsed_object.SerializeToString(), 'utf-8'))
+        except:
+            context.save_on_stage('proto_serialize_utf8', '')
 
     def _load(self, context: Context):
         proto_package = self.package
