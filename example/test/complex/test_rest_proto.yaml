@@ -31,7 +31,7 @@ stages:
         firstName: Test
         lastName: ing
     save:
-      serialised_request: ${proto_serialize}
+      serialised_request: ${proto_serialize_utf8}
 
   - name: Setup mockserver
     action:

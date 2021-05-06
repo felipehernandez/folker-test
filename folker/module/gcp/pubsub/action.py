@@ -121,8 +121,8 @@ class PubSubStageAction(StageAction):
         topic_path = self.publisher.topic_path(self.project, self.topic)
         attributes = self.attributes if self.attributes else {}
 
-        self._log_debug(logger, topic=topic_path, attributes=attributes, message=self.message)
-        future = self.publisher.publish(topic=topic_path, data=self.message.encode(), **attributes)
+        self._log_debug(logger, topic=topic_path, attributes=attributes, message=str(self.message))
+        future = self.publisher.publish(topic=topic_path, data=self.message, **attributes)
 
         context.save_on_stage('message_id', future.result())
 
