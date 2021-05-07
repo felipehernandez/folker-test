@@ -17,7 +17,7 @@ stages:
     save:
       host: grpc-test-server:8682
       request: ${proto_object}
-      serialised_request: ${proto_serialize}
+      serialised_request: ${proto_serialize_utf8}
 
   - name: call server single
     action:
