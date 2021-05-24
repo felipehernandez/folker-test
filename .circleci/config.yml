@@ -39,6 +39,8 @@ jobs:
   build-docker-image:
     executor: docker-builder
     steps:
+      - attach_workspace:
+          at: .
       - setup_remote_docker
       - run:
           name: Build Docker image
