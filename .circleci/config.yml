@@ -32,8 +32,41 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - .
+            - ./
+      - run:
+          name: Build Docker image
+          command: |
+            docker build -t folkertest:1.1.<<pipeline.number>> .
+      - run:
+          name: Archive Docker image
+          command: docker save -o folkertest.tar folkertest
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./folkertest.tar
+
+  setup-integration-tests-environment:
+    machine: true # Linux VM instead of docker environment
+    steps:
+      - run:
+          name: Create network
+          command: |
+            docker network create integration-test-network
+      - run:
+          name: startup mockserver
+          command: |
+            docker run --network integration-test-network \
+            -d \
+            --name mockserver \
+            mockserver/mockserver:latest
+
+  run-integration-tests:
+
+
 workflows:
   main:
     jobs:
       - build
+      - setup-integration-tests-environment
+      - run-integration-tests
+      -
