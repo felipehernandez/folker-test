@@ -61,7 +61,22 @@ jobs:
             mockserver/mockserver:latest
 
   run-integration-tests:
+    machine: true # Linux VM instead of docker environment
+        steps:
+          - run:
+              name: Run int tests
+              command: |
+                echo "integration tests"
 
+  terminate-integration-tests-environment:
+    machine: true # Linux VM instead of docker environment
+      steps:
+          - run:
+              name: Terminate mockserver
+              command: docker stop mockserver
+          - run:
+              name: Terminate network
+              command: docker network rm integration-test-network
 
 workflows:
   main:
@@ -69,4 +84,4 @@ workflows:
       - build
       - setup-integration-tests-environment
       - run-integration-tests
-      -
+      - terminate-integration-tests-environment
