@@ -33,6 +33,11 @@ jobs:
           root: .
           paths:
             - ./
+
+  build-docker-image:
+    image: circleci/buildpack-deps:stretch
+    steps:
+      - setup_remote_docker
       - run:
           name: Build Docker image
           command: |
@@ -82,9 +87,13 @@ workflows:
   main:
     jobs:
       - build
+      - build-docker-image:
+          requires:
+            - build
       - setup-integration-tests-environment:
           requires:
             - build
+            - build-docker-image
       - run-integration-tests:
           requires:
             - setup-integration-tests-environment
