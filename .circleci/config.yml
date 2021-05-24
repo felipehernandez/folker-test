@@ -21,11 +21,14 @@ jobs:
       - run:
           name: Test
           command: |
-            coverage run -m pytest -vv --junitxml=test-results/junit.xml
+            coverage run -m pytest -vv --junitxml
             coverage report -m
+            coverage xml -o codecoverage/coverage.xml
             coverage html
+      - store_test_results:
+          path: codecoverage
       - store_artifacts:
-          path: htmlcov
+          path: codecoverage
       - persist_to_workspace:
           root: .
           paths:
