@@ -4,10 +4,12 @@ orbs:
   python: circleci/python@1.4.0
 
 executors:
+  docker-builder:
+    docker:
+      - image: circleci/buildpack-deps:stretch
   docker-publisher:
     docker:
       - image: circleci/buildpack-deps:stretch
-
 jobs:
   build:
     executor: python/default
@@ -35,7 +37,7 @@ jobs:
             - ./
 
   build-docker-image:
-    image: circleci/buildpack-deps:stretch
+    executor: docker-builder
     steps:
       - setup_remote_docker
       - run:
