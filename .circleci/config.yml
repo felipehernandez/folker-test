@@ -21,7 +21,7 @@ jobs:
       - run:
           name: Test
           command: |
-            coverage run -m pytest -vv --junitxml
+            coverage run -m pytest -vv --junitxml unittests.xml
             coverage report -m
             coverage xml -o codecoverage/coverage.xml
             coverage html
