@@ -82,12 +82,12 @@ workflows:
   main:
     jobs:
       - build
-      - setup-integration-tests-environment
+      - setup-integration-tests-environment:
           requires:
             - build
-      - run-integration-tests
+      - run-integration-tests:
           requires:
             - setup-integration-tests-environment
-      - terminate-integration-tests-environment
+      - terminate-integration-tests-environment:
           requires:
             - run-integration-tests
