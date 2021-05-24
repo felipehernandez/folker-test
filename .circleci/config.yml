@@ -11,23 +11,23 @@ executors:
 jobs:
   build:
     executor: python/default
-      steps:
-        - checkout
-        - python/install-packages:
-            pkg-manager: pip
-        - python/install-packages:
-            pkg-manager: pip
-            pip-dependency-file: requirements.txt
-        - run:
-            name: Test
-            command: coverage run -m pytest -vv
-        - run:
-            name: Coverage report
-            command: coverage report -m
-        - persist_to_workspace:
-            root: .
-            paths:
-              - .
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip
+      - python/install-packages:
+          pkg-manager: pip
+          pip-dependency-file: requirements.txt
+      - run:
+          name: Test
+          command: coverage run -m pytest -vv
+      - run:
+          name: Coverage report
+          command: coverage report -m
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
 workflows:
   main:
     jobs:
