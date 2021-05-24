@@ -1,0 +1,34 @@
+version: 2.1
+
+orbs:
+  python: circleci/python@1.4.0
+
+executors:
+  docker-publisher:
+    docker:
+      - image: circleci/buildpack-deps:stretch
+
+jobs:
+  build:
+    executor: python/default
+      steps:
+        - checkout
+        - python/install-packages:
+            pkg-manager: pip
+        - python/install-packages:
+            pkg-manager: pip
+            pip-dependency-file: requirements.txt
+        - run:
+            name: Test
+            command: coverage run -m pytest -vv
+        - run:
+            name: Coverage report
+            command: coverage report -m
+        - persist_to_workspace:
+            root: .
+            paths:
+              - .
+workflows:
+  main:
+    jobs:
+      - build
