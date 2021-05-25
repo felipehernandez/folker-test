@@ -66,9 +66,9 @@ jobs:
       - run: docker-compose up -d graphql-test-server
       - run: docker-compose up -d postgres-server
 
-      - run: docker-compose up integration-test1
-      - run: docker-compose up integration-test2
-      - run: docker-compose up integration-test3
+      - run: docker-compose up integration-tests-1
+      - run: docker-compose up integration-tests-2
+      - run: docker-compose up integration-tests-3
 
       - run: docker-compose down mockserver
       - run: docker-compose down gcp-pubsub-emulator
