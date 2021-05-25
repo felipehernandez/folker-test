@@ -54,7 +54,31 @@ jobs:
           paths:
             - ./folkertest.tar
 
-  setup-integration-tests-environment:
+  integration-tests:
+    machine: true # Linux VM instead of docker environment
+    steps:
+      - attach_workspace:
+          at: .
+      - setup_remote_docker
+      - run: docker compose up --detach mockserver
+      - run: docker compose up --detach gcp-pubsub-emulator
+      - run: docker compose up --detach gcp-datastore-emulator
+      - run: docker compose up --detach grpc-test-server
+      - run: docker compose up --detach graphql-test-server
+      - run: docker compose up --detach postgres-server
+
+      - run docker compose up integration-test1
+      - run docker compose up integration-test2
+      - run docker compose up integration-test3
+
+      - run: docker compose down mockserver
+      - run: docker compose down gcp-pubsub-emulator
+      - run: docker compose down gcp-datastore-emulator
+      - run: docker compose down grpc-test-server
+      - run: docker compose down graphql-test-server
+      - run: docker compose down postgres-server
+
+  integration-tests2:
     machine: true # Linux VM instead of docker environment
     steps:
       - run:
@@ -68,24 +92,16 @@ jobs:
             -d \
             --name mockserver \
             mockserver/mockserver:latest
-
-  run-integration-tests:
-    machine: true # Linux VM instead of docker environment
-    steps:
       - run:
           name: Run int tests
           command: |
             echo "integration tests"
-
-  terminate-integration-tests-environment:
-    machine: true # Linux VM instead of docker environment
-    steps:
-        - run:
-            name: Terminate mockserver
-            command: docker stop mockserver
-        - run:
-            name: Terminate network
-            command: docker network rm integration-test-network
+      - run:
+          name: Terminate mockserver
+          command: docker stop mockserver
+      - run:
+          name: Terminate network
+          command: docker network rm integration-test-network
 
 workflows:
   main:
@@ -94,13 +110,7 @@ workflows:
       - build-docker-image:
           requires:
             - build
-      - setup-integration-tests-environment:
+      - integration-tests:
           requires:
             - build
             - build-docker-image
-      - run-integration-tests:
-          requires:
-            - setup-integration-tests-environment
-      - terminate-integration-tests-environment:
-          requires:
-            - run-integration-tests
