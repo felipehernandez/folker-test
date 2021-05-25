@@ -70,12 +70,7 @@ jobs:
       - run: docker-compose up integration-tests-2
       - run: docker-compose up integration-tests-3
 
-      - run: docker-compose down mockserver
-      - run: docker-compose down gcp-pubsub-emulator
-      - run: docker-compose down gcp-datastore-emulator
-      - run: docker-compose down grpc-test-server
-      - run: docker-compose down graphql-test-server
-      - run: docker-compose down postgres-server
+      - run: docker-compose down
 
   integration-tests2:
     machine: true # Linux VM instead of docker environment
