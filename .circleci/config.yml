@@ -59,7 +59,6 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      - setup_remote_docker
       - run: docker compose up --detach mockserver
       - run: docker compose up --detach gcp-pubsub-emulator
       - run: docker compose up --detach gcp-datastore-emulator
