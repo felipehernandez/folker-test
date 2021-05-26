@@ -108,7 +108,9 @@ workflows:
       - run-integration-tests:
           matrix:
             parameters:
-              tests: [template, profile]
+              tests:
+                - template
+                - profile
           requires:
             - setup-integration-tests
 #      - build-docker-image:
