@@ -94,6 +94,8 @@ jobs:
       tests:
         type: string
     steps:
+      - attach_workspace:
+          at: .
       - run: docker-compose up integration-tests-<<parameters.tests>>
 
 workflows:
