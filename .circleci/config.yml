@@ -94,7 +94,7 @@ jobs:
       tests:
         type: string
     steps:
-      - run: docker-compose up <<parameters.tests>>
+      - run: docker-compose up integration-tests-<<parameters.tests>>
 
 workflows:
   main:
@@ -104,10 +104,11 @@ workflows:
           requires:
             - build
       - run-integration-tests:
-          name: run template integration tests
-          tests: template
+          matrix:
+            parameters:
+              tests: [template, profile]
           requires:
             - setup-integration-tests
-      - build-docker-image:
-          requires:
-            - build
+#      - build-docker-image:
+#          requires:
+#            - build
