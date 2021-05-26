@@ -68,26 +68,6 @@ jobs:
       - run: docker-compose up -d graphql-test-server
       - run: docker-compose up -d postgres-server
 
-#      - run: docker-compose up integration-tests-template
-#      - run: docker-compose up integration-tests-profile
-#      - run: docker-compose up integration-tests-parallel
-#      - run: docker-compose up integration-tests-conditional
-#      - run: docker-compose up integration-tests-foreach
-#      - run: docker-compose up integration-tests-save
-#      - run: docker-compose up integration-tests-void
-#      - run: docker-compose up integration-tests-print
-#      - run: docker-compose up integration-tests-wait
-#      - run: docker-compose up integration-tests-rest
-#      - run: docker-compose up integration-tests-postgres
-#      - run: docker-compose up integration-tests-file
-#      - run: docker-compose up integration-tests-code
-#      - run: docker-compose up integration-tests-gmail
-#      - run: docker-compose up integration-tests-protobuf
-#      - run: docker-compose up integration-tests-grpc
-#      - run: docker-compose up integration-tests-graphql
-#
-#      - run: docker-compose down
-
   run-integration-tests:
     executor: integration-test-runner
     parameters:
@@ -111,8 +91,25 @@ workflows:
               tests:
                 - template
                 - profile
+                - template
+                - profile
+                - parallel
+                - conditional
+                - foreach
+                - save
+                - void
+                - print
+                - wait
+                - rest
+                - postgres
+                - file
+                - code
+                - gmail
+                - protobuf
+                - grpc
+                - graphql
           requires:
             - setup-integration-tests
-#      - build-docker-image:
-#          requires:
-#            - build
+      - build-docker-image:
+          requires:
+            - build
