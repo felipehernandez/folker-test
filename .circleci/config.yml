@@ -50,7 +50,7 @@ jobs:
             docker build -t folkertest/folkertest:1.1.<<pipeline.number>> .
       - run:
           name: Archive Docker image
-          command: docker save -o folkertest.tar folkertest
+          command: docker save -o folkertest.tar folkertest/folkertest
       - persist_to_workspace:
           root: .
           paths:
@@ -116,24 +116,24 @@ workflows:
             parameters:
               tests:
                 - template
-                - profile
-                - template
-                - profile
-                - parallel
-                - conditional
-                - foreach
-                - save
-                - void
-                - print
-                - wait
-                - rest
-                - postgres
-                - file
-                - code
-                - gmail
-                - protobuf
-                - grpc
-                - graphql
+#                - profile
+#                - template
+#                - profile
+#                - parallel
+#                - conditional
+#                - foreach
+#                - save
+#                - void
+#                - print
+#                - wait
+#                - rest
+#                - postgres
+#                - file
+#                - code
+#                - gmail
+#                - protobuf
+#                - grpc
+#                - graphql
           requires:
             - setup-integration-tests
       - build-docker-image:
