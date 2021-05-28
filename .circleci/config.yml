@@ -47,7 +47,11 @@ jobs:
       - run:
           name: Build Docker image
           command: |
-            docker build -t folkertest/folkertest:1.1.<<pipeline.number>> .
+            docker build \
+              -t folkertest/folkertest:1.1.<<pipeline.number>> \
+              -t folkertest/folkertest:beta \
+              -t folkertest/folkertest:latest \
+              .
       - run:
           name: Archive Docker image
           command: docker save -o folkertest.tar folkertest/folkertest
@@ -76,9 +80,9 @@ jobs:
       - run:
           name: Publish docker image as 1.1.<<pipeline.number>>
           command: |
-            docker push folkertest/folkertest:<<pipeline.number>>
+            docker push folkertest/folkertest:1.1.<<pipeline.number>>
       - run:
-          name: Publish docker image as 1.1.<<parameters.image-label>>
+          name: Publish docker image as <<parameters.image-label>>
           command: |
             docker push folkertest/folkertest:<<parameters.image-label>>
 
@@ -116,24 +120,24 @@ workflows:
             parameters:
               tests:
                 - template
-#                - profile
-#                - template
-#                - profile
-#                - parallel
-#                - conditional
-#                - foreach
-#                - save
-#                - void
-#                - print
-#                - wait
-#                - rest
-#                - postgres
-#                - file
-#                - code
-#                - gmail
-#                - protobuf
-#                - grpc
-#                - graphql
+                - profile
+                - template
+                - profile
+                - parallel
+                - conditional
+                - foreach
+                - save
+                - void
+                - print
+                - wait
+                - rest
+                - postgres
+                - file
+                - code
+                - gmail
+                - protobuf
+                - grpc
+                - graphql
           requires:
             - setup-integration-tests
       - build-docker-image:
