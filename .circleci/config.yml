@@ -71,7 +71,7 @@ jobs:
           name: Build Docker image
           command: |
             docker build \
-              -t folkertest/folkertest:1.1.<<pipeline.number>> \
+              -t folkertest/folkertest:1.2.<<pipeline.number>> \
               -t folkertest/folkertest:beta \
               -t folkertest/folkertest:latest \
               .
@@ -101,9 +101,9 @@ jobs:
           command: |
             echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
       - run:
-          name: Publish docker image as 1.1.<<pipeline.number>>
+          name: Publish docker image as 1.2.<<pipeline.number>>
           command: |
-            docker push folkertest/folkertest:1.1.<<pipeline.number>>
+            docker push folkertest/folkertest:1.2.<<pipeline.number>>
       - run:
           name: Publish docker image as <<parameters.image-label>>
           command: |
@@ -231,7 +231,7 @@ workflows:
             - build
             - run-integration-tests
       - publish-docker-image:
-          name: publich-beta
+          name: publich-latest
           image-label: latest
           requires:
             - build-docker-image
