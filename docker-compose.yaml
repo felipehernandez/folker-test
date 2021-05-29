@@ -1,0 +1,148 @@
+version: '3.1'
+
+services:
+  mockserver:
+    image: mockserver/mockserver:latest
+    ports:
+      - 1080:1080
+
+  gcp-pubsub-emulator:
+    image: messagebird/gcloud-pubsub-emulator:latest
+    ports:
+      - 8681:8681
+    environment:
+      PUBSUB_PROJECT1: "folker-test-gcp-test,a_topic:a_subscription"
+
+  gcp-datastore-emulator:
+    image: singularities/datastore-emulator
+    ports:
+      - 8684:8684
+    environment:
+      DATASTORE_PROJECT_ID: folker-test-gcp-test
+      DATASTORE_LISTEN_ADDRESS: 0.0.0.0:8684
+
+  grpc-test-server:
+    image: folkertest/grpc-test-server:latest
+    ports:
+      - 8682:8682
+
+  graphql-test-server:
+    image: folkertest/graphql-test-server:latest
+    ports:
+      - 8683:8683
+
+  postgres-server:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: docker
+
+  integration-tests-template:
+    build:
+      context: .
+      dockerfile: Dockerfile-integration
+    command: -t template -n 3 --trace
+  integration-tests-profile:
+    build:
+      context: .
+      dockerfile: Dockerfile-integration
+    command: -p test-profile -t profile -n 1 --trace
+  integration-tests-parallel:
+    build:
+      context: .
+      dockerfile: Dockerfile-integration
+    command: -t parallel -n 3 --trace
+  integration-tests-conditional:
+    build:
+      context: .
+      dockerfile: Dockerfile-integration
+    command: -t conditional -n 1 --trace
+  integration-tests-foreach:
+    build:
+      context: .
+      dockerfile: Dockerfile-integration
+    command: -t foreach -n 1 --trace
+  integration-tests-save:
+    build:
+      context: .
+      dockerfile: Dockerfile-integration
+    command: -t save -n 1 --trace
+  integration-tests-void:
+    build:
+      context: .
+      dockerfile: Dockerfile-integration
+    command: -t void -n 3 --trace
+  integration-tests-print:
+    build:
+      context: .
+      dockerfile: Dockerfile-integration
+    command: -t print -n 2 --trace
+  integration-tests-wait:
+    build:
+      context: .
+      dockerfile: Dockerfile-integration
+    command: -t wait -n 1 --trace
+  integration-tests-rest:
+    build:
+      context: .
+      dockerfile: Dockerfile-integration
+    command: -t rest -n 3 --trace
+    depends_on:
+      - mockserver
+  integration-tests-postgres:
+    build:
+      context: .
+      dockerfile: Dockerfile-integration
+    command: -t postgres -n 1 --trace
+    depends_on:
+      - postgres-server
+  integration-tests-file:
+    build:
+      context: .
+      dockerfile: Dockerfile-integration
+    command: -t file -n 1 --trace
+  integration-tests-code:
+    build:
+      context: .
+      dockerfile: Dockerfile-integration
+    command: -t code -n 1 --trace
+  integration-tests-gmail:
+    build:
+      context: .
+      dockerfile: Dockerfile-integration
+    command: -t gmail -n 1 --trace
+  integration-tests-protobuf:
+    build:
+      context: .
+      dockerfile: Dockerfile-integration
+    command: -t protobuf -n 1 --trace
+  integration-tests-grpc:
+    build:
+      context: .
+      dockerfile: Dockerfile-integration
+    command: -t grpc -n 1 --trace
+    depends_on:
+      - grpc-test-server
+  integration-tests-graphql:
+    build:
+      context: .
+      dockerfile: Dockerfile-integration
+    command: -t graphql -n 1 --trace
+    depends_on:
+      - graphql-test-server
+  integration-tests-pubsub:
+    build:
+      context: .
+      dockerfile: Dockerfile-integration
+    command: -t pubsub -n 1 --trace
+    depends_on:
+      - gcp-pubsub-emulator
+  integration-tests-datastore:
+    build:
+      context: .
+      dockerfile: Dockerfile-integration
+    command: -t datastore -n 4 --trace
+    depends_on:
+      - gcp-datastore-emulator

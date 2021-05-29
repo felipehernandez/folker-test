@@ -1,7 +1,5 @@
 id: partial_print_template
 description: Partial PRINT template
-tags:
-  - template
 
 stages:
   - id: partial_print_stage_reference

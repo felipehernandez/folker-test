@@ -21,6 +21,7 @@ reports
 .classpath
 .coverage
 example/protos/*.py
+unittests.xml
 
 # OS
 .DS_Store
