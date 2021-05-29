@@ -39,6 +39,43 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: docker
 
+  zookeeper:
+    image: docker.io/bitnami/zookeeper:3
+    ports:
+      - 2181:2181
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+
+  kafka:
+    image: docker.io/bitnami/kafka:2
+    ports:
+      - 9092:9092
+      - 9093:9093
+    environment:
+      ALLOW_PLAINTEXT_LISTENER: 'yes'
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://localhost:9092,INTEGRATION://integration-tests-kafka:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT,INTEGRATION:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092,INTEGRATION://0.0.0.0:9094
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "topic_test:1:1"
+    depends_on:
+      - zookeeper
+  kafka2:
+    image: docker.io/bitnami/kafka:2
+    ports:
+      - 9092:9092
+    environment:
+      ALLOW_PLAINTEXT_LISTENER: 'yes'
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "topic_test:1:1"
+    depends_on:
+      - zookeeper
+
   integration-tests-template:
     build:
       context: .
@@ -146,3 +183,10 @@ services:
     command: -t datastore -n 4 --trace
     depends_on:
       - gcp-datastore-emulator
+  integration-tests-kafka:
+    build:
+      context: .
+      dockerfile: Dockerfile-integration
+    command: -t kafka -n 1 --trace
+    depends_on:
+      - kafka

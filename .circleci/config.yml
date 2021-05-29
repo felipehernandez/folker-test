@@ -49,6 +49,7 @@ jobs:
       - run: docker-compose up -d grpc-test-server
       - run: docker-compose up -d graphql-test-server
       - run: docker-compose up -d postgres-server
+      - run: docker-compose up -d kafka
 
   run-integration-tests:
     executor: integration-test-runner
@@ -145,6 +146,7 @@ workflows:
                 - protobuf
                 - grpc
                 - graphql
+                - kafka
           requires:
             - setup-integration-tests
 
@@ -178,6 +180,7 @@ workflows:
                 - protobuf
                 - grpc
                 - graphql
+                - kafka
           requires:
             - setup-integration-tests
       - build-docker-image:
@@ -220,6 +223,7 @@ workflows:
                 - protobuf
                 - grpc
                 - graphql
+                - kafka
           requires:
             - setup-integration-tests
       - build-docker-image:

@@ -4,6 +4,7 @@ from enum import Enum, auto
 from kafka import KafkaProducer, KafkaConsumer
 from kafka.errors import KafkaError
 
+from folker.decorator import loggable_action, resolvable_variables, timed_action
 from folker.logger import TestLogger
 from folker.model import StageAction, Context
 from folker.model.error import InvalidSchemaDefinitionException
@@ -23,6 +24,7 @@ class KafkaStageAction(StageAction):
     key: str = None
     message: str = None
     headers: dict = {}
+    group: str
 
     def __init__(self,
                  method: str = None,
@@ -30,7 +32,8 @@ class KafkaStageAction(StageAction):
                  topic: str = None,
                  key: str = None,
                  message: str = None,
-                 headers: dict = None
+                 headers: dict = None,
+                 group=None
                  ):
         super().__init__()
 
@@ -45,6 +48,7 @@ class KafkaStageAction(StageAction):
         self.key = key
         self.message = message
         self.headers = headers
+        self.group = group
 
     def __copy__(self):
         return deepcopy(self)
@@ -52,18 +56,18 @@ class KafkaStageAction(StageAction):
     def mandatory_fields(self):
         return [
             'host',
-            'method'
+            'method',
+            'topic'
         ]
 
     def validate_specific(self, missing_fields):
         if hasattr(self, 'method') and KafkaMethod.PUBLISH is self.method:
             missing_fields.extend(self._validate_publish_values())
+        return missing_fields
 
     def _validate_publish_values(self) -> [str]:
         missing_fields = []
 
-        if not hasattr(self, 'topic') or not self.topic:
-            missing_fields.append('action.topic')
         if (not hasattr(self, 'message') or not self.message) \
                 and (not hasattr(self, 'key') or not self.key):
             missing_fields.append('action.message')
@@ -71,9 +75,9 @@ class KafkaStageAction(StageAction):
 
         return missing_fields
 
-    # @loggable_action
-    # @resolvable_variables
-    # @timed_action
+    @loggable_action
+    @resolvable_variables
+    @timed_action
     def execute(self, logger: TestLogger, context: Context) -> Context:
         {
             KafkaMethod.PUBLISH: self._publish,
@@ -101,6 +105,7 @@ class KafkaStageAction(StageAction):
 
     def _subscribe(self, logger: TestLogger, context: Context):
         consumer = KafkaConsumer(self.topic,
+                                 group_id=self.group,
                                  auto_offset_reset='earliest',
                                  consumer_timeout_ms=10000,
                                  bootstrap_servers=[self.host])
@@ -108,13 +113,13 @@ class KafkaStageAction(StageAction):
         for message in consumer:
             messages.append({
                 'headers': message.headers,
-                'key': message.key.decode(),
+                'key': message.key.decode() if self._has_value(message, 'key') else None,
                 'offset': message.offset,
                 'timestamp': message.timestamp,
                 'topic': message.topic,
-                'message': message.value.decode(),
+                'message': message.value.decode() if self._has_value(message, 'message') else None,
             })
-            print("%s:%d:%d: key=%s value=%s" % (message.topic, message.partition,
-                                                 message.offset, message.key,
-                                                 message.value))
         context.save_on_stage('messages', messages)
+
+    def _has_value(self, message, attribute: str):
+        return hasattr(message, attribute) and getattr(message, attribute)

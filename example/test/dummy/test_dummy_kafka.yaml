@@ -1,0 +1,79 @@
+name: Kafka Test
+description: Dummy Test for Kafka Stage
+tags:
+  - dummy
+  - kafka
+
+stages:
+  - name: setup
+    action:
+      type: VOID
+    save:
+#      host: localhost:9092
+      host: kafka:9093
+
+  - name: publish key
+    action:
+      type: KAFKA
+      method: PUBLISH
+      host: ${host}
+      topic: topic_test
+      key: '123'
+    log:
+      - 'Topic: ${topic}'
+      - 'Partition: ${partition}'
+      - 'Timestamp: ${timestamp}'
+      - 'Offset: ${offset}'
+      - 'Elapsed time: ${elapsed_time}'
+
+  - name: publish message
+    action:
+      type: KAFKA
+      method: PUBLISH
+      host: ${host}
+      topic: topic_test
+      message: hello world
+    log:
+      - 'Topic: ${topic}'
+      - 'Partition: ${partition}'
+      - 'Timestamp: ${timestamp}'
+      - 'Offset: ${offset}'
+      - 'Elapsed time: ${elapsed_time}'
+
+  - name: publish key and message
+    action:
+      type: KAFKA
+      method: PUBLISH
+      host: ${host}
+      topic: topic_test
+      key: '123'
+      message: hello world 2
+    log:
+      - 'Topic: ${topic}'
+      - 'Partition: ${partition}'
+      - 'Timestamp: ${timestamp}'
+      - 'Offset: ${offset}'
+      - 'Elapsed time: ${elapsed_time}'
+
+  - name: subscribe
+    action:
+      type: KAFKA
+      method: SUBSCRIBE
+      host: ${host}
+      topic: topic_test
+    log:
+      - 'Messages: ${messages}'
+    assert:
+      - len(${messages}) == 3
+
+  - name: subscribe group
+    action:
+      type: KAFKA
+      method: SUBSCRIBE
+      host: ${host}
+      topic: topic_test
+      group: group-test
+    log:
+      - 'Messages: ${messages}'
+    assert:
+      - len(${messages}) == 3
