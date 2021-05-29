@@ -61,6 +61,11 @@ jobs:
           at: .
       - run: docker-compose up integration-tests-<<parameters.tests>>
 
+  validate-integration-tests:
+    executor: integration-test-runner
+    steps:
+      - run: echo "Integration tests validated"
+
   build-docker-image:
     executor: docker-builder
     steps:
@@ -149,7 +154,9 @@ workflows:
                 - kafka
           requires:
             - setup-integration-tests
-
+      - validate-integration-tests:
+          requires:
+            - run-integration-tests
   beta:
     when:
       equal: [ beta, << pipeline.git.branch >> ]
@@ -183,10 +190,13 @@ workflows:
                 - kafka
           requires:
             - setup-integration-tests
+      - validate-integration-tests:
+          requires:
+            - run-integration-tests
       - build-docker-image:
           requires:
             - build
-            - run-integration-tests
+            - validate-integration-tests
       - publish-docker-image:
           name: publich-beta
           image-label: beta
@@ -226,10 +236,13 @@ workflows:
                 - kafka
           requires:
             - setup-integration-tests
+      - validate-integration-tests:
+          requires:
+            - run-integration-tests
       - build-docker-image:
           requires:
             - build
-            - run-integration-tests
+            - validate-integration-tests
       - publish-docker-image:
           name: publich-latest
           image-label: latest
