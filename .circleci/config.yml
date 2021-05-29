@@ -112,11 +112,11 @@ jobs:
 workflows:
   version: 2.1
 
-  default:
+  development:
     when:
       and:
         - not:
-            equal: [ development, << pipeline.git.branch >> ]
+            equal: [ beta, << pipeline.git.branch >> ]
         - not:
             equal: [ main, << pipeline.git.branch >> ]
     jobs:
@@ -150,9 +150,9 @@ workflows:
           requires:
             - setup-integration-tests
 
-  development:
+  beta:
     when:
-      equal: [ development, << pipeline.git.branch >> ]
+      equal: [ beta, << pipeline.git.branch >> ]
     jobs:
       - build
       - setup-integration-tests:
