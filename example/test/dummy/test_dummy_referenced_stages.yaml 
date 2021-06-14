@@ -1,0 +1,25 @@
+name: Dummy Test for referenced stages
+description: Dummy Test for complex save
+tags:
+  - dummy
+  - save
+
+stages:
+  - name: start
+    save:
+      vble: 1
+
+  - &tst1
+    name: original stage
+    save:
+      vble: ${vble} + 1
+    assert:
+      - "${vble} == 2"
+    log:
+      - "Stage"
+      - ${vble}
+
+  - <<: *tst1
+    name: referenced stage
+    assert:
+      - "${vble} == 3"
