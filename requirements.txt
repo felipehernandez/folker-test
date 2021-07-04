@@ -25,3 +25,4 @@ pytest-mock
 PyYAML==5.4.1
 requests==2.25.1
 kafka-python==2.0.2
+kazoo==2.8.0

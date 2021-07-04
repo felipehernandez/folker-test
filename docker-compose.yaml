@@ -190,3 +190,10 @@ services:
     command: -t kafka -n 1 --trace
     depends_on:
       - kafka
+  integration-tests-zookeepera:
+    build:
+      context: .
+      dockerfile: Dockerfile-integration
+    command: -t zookeeper -n 4 --trace
+    depends_on:
+      - zookeeper
