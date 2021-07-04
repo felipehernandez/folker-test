@@ -1,0 +1,57 @@
+name: Zookeeper Test create and delete
+description: Dummy Test for Zookeeper Stage
+tags:
+  - dummy
+  - zookeeper
+
+stages:
+  - name: Setup test variables
+    action:
+      type: VOID
+    save:
+      # zookeeper_host: localhost:2181
+      zookeeper_host: zookeeper:2181
+      node_path: /test_node_create_delete
+
+  - name: Node does not exists
+    action:
+      type: ZOOKEEPER
+      method: EXISTS
+      host: ${zookeeper_host}
+      node: ${node_path}
+    assert:
+      - ${path} == None
+
+  - name: Create node basic
+    action:
+      type: ZOOKEEPER
+      method: CREATE
+      host: ${zookeeper_host}
+      node: ${node_path}
+    assert:
+      - ${path} == ${node_path}
+
+  - name: Node does exists
+    action:
+      type: ZOOKEEPER
+      method: EXISTS
+      host: ${zookeeper_host}
+      node: ${node_path}
+    assert:
+      - ${path} == ${node_path}
+
+  - name: Delete node
+    action:
+      type: ZOOKEEPER
+      method: DELETE
+      host: ${zookeeper_host}
+      node: ${node_path}
+
+  - name: Node does not exists
+    action:
+      type: ZOOKEEPER
+      method: EXISTS
+      host: ${zookeeper_host}
+      node: ${node_path}
+    assert:
+      - ${path} == None
