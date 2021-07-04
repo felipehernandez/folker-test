@@ -189,6 +189,7 @@ workflows:
                 - grpc
                 - graphql
                 - kafka
+                - zookeeper
           requires:
             - setup-integration-tests
       - validate-integration-tests:
@@ -235,6 +236,7 @@ workflows:
                 - grpc
                 - graphql
                 - kafka
+                - zookeeper
           requires:
             - setup-integration-tests
       - validate-integration-tests:
