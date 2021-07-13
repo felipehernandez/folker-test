@@ -100,27 +100,6 @@ class DatastoreStageAction(StageAction):
             if not hasattr(self, 'entity') or not self.entity:
                 self.validation_report.missing_fields.add('action.entity')
 
-    def validate_specific(self, missing_fields):
-        if self.key.get('kind') is None:
-            missing_fields.append('action.key.kind')
-        if self.method in [DatastoreMethod.PUT, DatastoreMethod.GET, DatastoreMethod.DELETE] \
-                and self.key.get('id') is None \
-                and self.key.get('name') is None:
-            missing_fields.append('action.key.id')
-            missing_fields.append('action.key.name')
-        if self.method is DatastoreMethod.PUT:
-            missing_fields.extend(self._validate_put_values())
-
-        return missing_fields
-
-    def _validate_put_values(self):
-        missing_fields = []
-
-        if not hasattr(self, 'entity') or not self.entity:
-            missing_fields.append('action.entity')
-
-        return missing_fields
-
     @loggable_action
     @resolvable_variables
     @timed_action

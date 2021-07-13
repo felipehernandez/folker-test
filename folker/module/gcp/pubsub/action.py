@@ -107,32 +107,6 @@ class PubSubStageAction(StageAction):
             if not hasattr(self, 'subscription') or not self.subscription:
                 self.validation_report.missing_fields.add('action.subscription')
 
-    def validate_specific(self, missing_fields):
-        if hasattr(self, 'method') and PubSubMethod.PUBLISH is self.method:
-            missing_fields.extend(self._validate_publish_values())
-        if hasattr(self, 'method') and PubSubMethod.SUBSCRIBE is self.method:
-            missing_fields.extend(self._validate_subscribe_values())
-
-        return missing_fields
-
-    def _validate_publish_values(self) -> [str]:
-        missing_fields = []
-
-        if not hasattr(self, 'topic') or not self.topic:
-            missing_fields.append('action.topic')
-        if not hasattr(self, 'message') or not self.message:
-            missing_fields.append('action.message')
-
-        return missing_fields
-
-    def _validate_subscribe_values(self) -> [str]:
-        missing_fields = []
-
-        if not hasattr(self, 'subscription') or not self.subscription:
-            missing_fields.append('action.subscription')
-
-        return missing_fields
-
     @loggable_action
     @resolvable_variables
     @timed_action

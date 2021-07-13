@@ -79,21 +79,6 @@ class ProtobufStageAction(StageAction):
                 and (not hasattr(self, 'message') or not self.message):
             self.validation_report.missing_fields.add('action.message')
 
-    def validate_specific(self, missing_fields):
-        if not hasattr(self, 'clazz') or not self.__getattribute__('clazz'):
-            missing_fields.append('action.class')
-
-        if hasattr(self, 'method') \
-                and self.method == ProtobufMethod.CREATE \
-                and (not hasattr(self, 'data') or not self.data):
-            missing_fields.append('action.data')
-        if hasattr(self, 'method') \
-                and self.method == ProtobufMethod.LOAD \
-                and (not hasattr(self, 'message') or not self.message):
-            missing_fields.append('action.message')
-
-        return missing_fields
-
     @loggable_action
     @resolvable_variables
     @timed_action

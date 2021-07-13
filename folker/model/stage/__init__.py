@@ -9,12 +9,6 @@ class StageStep(Validatable, ABC):
     def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
         pass
 
-    @abstractmethod
-    def enrich(self, template): pass
-
-    @abstractmethod
-    def validate(self): pass
-
 
 from .stageaction import StageAction
 from .assertions import StageAssertions

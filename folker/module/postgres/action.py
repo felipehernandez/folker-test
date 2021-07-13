@@ -2,11 +2,11 @@ from enum import Enum, auto
 
 import psycopg2
 
+from folker.decorator import timed_action, resolvable_variables, loggable_action
 from folker.logger import TestLogger
 from folker.model import Context
-from folker.model.error import InvalidSchemaDefinitionException
 from folker.model import StageAction
-from folker.decorator import timed_action, resolvable_variables, loggable_action
+from folker.module.void.action import VoidStageAction
 
 
 class PostgresMethod(Enum):
@@ -48,7 +48,7 @@ class PostgresStageAction(StageAction):
             try:
                 self.method = PostgresMethod[method]
             except:
-                raise InvalidSchemaDefinitionException(wrong_fields=['action.method'])
+                self.validation_report.wrong_fields.add('action.method')
 
         self.host = host
         self.port = port
@@ -56,6 +56,26 @@ class PostgresStageAction(StageAction):
         self.password = password
         self.database = database
         self.sql = sql
+
+    def __add__(self, enrichment: 'PostgresStageAction'):
+        result = self.__copy__()
+        if isinstance(enrichment, VoidStageAction):
+            return result
+
+        if enrichment.host:
+            result.host = enrichment.host
+        if enrichment.port:
+            result.port = enrichment.port
+        if enrichment.user:
+            result.user = enrichment.user
+        if enrichment.password:
+            result.password = enrichment.password
+        if enrichment.database:
+            result.database = enrichment.database
+        if enrichment.sql:
+            result.sql = enrichment.sql
+
+        return result
 
     def mandatory_fields(self):
         return [

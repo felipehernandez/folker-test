@@ -57,13 +57,6 @@ class FileStageAction(StageAction):
                 and (not hasattr(self, 'content') or not self.__getattribute__('content'))):
             self.validation_report.missing_fields.add('action.content')
 
-    def validate_specific(self, missing_fields):
-        if FileMethod.WRITE == self.method and \
-                (not hasattr(self, 'content') or not self.__getattribute__('content')):
-            missing_fields.extend(['action.content'])
-
-        return missing_fields
-
     @loggable_action
     @resolvable_variables
     @timed_action

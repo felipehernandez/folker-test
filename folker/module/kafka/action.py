@@ -86,21 +86,6 @@ class KafkaStageAction(StageAction):
                     and (not hasattr(self, 'key') or not self.key):
                 self.validation_report.missing_fields.update({'action.key', 'action.message'})
 
-    def validate_specific(self, missing_fields):
-        if hasattr(self, 'method') and KafkaMethod.PUBLISH is self.method:
-            missing_fields.extend(self._validate_publish_values())
-        return missing_fields
-
-    def _validate_publish_values(self) -> [str]:
-        missing_fields = []
-
-        if (not hasattr(self, 'message') or not self.message) \
-                and (not hasattr(self, 'key') or not self.key):
-            missing_fields.append('action.message')
-            missing_fields.append('action.key')
-
-        return missing_fields
-
     @loggable_action
     @resolvable_variables
     @timed_action
