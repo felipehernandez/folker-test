@@ -1,5 +1,10 @@
 version: 2.1
 
+parameters:
+  image-version:
+    type: string
+    default: "1.4"
+
 orbs:
   python: circleci/python@1.4.0
 
@@ -76,7 +81,7 @@ jobs:
           name: Build Docker image
           command: |
             docker build \
-              -t folkertest/folkertest:1.3.<<pipeline.number>> \
+              -t folkertest/folkertest:<<pipeline.parameters.image-version>>.<<pipeline.number>> \
               -t folkertest/folkertest:beta \
               -t folkertest/folkertest:latest \
               .
@@ -106,9 +111,9 @@ jobs:
           command: |
             echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
       - run:
-          name: Publish docker image as 1.3.<<pipeline.number>>
+          name: Publish docker image as <<pipeline.parameters.image-version>>.<<pipeline.number>>
           command: |
-            docker push folkertest/folkertest:1.3.<<pipeline.number>>
+            docker push folkertest/folkertest:<<pipeline.parameters.image-version>>.<<pipeline.number>>
       - run:
           name: Publish docker image as <<parameters.image-label>>
           command: |
