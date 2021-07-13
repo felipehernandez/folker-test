@@ -11,6 +11,7 @@ from folker.logger import TestLogger
 from folker.model import Context
 from folker.model import StageAction
 from folker.model.error import InvalidSchemaDefinitionException
+from folker.module.void.action import VoidStageAction
 
 
 class PubSubMethod(Enum):
@@ -28,10 +29,10 @@ class PubSubStageAction(StageAction):
     credentials_path: str
 
     topic: str
-    attributes: dict = {}
+    attributes: dict
     message: str
     subscription: str
-    ack: bool = False
+    ack: bool = None
 
     def __init__(self,
                  method: str = None,
@@ -42,7 +43,7 @@ class PubSubStageAction(StageAction):
                  subscription=None,
                  attributes: dict = None,
                  message=None,
-                 ack: bool = False,
+                 ack: bool = None,
                  **kargs) -> None:
         super().__init__()
 
@@ -56,7 +57,7 @@ class PubSubStageAction(StageAction):
         self.project = project
         self.credentials_path = credentials
 
-        self.attributes = attributes
+        self.attributes = attributes if attributes else {}
 
         self.topic = topic
         self.message = message
@@ -67,11 +68,44 @@ class PubSubStageAction(StageAction):
     def __copy__(self):
         return deepcopy(self)
 
+    def __add__(self, enrichment: 'PubSubStageAction'):
+        result = self.__copy__()
+        if isinstance(enrichment, VoidStageAction):
+            return result
+
+        if enrichment.host:
+            result.host = enrichment.host
+        if enrichment.project:
+            result.project = enrichment.project
+        if enrichment.credentials_path:
+            result.credentials_path = enrichment.credentials_path
+        if enrichment.topic:
+            result.topic = enrichment.topic
+        if enrichment.message:
+            result.message = enrichment.message
+        if enrichment.subscription:
+            result.subscription = enrichment.subscription
+        if enrichment.ack:
+            result.ack = enrichment.ack
+        result.attributes = {**self.attributes, **enrichment.attributes}
+
+        return result
+
     def mandatory_fields(self):
         return [
             'project',
             'method'
         ]
+
+    def _validate_specific(self):
+        if hasattr(self, 'method') and PubSubMethod.PUBLISH is self.method:
+            if not hasattr(self, 'topic') or not self.topic:
+                self.validation_report.missing_fields.add('action.topic')
+            if not hasattr(self, 'message') or not self.message:
+                self.validation_report.missing_fields.add('action.message')
+        if hasattr(self, 'method') and PubSubMethod.SUBSCRIBE is self.method:
+            if not hasattr(self, 'subscription') or not self.subscription:
+                self.validation_report.missing_fields.add('action.subscription')
 
     def validate_specific(self, missing_fields):
         if hasattr(self, 'method') and PubSubMethod.PUBLISH is self.method:
@@ -137,7 +171,7 @@ class PubSubStageAction(StageAction):
 
         subscription_path = self.subscriber.subscription_path(self.project, self.subscription)
 
-        self._log_debug(logger, subscription=subscription_path, ack=self.ack)
+        self._log_debug(logger, subscription=subscription_path, ack=bool(self.ack))
         response = self.subscriber.pull(request={"subscription": subscription_path,
                                                  "max_messages": 1})
 

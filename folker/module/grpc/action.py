@@ -2,10 +2,11 @@ from collections import Iterable
 
 import grpc
 
+from folker.decorator import timed_action, resolvable_variables, loggable_action
 from folker.logger import TestLogger
 from folker.model import Context
 from folker.model import StageAction
-from folker.decorator import timed_action, resolvable_variables, loggable_action
+from folker.module.void.action import VoidStageAction
 
 
 class GrpcStageAction(StageAction):
@@ -30,11 +31,31 @@ class GrpcStageAction(StageAction):
         self.host = host
         self.uri = uri
 
-        self.package = package + '_pb2_grpc' if package else None
+        self.package = package if package else None
         self.stub = stub
         self.method = method
 
         self.data = data
+
+    def __add__(self, enrichment: 'GrpcStageAction'):
+        result = self.__copy__()
+        if isinstance(enrichment, VoidStageAction):
+            return result
+
+        if enrichment.host:
+            result.host = enrichment.host
+        if enrichment.uri:
+            result.uri = enrichment.uri
+        if enrichment.package:
+            result.package = enrichment.package
+        if enrichment.stub:
+            result.stub = enrichment.stub
+        if enrichment.method:
+            result.method = enrichment.method
+        if enrichment.data:
+            result.data = enrichment.data
+
+        return result
 
     def mandatory_fields(self):
         return [
@@ -51,7 +72,7 @@ class GrpcStageAction(StageAction):
         url = self._build_url()
         channel = grpc.insecure_channel(url)
 
-        imported_module = __import__(self.package, fromlist=[self.stub])
+        imported_module = __import__(self.package + '_pb2_grpc', fromlist=[self.stub])
         StubDefinition = getattr(imported_module, self.stub)
         stub = StubDefinition(channel)
 
