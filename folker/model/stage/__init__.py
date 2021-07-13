@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
 
 from folker.logger.logger import TestLogger
+from ..validation import Validatable
 
 
-class StageStep(ABC):
+class StageStep(Validatable, ABC):
     @abstractmethod
     def execute(self, logger: TestLogger, test_context: dict, stage_context: dict) -> (dict, dict):
         pass

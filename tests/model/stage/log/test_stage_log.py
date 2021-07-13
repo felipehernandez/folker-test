@@ -53,7 +53,7 @@ class TestStageLog:
 
         stage.enrich(template_stage)
 
-        assert stage.logs == ['log1', 'log2']
+        assert stage.logs == {'log1', 'log2'}
 
     def test_validate(self):
         stage = StageLog()

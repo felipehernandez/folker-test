@@ -1,6 +1,8 @@
 from abc import abstractmethod, ABC
 from copy import deepcopy
 
+from promise.utils import deprecated
+
 from folker.logger.logger import TestLogger
 from folker.model.context import Context
 from folker.model.error.load import InvalidSchemaDefinitionException
@@ -8,9 +10,22 @@ from folker.model.stage import StageStep
 
 
 class StageAction(StageStep, ABC):
+    def __bool__(self):
+        for attribute in self.mandatory_fields():
+            if not hasattr(self, attribute) or not self.__getattribute__(attribute):
+                self.validation_report.missing_fields.add('action.' + attribute)
+
+        self._validate_specific()
+
+        return bool(self.validation_report)
+
     def __copy__(self):
         return deepcopy(self)
 
+    def _validate_specific(self):
+        pass
+
+    @deprecated(reason='in favour of __add__')
     def enrich(self, template: 'StageAction'):
         for attribute, value in self.__dict__.items():
             self._set_attribute_if_missing(template, attribute)

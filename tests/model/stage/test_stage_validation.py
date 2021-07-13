@@ -1,36 +1,28 @@
-import pytest
-
 from folker.model import Stage
-from folker.model.error import InvalidSchemaDefinitionException
+from folker.module.void.action import VoidStageAction
+from folker.module.wait.action import WaitStageAction
 
 
-def test_stage_validation_named_missing_action():
-    stage = Stage(name='StageName')
+class TestStageValidation:
+    def test_validate_no_name_nor_id(self):
+        stage = Stage(action=VoidStageAction())
 
-    with pytest.raises(InvalidSchemaDefinitionException) as raised_exception:
-        stage.validate()
+        assert not stage
+        assert not stage.validation_report
+        assert 'stage.name' in stage.validation_report.missing_fields
+        assert 'stage.id' in stage.validation_report.missing_fields
 
-        assert raised_exception.wrong_fields == ['StageName[name].action']
+    def test_validate_correct(self):
+        stage = Stage(name='a_name',
+                      action=VoidStageAction())
 
+        assert stage
+        assert stage.validation_report
 
-def test_stage_validation_ided_missing_action():
-    stage = Stage(id='StageId')
+    def test_validate_incorrect_action(self):
+        stage = Stage(name='a_name',
+                      action=WaitStageAction())
 
-    with pytest.raises(InvalidSchemaDefinitionException) as raised_exception:
-        stage.validate()
-
-        assert raised_exception.wrong_fields == ['StageId[id].action']
-
-
-def test_stage_validation_invalid_action(mocker):
-    mocked_action = mocker.patch('folker.model.stage.StageAction')
-
-    stage = Stage(name='StageName', action=mocked_action)
-
-    mocked_action.validate.side_effect = InvalidSchemaDefinitionException(missing_fields=['field'])
-
-    with pytest.raises(InvalidSchemaDefinitionException) as raised_exception:
-        stage.validate()
-
-        assert raised_exception.missing_fields == ['field']
-
+        assert not stage
+        assert not stage.validation_report
+        assert 'action.time' in stage.validation_report.missing_fields

@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from folker.logger.logger import TestLogger
 from folker.model.context import Context
 from folker.model.error.error import SourceException
@@ -6,9 +8,10 @@ from folker.model.stage.assertions import StageAssertions
 from folker.model.stage.log import StageLog
 from folker.model.stage.save import StageSave
 from folker.model.stage.stageaction import StageAction
+from folker.model.validation import Validatable
 
 
-class Stage:
+class Stage(Validatable):
     id: str
     name: str
 
@@ -42,6 +45,43 @@ class Stage:
         self.save = StageSave(save)
         self.log = StageLog(log)
         self.assertions = StageAssertions(assertions)
+
+    def __copy__(self):
+        return deepcopy(self)
+
+    def __add__(self, enrichment: 'Stage'):
+        result = self.__copy__()
+
+        if enrichment.name:
+            result.name = enrichment.name
+        if enrichment.condition:
+            result.condition = enrichment.condition
+        result.params = {**self.foreach, **enrichment.foreach}
+
+        enriched_action = enrichment.action.__copy__()
+        enriched_action + self.action
+        result.action = self.action + enrichment.action
+        result.save = self.save + enrichment.save
+        result.log = self.log + enrichment.log
+        result.assertions = self.assertions + enrichment.assertions
+
+        return result
+
+    def __bool__(self):
+        if not self.name and not self.id:
+            self.validation_report.missing_fields.add('stage.name')
+            self.validation_report.missing_fields.add('stage.id')
+
+        if not self.action:
+            self.validation_report + self.action.validation_report
+        if not self.save:
+            self.validation_report + self.save.validation_report
+        if not self.log:
+            self.validation_report + self.log.validation_report
+        if not self.assertions:
+            self.validation_report + self.assertions.validation_report
+
+        return bool(self.validation_report)
 
     def enrich(self, template: 'Stage'):
         if self.name is None:

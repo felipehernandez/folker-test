@@ -12,12 +12,17 @@ class StageSave(StageStep):
         super().__init__()
         self.save = save if save else {}
 
+    def __bool__(self):
+        return True
+
+    def __add__(self, template: 'StageSave'):
+        self.save = {**self.save, **template.save}
+
     def __copy__(self):
         return copy(self)
 
     def enrich(self, template: 'StageSave'):
-        new_data = {**self.save, **template.save}
-        self.save = new_data
+        self.save = {**self.save, **template.save}
 
     def validate(self):
         pass

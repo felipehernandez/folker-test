@@ -89,7 +89,7 @@ class TestStageAssertions:
 
         stage.enrich(template_stage)
 
-        assert stage.assertions == ['assertion1', 'assertion2']
+        assert stage.assertions == {'assertion1', 'assertion2'}
 
     def test_validate(self):
         stage = StageAssertions()

@@ -49,6 +49,19 @@ class ProtobufStageAction(StageAction):
             'package'
         ]
 
+    def _validate_specific(self):
+        if not hasattr(self, 'clazz') or not self.__getattribute__('clazz'):
+            self.validation_report.missing_fields.add('action.class')
+
+        if hasattr(self, 'method') \
+                and self.method == ProtobufMethod.CREATE \
+                and (not hasattr(self, 'data') or not self.data):
+            self.validation_report.missing_fields.add('action.data')
+        if hasattr(self, 'method') \
+                and self.method == ProtobufMethod.LOAD \
+                and (not hasattr(self, 'message') or not self.message):
+            self.validation_report.missing_fields.add('action.message')
+
     def validate_specific(self, missing_fields):
         if not hasattr(self, 'clazz') or not self.__getattribute__('clazz'):
             missing_fields.append('action.class')
