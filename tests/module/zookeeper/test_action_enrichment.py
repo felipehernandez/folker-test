@@ -1,3 +1,4 @@
+from folker.module.void.action import VoidStageAction
 from folker.module.zookeeper.action import ZookeeperStageAction, ZookeeperMethod
 
 
@@ -25,4 +26,16 @@ class TestZookeeperActionEnrichment:
 
         assert enriched.method == ZookeeperMethod.EXISTS
         assert enriched.host == 'another_host'
+        assert enriched.node == 'a_node'
+
+    def test_enrich_void(self):
+        original = ZookeeperStageAction(method=ZookeeperMethod.EXISTS.name,
+                                        host='a_host',
+                                        node='a_node')
+        enrichment = VoidStageAction()
+
+        enriched = original + enrichment
+
+        assert enriched.method == ZookeeperMethod.EXISTS
+        assert enriched.host == 'a_host'
         assert enriched.node == 'a_node'

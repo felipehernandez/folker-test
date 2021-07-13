@@ -1,3 +1,4 @@
+from folker.module.void.action import VoidStageAction
 from folker.module.wait.action import WaitStageAction
 
 
@@ -17,4 +18,11 @@ class TestWaitActionEnrichment:
         enriched = original + enrichment
 
         assert enriched.time == 3
-        assert enriched.time == 3
+
+    def test_enrich_void(self):
+        original = WaitStageAction(time=2)
+        enrichment = VoidStageAction()
+
+        enriched = original + enrichment
+
+        assert enriched.time == 2

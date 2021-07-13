@@ -9,6 +9,7 @@ from folker.logger import TestLogger
 from folker.model import Context
 from folker.model import StageAction
 from folker.model.error import InvalidSchemaDefinitionException
+from folker.module.void.action import VoidStageAction
 
 
 class RestMethod(Enum):
@@ -58,6 +59,8 @@ class RestStageAction(StageAction):
 
     def __add__(self, enrichment: 'RestStageAction'):
         result = self.__copy__()
+        if isinstance(enrichment, VoidStageAction):
+            return result
 
         if enrichment.host:
             result.host = enrichment.host

@@ -8,6 +8,7 @@ from folker.logger import TestLogger
 from folker.model import Context
 from folker.model import StageAction
 from folker.model.error import InvalidSchemaDefinitionException
+from folker.module.void.action import VoidStageAction
 
 
 class ZookeeperMethod(Enum):
@@ -50,6 +51,8 @@ class ZookeeperStageAction(StageAction):
 
     def __add__(self, enrichment: 'ZookeeperStageAction'):
         result = self.__copy__()
+        if isinstance(enrichment, VoidStageAction):
+            return result
 
         if enrichment.host:
             result.host = enrichment.host

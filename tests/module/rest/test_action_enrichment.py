@@ -1,4 +1,5 @@
 from folker.module.rest.action import RestStageAction, RestMethod
+from folker.module.void.action import VoidStageAction
 
 
 class TestRestActionEnrichment:
@@ -237,3 +238,13 @@ class TestRestActionEnrichment:
         assert enriched.host == 'a_host'
         assert enriched.body_json == {'key_1': {'key_1_1': 'value_1_1',
                                                 'key_1_2': 'value_1_2'}}
+
+    def test_enrich_void(self):
+        original = RestStageAction(method=RestMethod.GET.name,
+                                   host='a_host')
+        enrichment = VoidStageAction()
+
+        enriched = original + enrichment
+
+        assert enriched.method == RestMethod.GET
+        assert enriched.host == 'a_host'

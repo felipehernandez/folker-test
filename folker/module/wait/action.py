@@ -4,6 +4,7 @@ from folker.decorator import loggable_action, resolvable_variables, timed_action
 from folker.logger import TestLogger
 from folker.model import Context
 from folker.model import StageAction
+from folker.module.void.action import VoidStageAction
 
 
 class WaitStageAction(StageAction):
@@ -15,6 +16,9 @@ class WaitStageAction(StageAction):
 
     def __add__(self, enrichment: 'WaitStageAction'):
         result = self.__copy__()
+
+        if isinstance(enrichment, VoidStageAction):
+            return result
 
         if enrichment.time:
             result.time = enrichment.time

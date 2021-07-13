@@ -16,17 +16,6 @@ class TestWaitAction:
         self.action = WaitStageAction()
         yield
 
-    def test_validate_missing_time(self):
-        with raises(InvalidSchemaDefinitionException) as execution_context:
-            self.action.validate()
-
-        assert 'action.time' in execution_context.value.details['missing_fields']
-
-    def test_validate_correct(self):
-        self.action.time = 3
-
-        self.action.validate()
-
     def test_execution(self):
         logger = Mock()
 
