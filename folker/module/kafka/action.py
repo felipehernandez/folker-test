@@ -8,6 +8,7 @@ from folker.decorator import loggable_action, resolvable_variables, timed_action
 from folker.logger import TestLogger
 from folker.model import StageAction, Context
 from folker.model.error import InvalidSchemaDefinitionException
+from folker.module.void.action import VoidStageAction
 
 
 class KafkaMethod(Enum):
@@ -23,7 +24,7 @@ class KafkaStageAction(StageAction):
     topic: str
     key: str = None
     message: str = None
-    headers: dict = {}
+    headers: dict = None
     group: str
 
     def __init__(self,
@@ -47,8 +48,27 @@ class KafkaStageAction(StageAction):
         self.topic = topic
         self.key = key
         self.message = message
-        self.headers = headers
+        self.headers = headers if headers else {}
         self.group = group
+
+    def __add__(self, enrichment: 'KafkaStageAction'):
+        result = self.__copy__()
+        if isinstance(enrichment, VoidStageAction):
+            return result
+
+        if enrichment.host:
+            result.host = enrichment.host
+        if enrichment.topic:
+            result.topic = enrichment.topic
+        if enrichment.key:
+            result.key = enrichment.key
+        if enrichment.message:
+            result.message = enrichment.message
+        if enrichment.group:
+            result.group = enrichment.group
+        result.headers = {**self.headers, **enrichment.headers}
+
+        return result
 
     def __copy__(self):
         return deepcopy(self)
@@ -59,6 +79,12 @@ class KafkaStageAction(StageAction):
             'method',
             'topic'
         ]
+
+    def _validate_specific(self):
+        if hasattr(self, 'method') and KafkaMethod.PUBLISH is self.method:
+            if (not hasattr(self, 'message') or not self.message) \
+                    and (not hasattr(self, 'key') or not self.key):
+                self.validation_report.missing_fields.update({'action.key', 'action.message'})
 
     def validate_specific(self, missing_fields):
         if hasattr(self, 'method') and KafkaMethod.PUBLISH is self.method:
