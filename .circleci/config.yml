@@ -32,8 +32,8 @@ jobs:
           command: |
             coverage run -m pytest --junitxml codecoverage/unittests.xml
             coverage report -m
-            coverage xml -o codecoverage/coverage.xml
-            coverage html
+            coverage xml --omit='*/venv/*','tests/*' -o codecoverage/coverage.xml
+            coverage html --omit='*/venv/*','tests/*' -d codecoverage
       - store_test_results:
           path: codecoverage
       - store_artifacts:
