@@ -1,7 +1,8 @@
+from folker.decorator import timed_action, resolvable_variables, loggable_action
 from folker.logger import TestLogger
 from folker.model import Context
 from folker.model import StageAction
-from folker.decorator import timed_action, resolvable_variables, loggable_action
+from folker.module.void.action import VoidStageAction
 
 
 class CodeStageAction(StageAction):
@@ -17,7 +18,20 @@ class CodeStageAction(StageAction):
         super().__init__()
         self.module = module
         self.method = method
-        self.parameters = parameters
+        self.parameters = parameters if parameters else {}
+
+    def __add__(self, enrichment: 'CodeStageAction'):
+        result = self.__copy__()
+        if isinstance(enrichment, VoidStageAction):
+            return result
+
+        if enrichment.module:
+            result.module = enrichment.module
+        if enrichment.method:
+            result.method = enrichment.method
+        result.parameters = {**self.parameters, **enrichment.parameters}
+
+        return result
 
     def mandatory_fields(self) -> [str]:
         return [

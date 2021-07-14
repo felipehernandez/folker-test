@@ -1,10 +1,11 @@
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 
+from folker.decorator import timed_action, resolvable_variables, loggable_action
 from folker.logger import TestLogger
 from folker.model import Context
 from folker.model import StageAction
-from folker.decorator import timed_action, resolvable_variables, loggable_action
+from folker.module.void.action import VoidStageAction
 
 
 class GraphQLStageAction(StageAction):
@@ -29,17 +30,31 @@ class GraphQLStageAction(StageAction):
         self.query = query
         self.mutation = mutation
 
+    def __add__(self, enrichment: 'GraphQLStageAction'):
+        result = self.__copy__()
+        if isinstance(enrichment, VoidStageAction):
+            return result
+
+        if enrichment.host:
+            result.host = enrichment.host
+        if enrichment.uri:
+            result.uri = enrichment.uri
+        if enrichment.query:
+            result.query = enrichment.query
+        if enrichment.mutation:
+            result.mutation = enrichment.mutation
+
+        return result
+
     def mandatory_fields(self) -> [str]:
         return [
             'host'
         ]
 
-    def validate_specific(self, missing_fields):
+    def _validate_specific(self):
         if (not hasattr(self, 'query') or not self.__getattribute__('query')) and \
                 (not hasattr(self, 'mutation') or not self.__getattribute__('mutation')):
-            missing_fields.extend(['action.query', 'action.mutation'])
-
-        return missing_fields
+            self.validation_report.missing_fields.update(['action.query', 'action.mutation'])
 
     @loggable_action
     @resolvable_variables

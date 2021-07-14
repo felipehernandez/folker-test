@@ -4,19 +4,21 @@ from folker.model.stage import StageStep
 
 
 class StageLog(StageStep):
-    logs: [str]
+    logs: set
 
-    def __init__(self, logs: [str] = []) -> None:
+    def __init__(self, logs: [str] = None) -> None:
         super().__init__()
-        self.logs = logs if logs else []
+        self.logs = set(logs) if logs else set()
 
-    def enrich(self, template: 'StageLog'):
-        new_data = []
-        new_data.extend(self.logs + template.logs)
-        self.logs = new_data
+    def __bool__(self):
+        return True
 
-    def validate(self):
-        pass
+    def __add__(self, enrichment: 'StageLog'):
+        result = StageLog()
+
+        result.logs = self.logs | enrichment.logs
+
+        return result
 
     def execute(self, logger: TestLogger, context: Context) -> Context:
         for log in self.logs:

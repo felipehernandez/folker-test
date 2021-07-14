@@ -1,7 +1,8 @@
+from folker.decorator import timed_action, resolvable_variables, loggable_action
 from folker.logger import TestLogger
 from folker.model import Context
 from folker.model import StageAction
-from folker.decorator import timed_action, resolvable_variables, loggable_action
+from folker.module.void.action import VoidStageAction
 
 
 class PrintStageAction(StageAction):
@@ -10,6 +11,17 @@ class PrintStageAction(StageAction):
     def __init__(self, message: str = None, **kargs) -> None:
         super().__init__()
         self.message = message
+
+    def __add__(self, enrichment: 'WaitStageAction'):
+        result = self.__copy__()
+
+        if isinstance(enrichment, VoidStageAction):
+            return result
+
+        if enrichment.message:
+            result.message = enrichment.message
+
+        return result
 
     def mandatory_fields(self):
         return [

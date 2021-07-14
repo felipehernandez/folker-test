@@ -2,12 +2,14 @@ import json
 from enum import Enum, auto
 
 import requests
+from mergedeep import merge
 
+from folker.decorator import timed_action, resolvable_variables, loggable_action
 from folker.logger import TestLogger
 from folker.model import Context
-from folker.model.error import InvalidSchemaDefinitionException
 from folker.model import StageAction
-from folker.decorator import timed_action, resolvable_variables, loggable_action
+from folker.model.error import InvalidSchemaDefinitionException
+from folker.module.void.action import VoidStageAction
 
 
 class RestMethod(Enum):
@@ -54,6 +56,28 @@ class RestStageAction(StageAction):
         self.body_json = json
         self.data = data
         self.params = params
+
+    def __add__(self, enrichment: 'RestStageAction'):
+        result = self.__copy__()
+        if isinstance(enrichment, VoidStageAction):
+            return result
+
+        if enrichment.host:
+            result.host = enrichment.host
+        if enrichment.uri:
+            result.uri = enrichment.uri
+        result.params = {**self.params, **enrichment.params}
+        result.headers = {**self.headers, **enrichment.headers}
+        if enrichment.body:
+            result.body = enrichment.body
+        if enrichment.data:
+            result.data = enrichment.data
+        if enrichment.body_json or enrichment.body_json:
+            self_json = self.body_json if self.body_json else {}
+            template_json = enrichment.body_json if enrichment.body_json else {}
+            result.body_json = merge(self_json, template_json)
+
+        return result
 
     def mandatory_fields(self) -> [str]:
         return [
