@@ -20,7 +20,7 @@ def test_test_validation_stage_validation_error(mocker):
 
     assert not test
     assert not test.validation_report
-    assert 'test.TestName.a_missing_field' in test.validation_report.missing_fields
+    assert 'test[TestName].a_missing_field' in test.validation_report.missing_fields
 
 
 def test_test_validation_stage_valid(mocker):

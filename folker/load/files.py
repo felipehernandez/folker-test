@@ -51,7 +51,7 @@ def load_schemas(logger: SystemLogger, file_name: str, schema, template: bool = 
     for filename in Path('./').absolute().glob(file_name):
         if _should_load_file(filename.name, template, selected_test_files):
             schema_definition = load_schema(filename, schema, valid_files, logger)
-            if schema_definition:
+            if schema_definition is not None:
                 if not template:
                     _enrich_stages(schema_definition)
                 schemas.append(schema_definition)

@@ -40,7 +40,7 @@ class Test(Validatable):
 
         for stage in self.stages:
             if not stage:
-                self.validation_report.merge_with_prefix('test.' + self.name + '.',
+                self.validation_report.merge_with_prefix('test[{name}].'.format(name=self.name),
                                                          stage.validation_report)
 
         return bool(self.validation_report)

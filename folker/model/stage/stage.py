@@ -70,7 +70,7 @@ class Stage(Validatable):
             self.validation_report.missing_fields.add('stage.id')
 
         if not self.action:
-            self.validation_report.merge_with_prefix('stage.{name}.'.format(name=self.name),
+            self.validation_report.merge_with_prefix('stage[{name}].'.format(name=self.name),
                                                      self.action.validation_report)
         if not self.save:
             self.validation_report + self.save.validation_report

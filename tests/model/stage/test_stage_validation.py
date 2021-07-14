@@ -25,7 +25,7 @@ class TestStageValidation:
 
         assert not stage
         assert not stage.validation_report
-        assert 'stage.a_name.action.time' in stage.validation_report.missing_fields
+        assert 'stage[a_name].action.time' in stage.validation_report.missing_fields
 
     def test_validate_incorrect_action_no_name(self):
         stage = Stage(action=WaitStageAction())
@@ -34,4 +34,4 @@ class TestStageValidation:
         assert not stage.validation_report
         assert 'stage.name' in stage.validation_report.missing_fields
         assert 'stage.id' in stage.validation_report.missing_fields
-        assert 'stage.None.action.time' in stage.validation_report.missing_fields
+        assert 'stage[None].action.time' in stage.validation_report.missing_fields
