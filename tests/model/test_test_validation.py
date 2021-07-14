@@ -1,16 +1,13 @@
-import pytest
-
 from folker.model import Test
-from folker.model.error import InvalidSchemaDefinitionException
+from folker.model.validation import ValidationReport
 
 
 def test_test_validation_missing_name():
     test = Test()
 
-    with pytest.raises(InvalidSchemaDefinitionException) as raise_exception:
-        test.validate()
-
-    assert raise_exception.value.details['missing_fields'] == ['test.name']
+    assert not test
+    assert not test.validation_report
+    assert 'test.name' in test.validation_report.missing_fields
 
 
 def test_test_validation_stage_validation_error(mocker):
@@ -18,12 +15,12 @@ def test_test_validation_stage_validation_error(mocker):
 
     test = Test(name='TestName', stages=[mocked_stage])
 
-    mocked_stage.validate.side_effect = InvalidSchemaDefinitionException(wrong_fields=['field'])
+    mocked_stage.__bool__.return_value = False
+    mocked_stage.validation_report = ValidationReport(missing_fields={'a_missing_field'})
 
-    with pytest.raises(InvalidSchemaDefinitionException) as raise_exception:
-        test.validate()
-
-    assert raise_exception.value.details['wrong_fields'] == ['TestName.field']
+    assert not test
+    assert not test.validation_report
+    assert 'test.TestName.a_missing_field' in test.validation_report.missing_fields
 
 
 def test_test_validation_stage_valid(mocker):
@@ -31,8 +28,7 @@ def test_test_validation_stage_valid(mocker):
 
     test = Test(name="TestName", stages=[mocked_stage])
 
-    mocked_stage.validate.return_value = None
+    mocked_stage.__bool__.return_value = True
 
-    test.validate()
-
-    assert True
+    assert test
+    assert test.validation_report

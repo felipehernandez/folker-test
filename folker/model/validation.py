@@ -1,5 +1,7 @@
 from abc import ABC
 
+from folker.model.error import InvalidSchemaDefinitionException
+
 
 class ValidationReport:
     missing_fields: set
@@ -16,6 +18,17 @@ class ValidationReport:
     def __add__(self, other: 'ValidationReport'):
         self.missing_fields.update(other.missing_fields)
         self.wrong_fields.update(other.wrong_fields)
+
+    def merge_with_prefix(self, prefix: str, report: 'ValidationReport'):
+        self.missing_fields.update({'{prefix}{field}'.format(prefix=prefix, field=field)
+                                    for field in report.missing_fields})
+        self.wrong_fields.update({'{prefix}{field}'.format(prefix=prefix, field=field)
+                                  for field in report.wrong_fields})
+
+    def generate_error(self):
+        if not self:
+            raise InvalidSchemaDefinitionException(missing_fields=self.missing_fields,
+                                                   wrong_fields=self.wrong_fields)
 
 
 class Validatable(ABC):

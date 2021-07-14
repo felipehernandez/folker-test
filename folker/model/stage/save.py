@@ -8,24 +8,22 @@ from folker.model.stage import StageStep
 class StageSave(StageStep):
     save: dict
 
-    def __init__(self, save: dict = {}) -> None:
+    def __init__(self, save: dict = None) -> None:
         super().__init__()
         self.save = save if save else {}
 
     def __bool__(self):
         return True
 
-    def __add__(self, template: 'StageSave'):
-        self.save = {**self.save, **template.save}
-
     def __copy__(self):
         return copy(self)
 
-    def enrich(self, template: 'StageSave'):
-        self.save = {**self.save, **template.save}
+    def __add__(self, enrichment: 'StageSave'):
+        result = StageSave()
 
-    def validate(self):
-        pass
+        result.save = {**self.save, **enrichment.save}
+
+        return result
 
     def execute(self, logger: TestLogger, context: Context) -> Context:
         for (variable, saving) in self.save.items():

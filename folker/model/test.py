@@ -1,11 +1,11 @@
 from folker.logger import TestLogger
+from folker.model import Validatable
 from folker.model.context import Context
 from folker.model.error.error import SourceException
-from folker.model.error.load import InvalidSchemaDefinitionException
 from folker.model.stage.stage import Stage
 
 
-class Test:
+class Test(Validatable):
     id: str
     name: str
     description: str
@@ -34,20 +34,16 @@ class Test:
         self.tags = tags
         self.stages = stages
 
-    def validate(self):
-        missing_fields = []
+    def __bool__(self):
         if self.name is None:
-            missing_fields.append('test.name')
-
-        if len(missing_fields) > 0:
-            raise InvalidSchemaDefinitionException(missing_fields=missing_fields)
+            self.validation_report.missing_fields.add('test.name')
 
         for stage in self.stages:
-            try:
-                stage.validate()
-            except InvalidSchemaDefinitionException as e:
-                message = '{}.{}'.format(self.name, e.details['wrong_fields'][0])
-                raise InvalidSchemaDefinitionException(wrong_fields=[message])
+            if not stage:
+                self.validation_report.merge_with_prefix('test.' + self.name + '.',
+                                                         stage.validation_report)
+
+        return bool(self.validation_report)
 
     def execute(self, logger: TestLogger, context: Context = None):
         if context is None:

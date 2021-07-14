@@ -39,7 +39,8 @@ def _enrich_stages(schema_definition: Test):
                                 if stage.id is not None and stage.id in stage_templates
                                 else stage
                                 for stage in schema_definition.stages]
-    schema_definition.validate()
+    if not schema_definition:
+        schema_definition.validation_report.generate_error()
 
 
 def load_schemas(logger: SystemLogger, file_name: str, schema, template: bool = False):
