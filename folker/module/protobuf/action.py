@@ -9,6 +9,7 @@ from folker.logger import TestLogger
 from folker.model import Context
 from folker.model import StageAction
 from folker.model.error import InvalidSchemaDefinitionException
+from folker.module.void.action import VoidStageAction
 
 
 class ProtobufMethod(Enum):
@@ -38,10 +39,26 @@ class ProtobufStageAction(StageAction):
             except:
                 raise InvalidSchemaDefinitionException(wrong_fields=['action.method'])
 
-        self.package = package + '_pb2' if package else None
+        self.package = package if package else None
         self.clazz = clazz
         self.data = data
         self.message = message
+
+    def __add__(self, enrichment: 'ProtobufStageAction'):
+        result = self.__copy__()
+        if isinstance(enrichment, VoidStageAction):
+            return result
+
+        if enrichment.package:
+            result.package = enrichment.package
+        if enrichment.clazz:
+            result.clazz = enrichment.clazz
+        if enrichment.data:
+            result.data = enrichment.data
+        if enrichment.message:
+            result.message = enrichment.message
+
+        return result
 
     def mandatory_fields(self) -> [str]:
         return [
@@ -49,20 +66,18 @@ class ProtobufStageAction(StageAction):
             'package'
         ]
 
-    def validate_specific(self, missing_fields):
+    def _validate_specific(self):
         if not hasattr(self, 'clazz') or not self.__getattribute__('clazz'):
-            missing_fields.append('action.class')
+            self.validation_report.missing_fields.add('action.class')
 
         if hasattr(self, 'method') \
                 and self.method == ProtobufMethod.CREATE \
                 and (not hasattr(self, 'data') or not self.data):
-            missing_fields.append('action.data')
+            self.validation_report.missing_fields.add('action.data')
         if hasattr(self, 'method') \
                 and self.method == ProtobufMethod.LOAD \
                 and (not hasattr(self, 'message') or not self.message):
-            missing_fields.append('action.message')
-
-        return missing_fields
+            self.validation_report.missing_fields.add('action.message')
 
     @loggable_action
     @resolvable_variables
@@ -81,7 +96,7 @@ class ProtobufStageAction(StageAction):
         return context
 
     def _create(self, context: Context):
-        mod = __import__(self.package, fromlist=[self.clazz])
+        mod = __import__(self.package + '_pb2', fromlist=[self.clazz])
         Proto = getattr(mod, self.clazz)
         parsed_object = json_format.Parse(json.dumps(self.data),
                                           Proto(),
@@ -104,7 +119,7 @@ class ProtobufStageAction(StageAction):
             context.save_on_stage('proto_serialize_utf8', '')
 
     def _load(self, context: Context):
-        proto_package = self.package
+        proto_package = self.package + '_pb2'
         proto_class = self.clazz
         message = self.message
 

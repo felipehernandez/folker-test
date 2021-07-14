@@ -1,11 +1,11 @@
 import os
 from enum import Enum, auto
 
+from folker.decorator import timed_action, resolvable_variables, loggable_action
 from folker.logger import TestLogger
 from folker.model import Context
-from folker.model.error import InvalidSchemaDefinitionException
 from folker.model import StageAction
-from folker.decorator import timed_action, resolvable_variables, loggable_action
+from folker.module.void.action import VoidStageAction
 
 
 class FileMethod(Enum):
@@ -15,7 +15,7 @@ class FileMethod(Enum):
 
 
 class FileStageAction(StageAction):
-    method: FileMethod
+    method: FileMethod = None
     file: str
     content: str
 
@@ -28,10 +28,22 @@ class FileStageAction(StageAction):
         try:
             self.method = FileMethod[method]
         except:
-            raise InvalidSchemaDefinitionException(wrong_fields=['action.method'])
+            self.validation_report.wrong_fields.add('action.method')
 
         self.file = file
         self.content = content
+
+    def __add__(self, enrichment: 'FileStageAction'):
+        result = self.__copy__()
+        if isinstance(enrichment, VoidStageAction):
+            return result
+
+        if enrichment.file:
+            result.file = enrichment.file
+        if enrichment.content:
+            result.content = enrichment.content
+
+        return result
 
     def mandatory_fields(self) -> [str]:
         return [
@@ -39,12 +51,11 @@ class FileStageAction(StageAction):
             'file'
         ]
 
-    def validate_specific(self, missing_fields):
-        if FileMethod.WRITE == self.method and \
-                (not hasattr(self, 'content') or not self.__getattribute__('content')):
-            missing_fields.extend(['action.content'])
-
-        return missing_fields
+    def _validate_specific(self):
+        if (self.method
+                and FileMethod.WRITE == self.method
+                and (not hasattr(self, 'content') or not self.__getattribute__('content'))):
+            self.validation_report.missing_fields.add('action.content')
 
     @loggable_action
     @resolvable_variables

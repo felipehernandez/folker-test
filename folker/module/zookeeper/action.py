@@ -7,6 +7,7 @@ from folker.logger import TestLogger
 from folker.model import Context
 from folker.model import StageAction
 from folker.model.error import InvalidSchemaDefinitionException
+from folker.module.void.action import VoidStageAction
 
 
 class ZookeeperMethod(Enum):
@@ -47,6 +48,24 @@ class ZookeeperStageAction(StageAction):
         self.ephemeral = ephemeral
         self.version = version
 
+    def __add__(self, enrichment: 'ZookeeperStageAction'):
+        result = self.__copy__()
+        if isinstance(enrichment, VoidStageAction):
+            return result
+
+        if enrichment.host:
+            result.host = enrichment.host
+        if enrichment.node:
+            result.node = enrichment.node
+        if enrichment.data:
+            result.data = enrichment.data
+        if enrichment.ephemeral:
+            result.ephemeral = enrichment.ephemeral
+        if enrichment.version:
+            result.version = enrichment.version
+
+        return result
+
     def mandatory_fields(self) -> [str]:
         return [
             'method',
@@ -54,27 +73,10 @@ class ZookeeperStageAction(StageAction):
             'node'
         ]
 
-    def validate_specific(self, missing_fields):
+    def _validate_specific(self):
         if hasattr(self, 'method') and ZookeeperMethod.SET is self.method:
-            missing_fields.extend(self._validate_put_values())
-
-        return missing_fields
-
-    def _validate_create_values(self) -> [str]:
-        missing_fields = []
-
-        if not hasattr(self, 'data'):
-            missing_fields.append('action.data')
-
-        return missing_fields
-
-    def _validate_put_values(self) -> [str]:
-        missing_fields = []
-
-        if not hasattr(self, 'data'):
-            missing_fields.append('action.data')
-
-        return missing_fields
+            if not hasattr(self, 'data') or not self.data:
+                self.validation_report.missing_fields.add('action.data')
 
     @loggable_action
     @resolvable_variables

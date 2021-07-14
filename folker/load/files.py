@@ -35,10 +35,12 @@ def load_test_files(logger: SystemLogger) -> [Test]:
 
 
 def _enrich_stages(schema_definition: Test):
-    for stage in schema_definition.stages:
-        if stage.id is not None and stage.id in stage_templates:
-            stage.enrich(stage_templates.get(stage.id))
-    schema_definition.validate()
+    schema_definition.stages = [stage_templates.get(stage.id) + stage
+                                if stage.id is not None and stage.id in stage_templates
+                                else stage
+                                for stage in schema_definition.stages]
+    if not schema_definition:
+        schema_definition.validation_report.generate_error()
 
 
 def load_schemas(logger: SystemLogger, file_name: str, schema, template: bool = False):
@@ -49,7 +51,7 @@ def load_schemas(logger: SystemLogger, file_name: str, schema, template: bool = 
     for filename in Path('./').absolute().glob(file_name):
         if _should_load_file(filename.name, template, selected_test_files):
             schema_definition = load_schema(filename, schema, valid_files, logger)
-            if schema_definition:
+            if schema_definition is not None:
                 if not template:
                     _enrich_stages(schema_definition)
                 schemas.append(schema_definition)
