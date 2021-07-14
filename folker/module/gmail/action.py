@@ -11,9 +11,9 @@ from oauth2client import file
 
 from folker.decorator import timed_action, resolvable_variables, loggable_action
 from folker.logger import TestLogger
-from folker.model import StageAction
 from folker.model import Context
-from folker.model.error import InvalidSchemaDefinitionException
+from folker.model import StageAction
+from folker.module.void.action import VoidStageAction
 
 
 class GmailMethod(Enum):
@@ -47,7 +47,7 @@ class GmailStageAction(StageAction):
             try:
                 self.method = GmailMethod[method]
             except:
-                raise InvalidSchemaDefinitionException(wrong_fields=['action.method'])
+                self.validation_report.wrong_fields.add('action.method')
 
         self.credentials_path = credentials_path
         self.sender = sender
@@ -57,8 +57,29 @@ class GmailStageAction(StageAction):
         self.text = text
         self.html = html
 
+    def __add__(self, enrichment: 'GmailStageAction'):
+        result = self.__copy__()
+        if isinstance(enrichment, VoidStageAction):
+            return result
+
+        if enrichment.credentials_path:
+            result.credentials_path = enrichment.credentials_path
+        if enrichment.sender:
+            result.sender = enrichment.sender
+        result.recipients = self.recipients + enrichment.recipients
+        result.hidden_recipients = self.hidden_recipients + enrichment.hidden_recipients
+        if enrichment.subject:
+            result.subject = enrichment.subject
+        if enrichment.text:
+            result.text = enrichment.text
+        if enrichment.html:
+            result.html = enrichment.html
+
+        return result
+
     def mandatory_fields(self) -> [str]:
         return [
+            'method',
             'sender',
             'recipients',
             'subject'

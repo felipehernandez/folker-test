@@ -9,22 +9,24 @@ from folker.model.stage import StageStep
 
 
 class StageAssertions(StageStep):
-    assertions: [str]
+    assertions: set
 
-    def __init__(self, assertions: [str] = []) -> None:
+    def __init__(self, assertions: [str] = None) -> None:
         super().__init__()
-        self.assertions = assertions
+        self.assertions = set(assertions) if assertions else set()
 
-    def enrich(self, template: 'StageAssertions'):
-        new_data = []
-        new_data.extend(self.assertions + template.assertions)
-        self.assertions = new_data
-
-    def validate(self):
-        pass
+    def __bool__(self):
+        return True
 
     def __copy__(self):
         return copy(self)
+
+    def __add__(self, enrichment: 'StageAssertions'):
+        result = StageAssertions()
+
+        result.assertions = self.assertions | enrichment.assertions
+
+        return result
 
     def execute(self, logger: TestLogger, context: Context) -> Context:
         assertion_definitions = self.assertions
