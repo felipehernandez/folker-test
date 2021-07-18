@@ -8,7 +8,7 @@ class TestStageAssertionsValidation:
 
         result = stage + template
 
-        assert result.assertions == set()
+        assert result.assertions == []
 
     def test_enrich_stage_empty(self):
         stage = StageAssertions()
@@ -16,7 +16,7 @@ class TestStageAssertionsValidation:
 
         result = stage + template
 
-        assert result.assertions == {'an_assertion'}
+        assert result.assertions == ['an_assertion']
 
     def test_enrich_template_empty(self):
         stage = StageAssertions(assertions=['an_assertion'])
@@ -24,8 +24,8 @@ class TestStageAssertionsValidation:
 
         result = stage + template
 
-        assert template.assertions == set()
-        assert stage.assertions == {'an_assertion'}
+        assert template.assertions == []
+        assert stage.assertions == ['an_assertion']
 
     def test_enrich_none_empty(self):
         stage = StageAssertions(assertions=['an_assertion'])
@@ -33,7 +33,7 @@ class TestStageAssertionsValidation:
 
         result = stage + template
 
-        assert result.assertions == {'an_assertion', 'another_assertion'}
+        assert result.assertions == ['an_assertion', 'another_assertion']
 
     def test_enrich_overlapping(self):
         stage = StageAssertions(assertions=['an_assertion', 'another_assertion'])
@@ -41,4 +41,4 @@ class TestStageAssertionsValidation:
 
         result = stage + template
 
-        assert result.assertions == {'an_assertion', 'another_assertion', 'and_another_assertion'}
+        assert result.assertions == ['an_assertion', 'another_assertion', 'and_another_assertion']

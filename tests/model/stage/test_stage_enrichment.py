@@ -55,7 +55,7 @@ class TestStageEnrichment:
         result = original + enrichment
 
         assert result.action.time == 2
-        assert result.log.logs == {'a_log'}
+        assert result.log.logs == ['a_log']
 
     def test_enrich_assertions(self):
         original = Stage(name='a_name',
@@ -66,4 +66,4 @@ class TestStageEnrichment:
         result = original + enrichment
 
         assert result.action.time == 2
-        assert result.assertions.assertions == {'an_assertion'}
+        assert result.assertions.assertions == ['an_assertion']

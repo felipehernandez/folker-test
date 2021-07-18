@@ -9,11 +9,11 @@ from folker.model.stage import StageStep
 
 
 class StageAssertions(StageStep):
-    assertions: set
+    assertions: list
 
     def __init__(self, assertions: [str] = None) -> None:
         super().__init__()
-        self.assertions = set(assertions) if assertions else set()
+        self.assertions = assertions if assertions else []
 
     def __bool__(self):
         return True
@@ -24,7 +24,10 @@ class StageAssertions(StageStep):
     def __add__(self, enrichment: 'StageAssertions'):
         result = StageAssertions()
 
-        result.assertions = self.assertions | enrichment.assertions
+        result.assertions = [assertion for assertion in self.assertions] + \
+                            [assertion
+                             for assertion in enrichment.assertions
+                             if assertion not in self.assertions]
 
         return result
 

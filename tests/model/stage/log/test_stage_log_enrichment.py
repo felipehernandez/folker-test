@@ -8,7 +8,7 @@ class TestStageLogValidation:
 
         result = stage + template
 
-        assert result.logs == set()
+        assert result.logs == []
 
     def test_enrich_stage_empty(self):
         stage = StageLog()
@@ -16,7 +16,7 @@ class TestStageLogValidation:
 
         result = stage + template
 
-        assert result.logs == {'a_log'}
+        assert result.logs == ['a_log']
 
     def test_enrich_template_empty(self):
         stage = StageLog(['a_log'])
@@ -24,7 +24,7 @@ class TestStageLogValidation:
 
         result = stage + template
 
-        assert result.logs == {'a_log'}
+        assert result.logs == ['a_log']
 
     def test_enrich_none_empty(self):
         stage = StageLog(['a_log'])
@@ -32,7 +32,7 @@ class TestStageLogValidation:
 
         result = stage + template
 
-        assert result.logs == {'a_log', 'another_log'}
+        assert result.logs == ['a_log', 'another_log']
 
     def test_enrich_overlapping(self):
         stage = StageLog(['a_log', 'another_log'])
@@ -40,4 +40,4 @@ class TestStageLogValidation:
 
         result = stage + template
 
-        assert result.logs == {'a_log', 'another_log', 'and_another_one'}
+        assert result.logs == ['a_log', 'another_log', 'and_another_one']

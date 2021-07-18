@@ -4,11 +4,11 @@ from folker.model.stage import StageStep
 
 
 class StageLog(StageStep):
-    logs: set
+    logs: list
 
     def __init__(self, logs: [str] = None) -> None:
         super().__init__()
-        self.logs = set(logs) if logs else set()
+        self.logs = logs if logs else []
 
     def __bool__(self):
         return True
@@ -16,7 +16,8 @@ class StageLog(StageStep):
     def __add__(self, enrichment: 'StageLog'):
         result = StageLog()
 
-        result.logs = self.logs | enrichment.logs
+        result.logs = [log for log in self.logs] + \
+                      [log for log in enrichment.logs if log not in self.logs]
 
         return result
 
