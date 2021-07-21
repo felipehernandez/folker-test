@@ -131,9 +131,9 @@ workflows:
             equal: [ main, << pipeline.git.branch >> ]
     jobs:
       - build
-      - setup-integration-tests:
-          requires:
-            - build
+#      - setup-integration-tests:
+#          requires:
+#            - build
       - run-integration-tests:
           matrix:
             parameters:
@@ -161,7 +161,8 @@ workflows:
                 - pubsub
                 - datastore
           requires:
-            - setup-integration-tests
+#            - setup-integration-tests
+            - build
       - validate-integration-tests:
           requires:
             - run-integration-tests
