@@ -155,6 +155,8 @@ services:
       context: .
       dockerfile: Dockerfile-integration
     command: -t protobuf -n 2 --trace
+    depends_on:
+      - mockserver
   integration-tests-grpc:
     build:
       context: .
