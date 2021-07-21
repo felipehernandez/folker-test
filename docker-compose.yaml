@@ -154,7 +154,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-integration
-    command: -t protobuf -n 1 --trace
+    command: -t protobuf -n 2 --trace
   integration-tests-grpc:
     build:
       context: .
