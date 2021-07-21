@@ -64,7 +64,7 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      - run: docker-compose up integration-tests-<<parameters.tests>>
+      - run: eval ${docker_compose} up integration-tests-<<parameters.tests>>
 
   validate-integration-tests:
     executor: integration-test-runner
@@ -138,26 +138,26 @@ workflows:
           matrix:
             parameters:
               tests:
-                - profile
-                - template
-                - profile
-                - parallel
-                - conditional
-                - foreach
-                - save
-                - void
-                - print
-                - wait
-                - rest
-                - postgres
-                - file
-                - code
-                - gmail
-                - protobuf
-                - grpc
-                - graphql
-                - kafka
-                - zookeeper
+#                - profile
+#                - template
+#                - profile
+#                - parallel
+#                - conditional
+#                - foreach
+#                - save
+#                - void
+#                - print
+#                - wait
+#                - rest
+#                - postgres
+#                - file
+#                - code
+#                - gmail
+#                - protobuf
+#                - grpc
+#                - graphql
+#                - kafka
+#                - zookeeper
                 - pubsub
                 - datastore
           requires:
