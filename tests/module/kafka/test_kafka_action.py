@@ -39,7 +39,7 @@ class TestKafkaAction:
         KafkaProducer.return_value.send.assert_called_with(topic='a-topic',
                                                            key='a-key'.encode(),
                                                            value=None,
-                                                           headers={})
+                                                           headers=[])
         assert context.test_variables == {}
         assert 'elapsed_time' in context.stage_variables
         assert context.stage_variables['topic'] == 'a-topic'

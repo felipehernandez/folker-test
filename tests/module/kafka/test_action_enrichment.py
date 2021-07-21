@@ -18,7 +18,7 @@ class TestKafkaActionEnrichment:
         assert enriched.host == 'a_host'
         assert enriched.topic == 'a_topic'
         assert enriched.key == 'a_key'
-        assert enriched.headers == {'key1': 'value1', 'key2': 'value2'}
+        assert enriched.headers == [('key1', b'value1'), ('key2', b'value2')]
 
     def test_enrich_void(self):
         original = KafkaStageAction(method=KafkaMethod.PUBLISH.name,
