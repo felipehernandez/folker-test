@@ -56,33 +56,33 @@ class TestPubSubAction:
         assert 'ack-id' == context.stage_variables['ack_id']
         assert 'message-id' == context.stage_variables['message_id']
         assert 'a-message' == context.stage_variables['message_content']
-        MockSubscriber.return_value.acknowledge.assert_called_with(
-            request={"subscription": 'subscription-path', "ack_ids": ['ack-id']})
+        MockSubscriber.return_value.acknowledge.assert_called_with(subscription='subscription-path',
+                                                                   ack_ids=['ack-id'])
 
-    @patch('os.path.exists')
-    @patch('folker.module.gcp.pubsub.action.SubscriberClient')
-    @patch('folker.module.gcp.pubsub.action.PublisherClient')
-    def test_simple_nack_subscription_execution(self, MockPublisher, MockSubscriber, mock_os):
-        logger = Mock()
-        mock_os.return_value = True
+        @patch('os.path.exists')
+        @patch('folker.module.gcp.pubsub.action.SubscriberClient')
+        @patch('folker.module.gcp.pubsub.action.PublisherClient')
+        def test_simple_nack_subscription_execution(self, MockPublisher, MockSubscriber, mock_os):
+            logger = Mock()
+            mock_os.return_value = True
 
-        action = PubSubStageAction(method=PubSubMethod.SUBSCRIBE.name,
-                                   project='a-project',
-                                   subscription='a-subscription',
-                                   ack=False)
+            action = PubSubStageAction(method=PubSubMethod.SUBSCRIBE.name,
+                                       project='a-project',
+                                       subscription='a-subscription',
+                                       ack=False)
 
-        MockSubscriber.return_value.subscription_path.return_value = 'subscription-path'
-        received_message = Mock()
-        MockSubscriber.return_value.pull.return_value.received_messages = [received_message]
-        received_message.ack_id = 'ack-id'
-        received_message.message.message_id = 'message-id'
-        received_message.message.data.decode.return_value = 'a-message'
+            MockSubscriber.return_value.subscription_path.return_value = 'subscription-path'
+            received_message = Mock()
+            MockSubscriber.return_value.pull.return_value.received_messages = [received_message]
+            received_message.ack_id = 'ack-id'
+            received_message.message.message_id = 'message-id'
+            received_message.message.data.decode.return_value = 'a-message'
 
-        context = action.execute(logger, context=Context())
+            context = action.execute(logger, context=Context())
 
-        assert {} == context.test_variables
-        assert 'elapsed_time' in context.stage_variables
-        assert 'ack-id' == context.stage_variables['ack_id']
-        assert 'message-id' == context.stage_variables['message_id']
-        assert 'a-message' == context.stage_variables['message_content']
-        assert not MockSubscriber.return_value.acknowledge.assert_not_called()
+            assert {} == context.test_variables
+            assert 'elapsed_time' in context.stage_variables
+            assert 'ack-id' == context.stage_variables['ack_id']
+            assert 'message-id' == context.stage_variables['message_id']
+            assert 'a-message' == context.stage_variables['message_content']
+            assert not MockSubscriber.return_value.acknowledge.assert_not_called()
