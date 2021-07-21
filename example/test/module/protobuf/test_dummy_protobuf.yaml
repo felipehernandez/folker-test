@@ -2,7 +2,7 @@ name: Protobuf Test
 description: Dummy Test for Protobuf Stage
 tags:
   - dummy
-  - proto
+  - protobuf
 
 stages:
   - name: protobuf_write_stage
