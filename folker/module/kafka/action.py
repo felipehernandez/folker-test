@@ -48,8 +48,8 @@ class KafkaStageAction(StageAction):
         self.topic = topic
         self.key = key
         self.message = message
-        self.headers = headers if headers else {}
         self.group = group
+        self.headers = [(key, value.encode()) for key, value in headers.items()] if headers else []
 
     def __add__(self, enrichment: 'KafkaStageAction'):
         result = self.__copy__()
@@ -66,7 +66,7 @@ class KafkaStageAction(StageAction):
             result.message = enrichment.message
         if enrichment.group:
             result.group = enrichment.group
-        result.headers = {**self.headers, **enrichment.headers}
+        result.headers = self.headers + enrichment.headers
 
         return result
 

@@ -2,12 +2,12 @@ certifi==2020.4.5.1
 chardet==4.0.0
 click==7.1.2
 coverage
-google==3.0.0
+google==2.0.3
 google-api-python-client==1.12.8
 google-auth-httplib2
 google-auth-oauthlib
-google-cloud-pubsub==2.6.1
-google-cloud-datastore==2.1.0
+google-cloud-pubsub==1.6.0
+google-cloud-datastore==1.12.0
 gql==2.0.0
 grpcio==1.38.1
 grpcio-tools==1.35.0

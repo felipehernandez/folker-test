@@ -1,7 +1,7 @@
 name: Rest proto test
 tags:
   - rest
-  - proto
+  - protobuf
   - complex
 
 stages:
