@@ -64,7 +64,7 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      - run: eval ${docker_compose} up integration-tests-<<parameters.tests>>
+      - run: eval ${docker_compose up integration-tests-<<parameters.tests>>}
 
   validate-integration-tests:
     executor: integration-test-runner
