@@ -146,8 +146,8 @@ class PubSubStageAction(StageAction):
         subscription_path = self.subscriber.subscription_path(self.project, self.subscription)
 
         self._log_debug(logger, subscription=subscription_path, ack=bool(self.ack))
-        response = self.subscriber.pull(request={"subscription": subscription_path,
-                                                 "max_messages": 1})
+        response = self.subscriber.pull(subscription=subscription_path,
+                                        max_messages=1)
 
         for message in response.received_messages:
             context.save_on_stage('ack_id', message.ack_id)
@@ -157,8 +157,8 @@ class PubSubStageAction(StageAction):
             context.save_on_stage('message_content', message.message.data.decode('UTF-8'))
 
             if self.ack:
-                self.subscriber.acknowledge(request={"subscription": subscription_path,
-                                                     "ack_ids": [message.ack_id]})
+                self.subscriber.acknowledge(subscription=subscription_path,
+                                            ack_ids=[message.ack_id])
 
     def _topics(self, logger: TestLogger, context: Context):
         self.publisher = PublisherClient(channel=grpc.insecure_channel(target=self.host)) \
