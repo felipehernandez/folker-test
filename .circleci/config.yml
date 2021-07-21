@@ -158,6 +158,8 @@ workflows:
                 - graphql
                 - kafka
                 - zookeeper
+                - pubsub
+                - datastore
           requires:
             - setup-integration-tests
       - validate-integration-tests:
@@ -195,6 +197,8 @@ workflows:
                 - graphql
                 - kafka
                 - zookeeper
+                - pubsub
+                - datastore
           requires:
             - setup-integration-tests
       - validate-integration-tests:
@@ -242,6 +246,8 @@ workflows:
                 - graphql
                 - kafka
                 - zookeeper
+                - pubsub
+                - datastore
           requires:
             - setup-integration-tests
       - validate-integration-tests:
