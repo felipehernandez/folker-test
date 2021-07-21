@@ -81,6 +81,8 @@ services:
       context: .
       dockerfile: Dockerfile-integration
     command: -t template -n 3 --trace
+    depends_on:
+      - mockserver
   integration-tests-profile:
     build:
       context: .
