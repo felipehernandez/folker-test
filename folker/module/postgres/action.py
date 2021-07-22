@@ -47,7 +47,7 @@ class PostgresStageAction(StageAction):
         if method:
             try:
                 self.method = PostgresMethod[method]
-            except:
+            except Exception as ex:
                 self.validation_report.wrong_fields.add('action.method')
 
         self.host = host

@@ -39,7 +39,7 @@ class ZookeeperStageAction(StageAction):
         if method:
             try:
                 self.method = ZookeeperMethod[method]
-            except:
+            except Exception as ex:
                 raise InvalidSchemaDefinitionException(wrong_fields=['action.method'])
 
         self.host = host

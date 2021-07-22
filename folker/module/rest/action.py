@@ -45,7 +45,7 @@ class RestStageAction(StageAction):
         if method:
             try:
                 self.method = RestMethod[method]
-            except:
+            except Exception as ex:
                 raise InvalidSchemaDefinitionException(wrong_fields=['action.method'])
 
         self.host = host
@@ -110,7 +110,7 @@ class RestStageAction(StageAction):
                                 status_code=response.status_code,
                                 response=response.text)
                 context.save_on_stage('response_json', response.json())
-            except:
+            except Exception as ex:
                 pass
 
         except Exception as e:
