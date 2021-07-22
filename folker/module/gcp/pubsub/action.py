@@ -50,7 +50,7 @@ class PubSubStageAction(StageAction):
         if method:
             try:
                 self.method = PubSubMethod[method]
-            except:
+            except Exception as ex:
                 raise InvalidSchemaDefinitionException(wrong_fields=['action.method'])
 
         self.host = host

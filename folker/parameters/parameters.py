@@ -1,5 +1,21 @@
 import click
 
+__all__ = [
+    'is_debug',
+    'is_trace',
+    'parameterised_tags',
+    'parameterised_profile',
+    'capture_parameters_context',
+    'capture_parameters_secrets',
+    'log_to_file',
+    'parameterised_number_of_tests',
+    'parameterised_test_files',
+    'test_file_regular_expression',
+    'template_file_regular_expression',
+    'profile_file_regular_expression',
+    'parameterised',
+]
+
 DEBUG_KEY = 'debug'
 TRACE_KEY = 'trace'
 TAGS_KEY = 'tags'

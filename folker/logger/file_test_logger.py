@@ -68,7 +68,7 @@ class FileTestLogger(TestLogger, FileLogger):
                 try:
                     json.dumps(value)
                     serialized[key] = value
-                except:
+                except Exception as ex:
                     serialized[key] = str(value)
         return serialized
 

@@ -21,9 +21,9 @@ def _resolve_variable_reference(context: dict, path: str) -> str:
                 step = int(step[1:-1])
             try:
                 context_navigation = context_navigation[step]
-            except:
+            except Exception as ex:
                 context_navigation = getattr(context_navigation, step)
-    except:
+    except Exception as ex:
         raise VariableReferenceResolutionException(variable_reference=path)
 
     return context_navigation

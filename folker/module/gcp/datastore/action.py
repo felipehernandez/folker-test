@@ -48,7 +48,7 @@ class DatastoreStageAction(StageAction):
         if method:
             try:
                 self.method = DatastoreMethod[method]
-            except:
+            except Exception as ex:
                 self.validation_report.wrong_fields.add('action.method')
 
         self.host = host
