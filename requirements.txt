@@ -10,7 +10,7 @@ google-cloud-pubsub==1.6.0
 google-cloud-datastore==2.1.5
 gql==2.0.0
 grpcio==1.39.0
-grpcio-tools==1.35.0
+grpcio-tools==1.39.0
 httplib2==0.19.1
 idna==2.10
 marshmallow==3.13.0
