@@ -127,7 +127,6 @@ workflows:
               tests:
                 - profile
                 - template
-                - profile
                 - parallel
                 - conditional
                 - foreach
@@ -163,7 +162,6 @@ workflows:
               tests:
                 - profile
                 - template
-                - profile
                 - parallel
                 - conditional
                 - foreach
@@ -209,7 +207,6 @@ workflows:
               tests:
                 - profile
                 - template
-                - profile
                 - parallel
                 - conditional
                 - foreach
