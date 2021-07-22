@@ -1,5 +1,10 @@
 version: 2.1
 
+parameters:
+  image-version:
+    type: string
+    default: "1.4"
+
 orbs:
   python: circleci/python@1.4.0
 
@@ -27,8 +32,8 @@ jobs:
           command: |
             coverage run -m pytest --junitxml codecoverage/unittests.xml
             coverage report -m
-            coverage xml -o codecoverage/coverage.xml
-            coverage html
+            coverage xml --omit='*/venv/*','tests/*' -o codecoverage/coverage.xml
+            coverage html --omit='*/venv/*','tests/*' -d codecoverage
       - store_test_results:
           path: codecoverage
       - store_artifacts:
@@ -38,18 +43,6 @@ jobs:
           paths:
             - ./
 
-  setup-integration-tests:
-    executor: integration-test-runner
-    steps:
-      - attach_workspace:
-          at: .
-      - run: docker-compose up -d mockserver
-      - run: docker-compose up -d gcp-pubsub-emulator
-      - run: docker-compose up -d gcp-datastore-emulator
-      - run: docker-compose up -d grpc-test-server
-      - run: docker-compose up -d graphql-test-server
-      - run: docker-compose up -d postgres-server
-
   run-integration-tests:
     executor: integration-test-runner
     parameters:
@@ -58,7 +51,12 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      - run: docker-compose up integration-tests-<<parameters.tests>>
+      - run: eval docker-compose run integration-tests-<<parameters.tests>>
+
+  validate-integration-tests:
+    executor: integration-test-runner
+    steps:
+      - run: echo "Integration tests validated"
 
   build-docker-image:
     executor: docker-builder
@@ -70,7 +68,7 @@ jobs:
           name: Build Docker image
           command: |
             docker build \
-              -t folkertest/folkertest:1.1.<<pipeline.number>> \
+              -t folkertest/folkertest:<<pipeline.parameters.image-version>>.<<pipeline.number>> \
               -t folkertest/folkertest:beta \
               -t folkertest/folkertest:latest \
               .
@@ -100,9 +98,9 @@ jobs:
           command: |
             echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
       - run:
-          name: Publish docker image as 1.1.<<pipeline.number>>
+          name: Publish docker image as <<pipeline.parameters.image-version>>.<<pipeline.number>>
           command: |
-            docker push folkertest/folkertest:1.1.<<pipeline.number>>
+            docker push folkertest/folkertest:<<pipeline.parameters.image-version>>.<<pipeline.number>>
       - run:
           name: Publish docker image as <<parameters.image-label>>
           command: |
@@ -111,25 +109,24 @@ jobs:
 workflows:
   version: 2.1
 
-  default:
+  development:
     when:
       and:
         - not:
-            equal: [ development, << pipeline.git.branch >> ]
+            equal: [ beta, << pipeline.git.branch >> ]
         - not:
             equal: [ main, << pipeline.git.branch >> ]
     jobs:
       - build
-      - setup-integration-tests:
-          requires:
-            - build
+#      - setup-integration-tests:
+#          requires:
+#            - build
       - run-integration-tests:
           matrix:
             parameters:
               tests:
                 - profile
                 - template
-                - profile
                 - parallel
                 - conditional
                 - foreach
@@ -145,24 +142,26 @@ workflows:
                 - protobuf
                 - grpc
                 - graphql
+                - kafka
+                - zookeeper
+                - pubsub
+                - datastore
           requires:
-            - setup-integration-tests
-
-  development:
+            - build
+      - validate-integration-tests:
+          requires:
+            - run-integration-tests
+  beta:
     when:
-      equal: [ development, << pipeline.git.branch >> ]
+      equal: [ beta, << pipeline.git.branch >> ]
     jobs:
       - build
-      - setup-integration-tests:
-          requires:
-            - build
       - run-integration-tests:
           matrix:
             parameters:
               tests:
                 - profile
                 - template
-                - profile
                 - parallel
                 - conditional
                 - foreach
@@ -178,12 +177,19 @@ workflows:
                 - protobuf
                 - grpc
                 - graphql
+                - kafka
+                - zookeeper
+                - pubsub
+                - datastore
           requires:
-            - setup-integration-tests
+            - build
+      - validate-integration-tests:
+          requires:
+            - run-integration-tests
       - build-docker-image:
           requires:
             - build
-            - run-integration-tests
+            - validate-integration-tests
       - publish-docker-image:
           name: publich-beta
           image-label: beta
@@ -195,16 +201,12 @@ workflows:
       equal: [ main, << pipeline.git.branch >> ]
     jobs:
       - build
-      - setup-integration-tests:
-          requires:
-            - build
       - run-integration-tests:
           matrix:
             parameters:
               tests:
                 - profile
                 - template
-                - profile
                 - parallel
                 - conditional
                 - foreach
@@ -220,14 +222,21 @@ workflows:
                 - protobuf
                 - grpc
                 - graphql
+                - kafka
+                - zookeeper
+                - pubsub
+                - datastore
           requires:
-            - setup-integration-tests
+            - build
+      - validate-integration-tests:
+          requires:
+            - run-integration-tests
       - build-docker-image:
           requires:
             - build
-            - run-integration-tests
+            - validate-integration-tests
       - publish-docker-image:
-          name: publich-beta
+          name: publich-latest
           image-label: latest
           requires:
             - build-docker-image

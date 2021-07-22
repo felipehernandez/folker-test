@@ -23,10 +23,9 @@ def generate_protos(logger: SystemLogger):
                          '--grpc_python_out=.',
                          './' + file_name]
             try:
-                result = subprocess.run(proto_run)
+                subprocess.run(proto_run)
                 valid_files.append(file_name)
             except Exception as e:
                 logger.loading_proto_file_error(file_name, proto_run, e)
-                pass
 
     logger.loading_proto_files_completed(valid_files)

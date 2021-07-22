@@ -63,7 +63,7 @@ class ConsoleSystemLogger(SystemLogger, ColorLogger):
     def assert_execution_result(self, total, success, failures):
         self._log(self.COLOR_HIGH_CYAN, '\n' + '#' * 100)
         self._log(self.COLOR_HIGH_CYAN, 'RESULTS:')
-        print_color = self.COLOR_HIGH_GREEN if len(success) is total else self.COLOR_HIGH_RED
+        print_color = self.COLOR_HIGH_GREEN if len(success) == total else self.COLOR_HIGH_RED
         self._log(print_color,
                   'Tests: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(len(success),
                                                                        len(failures),

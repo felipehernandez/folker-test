@@ -9,7 +9,7 @@ from folker.decorator import timed_action, resolvable_variables, loggable_action
 from folker.logger import TestLogger
 from folker.model import Context
 from folker.model import StageAction
-from folker.model.error import InvalidSchemaDefinitionException
+from folker.module.void.action import VoidStageAction
 
 
 class DatastoreMethod(Enum):
@@ -26,7 +26,7 @@ def _divide_chunks(l, chunk_size):
 
 
 class DatastoreStageAction(StageAction):
-    method: DatastoreMethod
+    method: DatastoreMethod = None
 
     host: str
     project: str
@@ -45,10 +45,11 @@ class DatastoreStageAction(StageAction):
                  **kargs) -> None:
         super().__init__()
 
-        try:
-            self.method = DatastoreMethod[method]
-        except:
-            raise InvalidSchemaDefinitionException(wrong_fields=['action.method'])
+        if method:
+            try:
+                self.method = DatastoreMethod[method]
+            except Exception as ex:
+                self.validation_report.wrong_fields.add('action.method')
 
         self.host = host
         self.project = project
@@ -60,6 +61,24 @@ class DatastoreStageAction(StageAction):
     def __copy__(self):
         return deepcopy(self)
 
+    def __add__(self, enrichment: 'DatastoreStageAction'):
+        result = self.__copy__()
+        if isinstance(enrichment, VoidStageAction):
+            return result
+
+        if enrichment.host:
+            result.host = enrichment.host
+        if enrichment.project:
+            result.project = enrichment.project
+        if enrichment.credentials_path:
+            result.credentials_path = enrichment.credentials_path
+        if enrichment.entity:
+            result.entity = enrichment.entity
+        if enrichment.key:
+            result.key = enrichment.key
+
+        return result
+
     def mandatory_fields(self):
         return [
             'project',
@@ -67,26 +86,19 @@ class DatastoreStageAction(StageAction):
             'key'
         ]
 
-    def validate_specific(self, missing_fields):
+    def _validate_specific(self):
         if self.key.get('kind') is None:
-            missing_fields.append('action.key.kind')
-        if self.method in [DatastoreMethod.PUT, DatastoreMethod.GET, DatastoreMethod.DELETE] \
-                and self.key.get('id') is None \
-                and self.key.get('name') is None:
-            missing_fields.append('action.key.id')
-            missing_fields.append('action.key.name')
-        if self.method is DatastoreMethod.PUT:
-            missing_fields.extend(self._validate_put_values())
-
-        return missing_fields
-
-    def _validate_put_values(self):
-        missing_fields = []
-
-        if not hasattr(self, 'entity') or not self.entity:
-            missing_fields.append('action.entity')
-
-        return missing_fields
+            self.validation_report.missing_fields.add('action.key.kind')
+        if (self.method
+                and self.method in [DatastoreMethod.PUT,
+                                    DatastoreMethod.GET,
+                                    DatastoreMethod.DELETE]
+                and self.key.get('id') is None
+                and self.key.get('name') is None):
+            self.validation_report.missing_fields.update({'action.key.id', 'action.key.name'})
+        if self.method and self.method is DatastoreMethod.PUT:
+            if not hasattr(self, 'entity') or not self.entity:
+                self.validation_report.missing_fields.add('action.entity')
 
     @loggable_action
     @resolvable_variables
