@@ -12,6 +12,7 @@ class ActionSchema(OneOfSchema):
 class StageSchema(Schema):
     id = fields.String()
     name = fields.String()
+    description = fields.String()
 
     condition = fields.String(data_key='if')
     foreach = fields.Mapping()

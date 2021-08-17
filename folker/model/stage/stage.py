@@ -13,6 +13,7 @@ from folker.model.validation import Validatable
 class Stage(Validatable):
     id: str
     name: str
+    description: str
 
     condition: str
     foreach: dict
@@ -26,6 +27,7 @@ class Stage(Validatable):
     def __init__(self,
                  id: str = None,
                  name: str = None,
+                 description=None,
                  condition: str = None,
                  foreach: dict = None,
                  action: StageAction = None,
@@ -36,6 +38,7 @@ class Stage(Validatable):
         super().__init__()
         self.id = id
         self.name = name
+        self.description = description
 
         self.condition = condition
         self.foreach = foreach if foreach else {}
@@ -53,6 +56,8 @@ class Stage(Validatable):
 
         if enrichment.name:
             result.name = enrichment.name
+        if enrichment.description:
+            result.description = enrichment.description
         if enrichment.condition:
             result.condition = enrichment.condition
         result.params = {**self.foreach, **enrichment.foreach}
