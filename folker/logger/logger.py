@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 
-from folker.model import Context
-from folker.model.error import SourceException
+from folker.parameters import Configuration
 
 
 class ColorLogger(ABC):
@@ -39,10 +38,10 @@ class FileLogger(ABC):
     report: [str]
     current_index = 0
 
-    def __init__(self, file_name: str) -> None:
-        super().__init__()
-        self.file_name = file_name
+    def __init__(self, config: Configuration) -> None:
+        self.file_name = config.log_file
         self.report = []
+        super().__init__()
 
     # Util
     def _delayed_log(self, text, end=None):
@@ -61,101 +60,18 @@ class FileLogger(ABC):
 
 
 class SystemLogger(ABC):
+    debug: bool
+    trace: bool
+
+    def __init__(self, config: Configuration) -> None:
+        self.debug = config.debug_mode
+        self.trace = config.trace_mode
+
     # Setup
     @abstractmethod
-    def loading_profile_files(self):
+    def system_setup_start(self):
         pass
 
     @abstractmethod
-    def loading_template_files(self): pass
-
-    @abstractmethod
-    def loading_test_files(self): pass
-
-    @abstractmethod
-    def loading_file(self, filename): pass
-
-    @abstractmethod
-    def loading_file_error(self, file_name: str, exception: Exception): pass
-
-    @abstractmethod
-    def loading_files_completed(self, files): pass
-
-    # Protos
-    @abstractmethod
-    def loading_proto_files(self): pass
-
-    @abstractmethod
-    def loading_proto_file_skipped(self, filename): pass
-
-    @abstractmethod
-    def loading_proto_file(self, filename): pass
-
-    @abstractmethod
-    def loading_proto_file_error(self, file_name: str, proto_command: str, exception: Exception):
+    def system_setup_completed(self):
         pass
-
-    @abstractmethod
-    def loading_proto_files_completed(self, files): pass
-
-    # Wrap up
-    @abstractmethod
-    def assert_execution_result(self, total, success, failures): pass
-
-    @abstractmethod
-    def assert_number_tests_executed(self, expected: int, executed: int): pass
-
-
-class TestLogger(ABC):
-
-    # Test
-    @abstractmethod
-    def test_start(self, test_name: str, test_description: str = None): pass
-
-    @abstractmethod
-    def test_finish(self): pass
-
-    @abstractmethod
-    def test_finish_error(self, e: SourceException): pass
-
-    # Stage
-    @abstractmethod
-    def stage_start(self, stage_name: str, context: Context): pass
-
-    @abstractmethod
-    def stage_skip(self, stage_name: str, context: Context): pass
-
-    # Action
-    @abstractmethod
-    def action_prelude(self, action: dict, context: Context): pass
-
-    @abstractmethod
-    def action_conclusion(self, action: dict, context: Context): pass
-
-    @abstractmethod
-    def message(self, message): pass
-
-    @abstractmethod
-    def action_error(self, message): pass
-
-    @abstractmethod
-    def action_warn(self, message): pass
-
-    @abstractmethod
-    def action_debug(self, message): pass
-
-    # Assertions
-    @abstractmethod
-    def assertion_success(self, assertion: str): pass
-
-    @abstractmethod
-    def assertion_fail(self, assertion: str, variables: dict): pass
-
-    @abstractmethod
-    def assertion_error(self, assertion: str, exception: Exception = None): pass
-
-    @abstractmethod
-    def assert_test_result(self, total, success, failures): pass
-
-    # Log
-    def log_text(self, log: str): pass

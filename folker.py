@@ -1,3 +1,3 @@
-from folker import folker
+from folker import cli
 
-folker.run()
+cli.run()
