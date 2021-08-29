@@ -1,3 +1,5 @@
+from enum import Enum, auto
+
 import click
 
 DEFAULT_TEST_FILES_RE = 'test*.yaml'
@@ -6,9 +8,14 @@ DEFAULT_PROFILE_FILES_RE = 'profile*.yaml'
 
 
 class Configuration:
+    class LoggerType(Enum):
+        PLAIN = auto()
+        COLOR = auto()
+
     debug_mode: bool
     trace_mode: bool
     log_file: str
+    logger_type: LoggerType
     execute_tags: set
     profiles: set
     context: dict
@@ -23,6 +30,7 @@ class Configuration:
                  debug: bool = False,
                  trace: bool = False,
                  log_file: str = None,
+                 logger_type: str = None,
                  tags: {str} = None,
                  profiles: {str} = None,
                  context: dict = None,
@@ -35,11 +43,13 @@ class Configuration:
         self.trace_mode = trace
 
         self.log_file = log_file
+        self.logger_type = Configuration.LoggerType[logger_type] \
+            if logger_type \
+            else Configuration.LoggerType.COLOR
         self.test_files = test_files
         self.test_files_re = test_files_re if test_files_re else DEFAULT_TEST_FILES_RE
         self.template_files_re = DEFAULT_TEMPLATE_FILES_RE
         self.profile_files_re = DEFAULT_PROFILE_FILES_RE
-
         self.execute_tags = tags if tags else set()
         self.profiles = profiles if profiles else set()
         self.context = context if context else dict()
@@ -64,6 +74,13 @@ def parameterised(func):
     @click.option('-lf', '--log-file',
                   'log_file',
                   help='Log to file XXX.XX')
+    @click.option('--logger-type',
+                  'logger_type',
+                  type=click.Choice([logger_type.name for logger_type in Configuration.LoggerType],
+                                    case_sensitive=False),
+                  default=Configuration.LoggerType.COLOR.name,
+                  show_default=True,
+                  help='Logger type')
     @click.option('-t', '--tag',
                   'tags',
                   multiple=True,
@@ -100,6 +117,7 @@ def parameterised(func):
                 debug: bool = False,
                 trace: bool = False,
                 log_file: str = None,
+                logger_type: str = None,
                 tags: [str] = None,
                 profiles: str = None,
                 context: (str, str) = None,
@@ -122,6 +140,7 @@ def parameterised(func):
                                secrets={key: value for key, value in secrets},
                                expected_test_count=expected_test_count,
                                log_file=log_file,
+                               logger_type=logger_type,
                                test_files={file for file in test_files},
                                test_files_re=test_files_re)
 

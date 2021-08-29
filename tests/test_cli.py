@@ -16,8 +16,7 @@ class TestCli:
         runner = CliRunner()
         result = runner.invoke(folker.cli.run, ['-d'])
 
-        assert 'SETUP : start' in result.output
-        assert 'SETUP : completed' in result.output
+        assert result.output == ''
 
     def test_trace_run(self):
         runner = CliRunner()
@@ -30,7 +29,7 @@ class TestCli:
         output_file = tmpdir.join('output.txt')
 
         runner = CliRunner()
-        result = runner.invoke(folker.cli.run, ['-d', '-lf', str(output_file)])
+        result = runner.invoke(folker.cli.run, ['--trace', '-lf', str(output_file)])
 
         assert result.output == ''
 

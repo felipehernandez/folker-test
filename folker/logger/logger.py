@@ -45,16 +45,16 @@ class FileLogger(ABC):
 
     # Util
     def _delayed_log(self, text, end=None):
-        self.report.append(text + (end if end else '\n'))
+        self.report.append((text, end))
 
     def _log(self, text, end=None):
-        self.report.append(text + (end if end else '\n'))
+        self.report.append((text, end))
         self._write_to_file()
 
     def _write_to_file(self):
         f = open(self.file_name, 'a+')
-        for report_entry in self.report:
-            f.write(report_entry)
+        for report_entry, report_end in self.report:
+            print(report_entry, end=report_end, file=f)
         f.close()
         self.report = []
 

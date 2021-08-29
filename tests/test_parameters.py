@@ -55,7 +55,7 @@ class TestLogFileParameter:
         assert config.log_file is None
 
     @patch('sys.argv', ['method', '-lf', 'file.txt', ])
-    def test_flag_flag(self):
+    def test_flag(self):
         config: Configuration = load_command_arguments(standalone_mode=False)
 
         assert config.log_file == 'file.txt'
@@ -65,6 +65,27 @@ class TestLogFileParameter:
         config: Configuration = load_command_arguments(standalone_mode=False)
 
         assert config.log_file == 'file.txt'
+
+
+@pytest.mark.cli
+class TestLoggetTypeParameter:
+    @patch('sys.argv', ['method', ])
+    def test_no_flag(self):
+        config: Configuration = load_command_arguments(standalone_mode=False)
+
+        assert config.logger_type is Configuration.LoggerType.COLOR
+
+    @patch('sys.argv', ['method', '--logger-type=plain', ])
+    def test_plain_flag(self):
+        config: Configuration = load_command_arguments(standalone_mode=False)
+
+        assert config.logger_type is Configuration.LoggerType.PLAIN
+
+    @patch('sys.argv', ['method', '--logger-type=color', ])
+    def test_color_flag(self):
+        config: Configuration = load_command_arguments(standalone_mode=False)
+
+        assert config.logger_type is Configuration.LoggerType.COLOR
 
 
 @pytest.mark.cli

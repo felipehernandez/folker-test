@@ -3,7 +3,7 @@ from folker.logger.logger import ColorLogger
 from folker.parameters import Configuration
 
 
-class ConsoleSystemLogger(SystemLogger, ColorLogger):
+class ColorConsoleSystemLogger(SystemLogger, ColorLogger):
     SYSTEM_COLOR = ColorLogger.COLOR_HIGH_CYAN
 
     def __init__(self, config: Configuration) -> None:
@@ -11,11 +11,11 @@ class ConsoleSystemLogger(SystemLogger, ColorLogger):
         SystemLogger.__init__(self, config)
 
     def system_setup_start(self):
-        if self.debug:
+        if self.trace:
             self._log(self.SYSTEM_COLOR, 'SETUP : start')
 
     def system_setup_completed(self):
-        if self.debug:
+        if self.trace:
             self._log(self.SYSTEM_COLOR, 'SETUP : completed')
 
     # Util
