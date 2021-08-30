@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from folker.model import Context
+from folker.model.error import SourceException
 from folker.parameters import Configuration
 
 
@@ -75,3 +77,64 @@ class SystemLogger(ABC):
     @abstractmethod
     def system_setup_completed(self):
         pass
+
+
+class TestLogger(ABC):
+    debug: bool
+    trace: bool
+
+    def __init__(self, config: Configuration) -> None:
+        self.debug = config.debug_mode
+        self.trace = config.trace_mode
+
+    # Test
+    @abstractmethod
+    def test_start(self, test_name: str, test_description: str = None): pass
+
+    @abstractmethod
+    def test_finish(self): pass
+
+    @abstractmethod
+    def test_finish_error(self, e: SourceException): pass
+
+    # Stage
+    @abstractmethod
+    def stage_start(self, stage_name: str, context: Context): pass
+
+    @abstractmethod
+    def stage_skip(self, stage_name: str, context: Context): pass
+
+    # Action
+    @abstractmethod
+    def action_prelude(self, action: dict, context: Context): pass
+
+    @abstractmethod
+    def action_conclusion(self, action: dict, context: Context): pass
+
+    @abstractmethod
+    def message(self, message): pass
+
+    @abstractmethod
+    def action_error(self, message): pass
+
+    @abstractmethod
+    def action_warn(self, message): pass
+
+    @abstractmethod
+    def action_debug(self, message): pass
+
+    # Assertions
+    @abstractmethod
+    def assertion_success(self, assertion: str): pass
+
+    @abstractmethod
+    def assertion_fail(self, assertion: str, variables: dict): pass
+
+    @abstractmethod
+    def assertion_error(self, assertion: str, exception: Exception = None): pass
+
+    @abstractmethod
+    def assert_test_result(self, total, success, failures): pass
+
+    # Log
+    def log_text(self, log: str): pass
