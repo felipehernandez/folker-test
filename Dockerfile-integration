@@ -4,9 +4,6 @@ WORKDIR /
 
 RUN pip install --upgrade pip
 
-COPY ./requirements.txt requirements.txt
-RUN pip install -r requirements.txt
-
 COPY folker folker
 COPY ./setup.py setup.py
 RUN pip install -e .
@@ -16,10 +13,4 @@ COPY example/code testcode
 COPY example/credentials credentials
 COPY example/test test
 
-#RUN python3 folker.py -t dummy -t print --trace
-#RUN python3 folker.py -t dummy -t print -n 2 --trace
-#RUN python3 folker.py -p test-profile -n 28 --trace
-
-WORKDIR /
-
-ENTRYPOINT ["folker"]
+ENTRYPOINT ["folker-test"]
