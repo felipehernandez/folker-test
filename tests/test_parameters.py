@@ -292,25 +292,25 @@ class TestTestFilesReParameter:
     def test_no_value(self):
         config: Configuration = load_command_arguments(standalone_mode=False)
 
-        assert config.test_files_re == 'test*.yaml'
+        assert config.test_files_re == '**/test*.yaml'
 
     @patch('sys.argv', ['method', '-TF', 'testing*.yaml'])
     def test_flag(self):
         config: Configuration = load_command_arguments(standalone_mode=False)
 
-        assert config.test_files_re == 'testing*.yaml'
+        assert config.test_files_re == '**/testing*.yaml'
 
     @patch('sys.argv', ['method', '--TEST-FILES', 'testing*.yaml'])
     def test_long_flag(self):
         config: Configuration = load_command_arguments(standalone_mode=False)
 
-        assert config.test_files_re == 'testing*.yaml'
+        assert config.test_files_re == '**/testing*.yaml'
 
     @patch('sys.argv', ['method', '--TEST-FILES=testing*.yaml'])
     def test_long_flag_equals(self):
         config: Configuration = load_command_arguments(standalone_mode=False)
 
-        assert config.test_files_re == 'testing*.yaml'
+        assert config.test_files_re == '**/testing*.yaml'
 
 
 @pytest.mark.cli
@@ -319,7 +319,7 @@ class TestTemplateFilesReParameter:
     def test_no_value(self):
         config: Configuration = load_command_arguments(standalone_mode=False)
 
-        assert config.template_files_re == 'template*.yaml'
+        assert config.template_files_re == '**/template*.yaml'
 
 
 @pytest.mark.cli
@@ -328,4 +328,4 @@ class TestProfileFilesReParameter:
     def test_no_value(self):
         config: Configuration = load_command_arguments(standalone_mode=False)
 
-        assert config.profile_files_re == 'profile*.yaml'
+        assert config.profile_files_re == '**/profile*.yaml'
