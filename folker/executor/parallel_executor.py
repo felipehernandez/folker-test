@@ -7,6 +7,7 @@ from folker.logger import logger_factory, LoggerType
 from folker.model import Context
 from folker.model import Test
 from folker.parameters import Configuration
+from itertools import repeat
 
 
 def _test_execution(config: Configuration, test: Test):
@@ -28,7 +29,7 @@ def _test_execution(config: Configuration, test: Test):
 class ParallelExecutor:
     def execute(self, config: Configuration, tests: [Test]):
         pool = Pool(cpu_count())
-        results = pool.starmap(_test_execution, [(config, tests)])
+        results = pool.map(_test_execution, zip(repeat(config), tests))
         pool.close()
         return [name for (result, name) in results if result], \
                [name for (result, name) in results if not result]
