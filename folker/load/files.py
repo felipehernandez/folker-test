@@ -12,7 +12,11 @@ from folker.parameters import Configuration
 def load_and_initialize_template_files(config: Configuration, logger: SystemLogger) -> [Test]:
     schema = TestSchema()
     logger.loading_template_files()
-    schemas = load_schemas(logger, config.template_files_re, schema, template=True)
+    schemas = load_schemas(config=config,
+                           logger=logger,
+                           file_name=config.template_files_re,
+                           schema=schema,
+                           template=True)
 
     for schema in schemas:
         templates[schema.id] = schema
@@ -25,7 +29,11 @@ def load_and_initialize_template_files(config: Configuration, logger: SystemLogg
 def load_test_files(config: Configuration, logger: SystemLogger) -> [Test]:
     schema = TestSchema()
     logger.loading_test_files()
-    schemas = load_schemas(logger, config.test_files_re, schema)
+    schemas = load_schemas(config=config,
+                           logger=logger,
+                           file_name=config.test_files_re,
+                           schema=schema,
+                           template=False)
 
     return schemas
 
