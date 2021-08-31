@@ -76,4 +76,4 @@ def execute_tests(config: Configuration,
 
 
 if __name__ == '__main__':
-    run(Configuration())
+    run()
