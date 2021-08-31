@@ -1,3 +1,4 @@
+from itertools import repeat
 from multiprocessing.pool import Pool
 from os import cpu_count
 
@@ -7,7 +8,6 @@ from folker.logger import logger_factory, LoggerType
 from folker.model import Context
 from folker.model import Test
 from folker.parameters import Configuration
-from itertools import repeat
 
 
 def _test_execution(config: Configuration, test: Test):
