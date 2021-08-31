@@ -22,14 +22,15 @@ def _test_execution(config: Configuration, test: Test):
             **(profile.secrets),
             **(config.secrets)
         })
-    return (test.execute(logger_factory.build_test_logger(config, LoggerType.PARALLEL), context),
-            test.name)
+
+    test_logger = logger_factory.build_test_logger(config, LoggerType.PARALLEL)
+    return (test.execute(logger=test_logger, context=context), test.name)
 
 
 class ParallelExecutor:
     def execute(self, config: Configuration, tests: [Test]):
         pool = Pool(cpu_count())
-        results = pool.map(_test_execution, zip(repeat(config), tests))
+        results = pool.starmap(_test_execution, zip(repeat(config), tests))
         pool.close()
         return [name for (result, name) in results if result], \
                [name for (result, name) in results if not result]

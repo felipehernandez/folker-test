@@ -44,4 +44,4 @@ def build_test_logger(config: Configuration, type: LoggerType = LoggerType.SEQUE
         return {
             LoggerType.SEQUENTIAL: ConsoleSequentialTestLogger,
             LoggerType.PARALLEL: ConsoleParallelTestLogger
-        }[type]()
+        }[type](config)

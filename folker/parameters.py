@@ -146,6 +146,6 @@ def parameterised(func):
                                test_files={file for file in test_files},
                                test_files_re=test_files_re)
 
-        return func(config=config, )
+        return func(config=config)
 
     return wrapper
