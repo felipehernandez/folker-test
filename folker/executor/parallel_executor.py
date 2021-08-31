@@ -26,9 +26,9 @@ def _test_execution(config: Configuration, test: Test):
 
 
 class ParallelExecutor:
-    def execute(self, config: Configuration, parallel_tests: [Test]):
+    def execute(self, config: Configuration, tests: [Test]):
         pool = Pool(cpu_count())
-        results = pool.map(_test_execution, config, parallel_tests)
+        results = pool.map(_test_execution, config, tests)
         pool.close()
         return [name for (result, name) in results if result], \
                [name for (result, name) in results if not result]

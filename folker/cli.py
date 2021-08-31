@@ -18,12 +18,14 @@ def run(config: Configuration):
 
     # Execution
     executed, success, failures = 0, [], []
-    executed = execute_tests(tests=[test for test in tests if test.parallel],
+    executed = execute_tests(config=config,
+                             tests=[test for test in tests if test.parallel],
                              executor=ParallelExecutor(),
                              executed_tests=executed,
                              cumulative_failures=failures,
                              cumulative_success=success)
-    executed = execute_tests(tests=[test for test in tests if not test.parallel],
+    executed = execute_tests(config=config,
+                             tests=[test for test in tests if not test.parallel],
                              executor=SequentialExecutor(),
                              executed_tests=executed,
                              cumulative_failures=failures,
@@ -60,8 +62,13 @@ def filter_tests_by_tags(config: Configuration, tests: [Test]):
     return [test for test in tests if all(tag in test.tags for tag in tags)]
 
 
-def execute_tests(tests, executor, executed_tests, cumulative_failures, cumulative_success):
-    success_tests, fail_tests = executor.execute(tests)
+def execute_tests(config: Configuration,
+                  tests: [Test],
+                  executor,
+                  executed_tests,
+                  cumulative_failures,
+                  cumulative_success):
+    success_tests, fail_tests = executor.execute(config=config, tests=tests)
     cumulative_success.extend(success_tests)
     cumulative_failures.extend(fail_tests)
     executed_tests += len(success_tests) + len(fail_tests)

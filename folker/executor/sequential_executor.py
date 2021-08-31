@@ -7,7 +7,7 @@ from folker.parameters import Configuration
 
 
 class SequentialExecutor:
-    def execute(self, config: Configuration, sequential_tests: [Test]):
+    def execute(self, config: Configuration, tests: [Test]):
         success_tests = []
         fail_tests = []
         param_profile = config.profiles[0] if config.profiles else None
@@ -22,7 +22,7 @@ class SequentialExecutor:
                 **(config.secrets)
             })
 
-        for test in sequential_tests:
+        for test in tests:
             if test.execute(logger_factory.build_test_logger(config, LoggerType.SEQUENTIAL),
                             context):
                 success_tests.append(test.name)
