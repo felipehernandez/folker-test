@@ -11,7 +11,7 @@ from folker.parameters import Configuration
 
 
 def _test_execution(config: Configuration, test: Test):
-    param_profile = config.profiles[0] if config.profiles else None
+    param_profile = list(config.profiles)[0] if config.profiles else None
     profile = profiles.get(param_profile, DEFAULT_PROFILE)
     context = Context(
         test_variables={

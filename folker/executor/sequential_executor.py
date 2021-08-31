@@ -10,7 +10,7 @@ class SequentialExecutor:
     def execute(self, config: Configuration, tests: [Test]):
         success_tests = []
         fail_tests = []
-        param_profile = config.profiles[0] if config.profiles else None
+        param_profile = list(config.profiles)[0] if config.profiles else None
         profile = profiles.get(param_profile, DEFAULT_PROFILE)
         context = Context(
             test_variables={
