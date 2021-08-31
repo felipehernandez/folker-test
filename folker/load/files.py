@@ -39,7 +39,10 @@ def _enrich_stages(schema_definition: Test):
         schema_definition.validation_report.generate_error()
 
 
-def load_schemas(config: Configuration, logger: SystemLogger, file_name: str, schema,
+def load_schemas(config: Configuration,
+                 logger: SystemLogger,
+                 file_name: str,
+                 schema,
                  template: bool = False):
     schemas = []
     valid_files = []
@@ -83,9 +86,12 @@ def load_definition(file_path, schema):
 
 
 def load_profile_files(config: Configuration, logger: SystemLogger):
-    schema = ProfileSchema()
     logger.loading_profile_files()
-    schemas = load_schemas(logger, config.profile_files_re, schema, template=True)
+    schemas = load_schemas(config=config,
+                           logger=logger,
+                           file_name=config.profile_files_re,
+                           schema=ProfileSchema(),
+                           template=True)
 
     for schema in schemas:
         profiles[schema.name] = schema

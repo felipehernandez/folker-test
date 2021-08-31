@@ -46,9 +46,9 @@ def run_system_setup(system_logger: SystemLogger):
 
 
 def run_execution_setup(config: Configuration, system_logger: SystemLogger):
-    load_profile_files(config, system_logger)
-    load_and_initialize_template_files(config, system_logger)
-    tests = load_test_files(config, system_logger)
+    load_profile_files(config=config, logger=system_logger)
+    load_and_initialize_template_files(config=config, logger=system_logger)
+    tests = load_test_files(config=config, logger=system_logger)
 
     return filter_tests_by_tags(config=config, tests=tests)
 

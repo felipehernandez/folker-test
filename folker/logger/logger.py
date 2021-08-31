@@ -78,6 +78,50 @@ class SystemLogger(ABC):
     def system_setup_completed(self):
         pass
 
+    # Setup
+    @abstractmethod
+    def loading_profile_files(self):
+        pass
+
+    @abstractmethod
+    def loading_template_files(self): pass
+
+    @abstractmethod
+    def loading_test_files(self): pass
+
+    @abstractmethod
+    def loading_file(self, filename): pass
+
+    @abstractmethod
+    def loading_file_error(self, file_name: str, exception: Exception): pass
+
+    @abstractmethod
+    def loading_files_completed(self, files): pass
+
+    # Protos
+    @abstractmethod
+    def loading_proto_files(self): pass
+
+    @abstractmethod
+    def loading_proto_file_skipped(self, filename): pass
+
+    @abstractmethod
+    def loading_proto_file(self, filename): pass
+
+    @abstractmethod
+    def loading_proto_file_error(self, file_name: str, proto_command: str, exception: Exception):
+        pass
+
+    @abstractmethod
+    def loading_proto_files_completed(self, files): pass
+
+    # Wrap up
+    @abstractmethod
+    def assert_execution_result(self, total, success, failures): pass
+
+    @abstractmethod
+    def assert_number_tests_executed(self, expected: int, executed: int): pass
+
 
 class TestLogger(ABC):
     debug: bool
