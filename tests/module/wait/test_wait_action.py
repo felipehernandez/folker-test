@@ -1,13 +1,12 @@
 from unittest.mock import Mock
 
 import pytest
-from pytest import raises
 
 from folker.model.context import Context
-from folker.model.error.load import InvalidSchemaDefinitionException
 from folker.module.wait.action import WaitStageAction
 
 
+@pytest.mark.action_wait
 class TestWaitAction:
     action: WaitStageAction
 
@@ -21,7 +20,7 @@ class TestWaitAction:
 
         self.action.time = 0.1
 
-        context = self.action.execute(logger, context=Context())
+        context = self.action.execute(logger=logger, context=Context())
 
         assert {} == context.test_variables
         assert 'elapsed_time' in context.stage_variables

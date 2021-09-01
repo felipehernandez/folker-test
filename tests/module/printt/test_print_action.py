@@ -6,6 +6,7 @@ from folker.model.context import Context
 from folker.module.printt.action import PrintStageAction
 
 
+@pytest.mark.action_print
 class TestVoidAction:
     action: PrintStageAction
 
@@ -19,7 +20,7 @@ class TestVoidAction:
 
         self.action.message = 'Hello world'
 
-        context = self.action.execute(logger, context=Context())
+        context = self.action.execute(logger=logger, context=Context())
 
         assert {} == context.test_variables
         assert 'elapsed_time' in context.stage_variables

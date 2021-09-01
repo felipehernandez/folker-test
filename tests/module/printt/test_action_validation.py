@@ -1,6 +1,10 @@
+import pytest
+
 from folker.module.printt.action import PrintStageAction
 
 
+@pytest.mark.action_correctness
+@pytest.mark.action_print
 class TestPrintActionValidation:
     def test_validate_empty(self):
         action = PrintStageAction()

@@ -5,11 +5,9 @@ from folker.logger import TestLogger
 from folker.logger.logger import ColorLogger
 from folker.model import Context
 from folker.model.error import SourceException
-from folker.parameters import is_debug
 
 
 class ConsoleTestLogger(TestLogger, ColorLogger):
-
     # Test
     def test_start(self, test_name: str, test_description: str = None):
         self._log(self.COLOR_HIGH_CYAN, 'TEST: ', '\t')
@@ -36,28 +34,30 @@ class ConsoleTestLogger(TestLogger, ColorLogger):
 
     # Action
     def action_prelude(self, action: dict, context: Context):
-        self._log(self.COLOR_GREY, 'PRELUDE')
-        self._log(self.COLOR_GREY,
-                  json.dumps({'ACTION': self._to_serialized(action),
-                              'SECRETS': self._obfuscate_secrets(
-                                  self._to_serialized(context.secrets)),
-                              'TEST CONTEXT': self._to_serialized(context.test_variables),
-                              'STAGE CONTEXT': self._to_serialized(context.stage_variables)
-                              },
-                             sort_keys=True,
-                             indent=4))
+        if self.trace:
+            self._log(self.COLOR_GREY, 'PRELUDE')
+            self._log(self.COLOR_GREY,
+                      json.dumps({'ACTION': self._to_serialized(action),
+                                  'SECRETS': self._obfuscate_secrets(
+                                      self._to_serialized(context.secrets)),
+                                  'TEST CONTEXT': self._to_serialized(context.test_variables),
+                                  'STAGE CONTEXT': self._to_serialized(context.stage_variables)
+                                  },
+                                 sort_keys=True,
+                                 indent=4))
 
     def action_conclusion(self, action: dict, context: Context):
-        self._log(self.COLOR_GREY, 'CONCLUSION')
-        self._log(self.COLOR_GREY,
-                  json.dumps({'ACTION': self._to_serialized(action),
-                              'SECRETS': self._obfuscate_secrets(
-                                  self._to_serialized(context.secrets)),
-                              'TEST CONTEXT': self._to_serialized(context.test_variables),
-                              'STAGE CONTEXT': self._to_serialized(context.stage_variables)
-                              },
-                             sort_keys=True,
-                             indent=4))
+        if self.trace:
+            self._log(self.COLOR_GREY, 'CONCLUSION')
+            self._log(self.COLOR_GREY,
+                      json.dumps({'ACTION': self._to_serialized(action),
+                                  'SECRETS': self._obfuscate_secrets(
+                                      self._to_serialized(context.secrets)),
+                                  'TEST CONTEXT': self._to_serialized(context.test_variables),
+                                  'STAGE CONTEXT': self._to_serialized(context.stage_variables)
+                                  },
+                                 sort_keys=True,
+                                 indent=4))
 
     def _obfuscate_secrets(self, secrets: dict):
         return {key: '*' * len(value) for key, value in secrets.items()}
@@ -79,7 +79,7 @@ class ConsoleTestLogger(TestLogger, ColorLogger):
         self._log(self.COLOR_GREEN, message)
 
     def action_debug(self, message):
-        if is_debug():
+        if self.debug:
             self._log(self.COLOR_GREY, message)
 
     def action_error(self, message):
@@ -94,7 +94,7 @@ class ConsoleTestLogger(TestLogger, ColorLogger):
 
     # Assertions
     def assertion_success(self, assertion: str):
-        if is_debug():
+        if self.debug:
             self._log(self.COLOR_GREEN, '\t{}'.format(assertion))
 
     def assertion_fail(self, assertion: str, variables: dict):
@@ -110,7 +110,7 @@ class ConsoleTestLogger(TestLogger, ColorLogger):
                       '\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success,
                                                                                failures,
                                                                                total))
-        elif is_debug():
+        elif self.debug:
             self._log(self.COLOR_CYAN,
                       '\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success,
                                                                                failures,

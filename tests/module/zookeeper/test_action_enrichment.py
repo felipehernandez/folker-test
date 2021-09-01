@@ -1,7 +1,10 @@
+import pytest
+
 from folker.module.void.action import VoidStageAction
 from folker.module.zookeeper.action import ZookeeperStageAction, ZookeeperMethod
 
 
+@pytest.mark.action_gcp_zookeeper
 class TestZookeeperActionEnrichment:
     def test_enrich_empty_exists(self):
         original = ZookeeperStageAction(ZookeeperMethod.EXISTS.name)

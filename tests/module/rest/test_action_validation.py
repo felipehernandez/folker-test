@@ -1,6 +1,10 @@
+import pytest
+
 from folker.module.rest.action import RestStageAction, RestMethod
 
 
+@pytest.mark.action_correctness
+@pytest.mark.action_rest
 class TestRestActionValidation:
     def test_validate_empty(self):
         action = RestStageAction()

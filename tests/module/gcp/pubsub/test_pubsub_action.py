@@ -1,9 +1,12 @@
 from unittest.mock import patch, Mock
 
+import pytest
+
 from folker.model.context import Context
 from folker.module.gcp.pubsub.action import PubSubStageAction, PubSubMethod
 
 
+@pytest.mark.action_gcp_pubsub
 class TestPubSubAction:
 
     @patch('os.path.exists')
@@ -22,7 +25,7 @@ class TestPubSubAction:
         MockPublisher.return_value.publish.return_value = future
         future.result.return_value = 'message-id'
 
-        context = action.execute(logger, context=Context())
+        context = action.execute(logger=logger, context=Context())
 
         assert {} == context.test_variables
         assert 'elapsed_time' in context.stage_variables
@@ -49,7 +52,7 @@ class TestPubSubAction:
         received_message.message.message_id = 'message-id'
         received_message.message.data.decode.return_value = 'a-message'
 
-        context = action.execute(logger, context=Context())
+        context = action.execute(logger=logger, context=Context())
 
         assert {} == context.test_variables
         assert 'elapsed_time' in context.stage_variables

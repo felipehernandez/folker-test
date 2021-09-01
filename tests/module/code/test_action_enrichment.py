@@ -1,7 +1,10 @@
+import pytest
+
 from folker.module.code.action import CodeStageAction
 from folker.module.void.action import VoidStageAction
 
 
+@pytest.mark.action_code
 class TestFileActionEnrichment:
     def test_enrich_empty(self):
         original = CodeStageAction()

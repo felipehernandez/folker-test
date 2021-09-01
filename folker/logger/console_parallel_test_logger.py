@@ -1,12 +1,13 @@
 from folker.logger.console_test_logger import ConsoleTestLogger
 from folker.model.error import SourceException
+from folker.parameters import Configuration
 
 
 class ConsoleParallelTestLogger(ConsoleTestLogger):
     report: str
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, config: Configuration) -> None:
+        super().__init__(config)
         self.report = ''
 
     # Test

@@ -1,7 +1,10 @@
+import pytest
+
 from folker.module.void.action import VoidStageAction
 from folker.module.wait.action import WaitStageAction
 
 
+@pytest.mark.action_wait
 class TestWaitActionEnrichment:
     def test_enrich_empty(self):
         original = WaitStageAction()

@@ -1,7 +1,10 @@
+import pytest
+
 from folker.module.kafka.action import KafkaStageAction, KafkaMethod
 from folker.module.void.action import VoidStageAction
 
 
+@pytest.mark.action_kafka
 class TestKafkaActionEnrichment:
     def test_enrich_merge_headers(self):
         original = KafkaStageAction(method=KafkaMethod.PUBLISH.name,

@@ -1,8 +1,10 @@
+import pytest
+
 from folker.module.gmail.action import GmailStageAction, GmailMethod
-from folker.module.graphql.action import GraphQLStageAction
 from folker.module.void.action import VoidStageAction
 
 
+@pytest.mark.action_gmail
 class TestGmailActionEnrichment:
     def test_enrich_empty(self):
         original = GmailStageAction(method=GmailMethod.SEND.name)
@@ -47,7 +49,6 @@ class TestGmailActionEnrichment:
         assert enriched.sender == 'a_sender__email'
         assert enriched.recipients == ['a_recipient_email', 'another_recipient_email']
         assert enriched.subject == 'a_subject'
-
 
     def test_enrich_void(self):
         original = GmailStageAction(method=GmailMethod.SEND.name,

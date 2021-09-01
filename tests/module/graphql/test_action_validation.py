@@ -1,6 +1,10 @@
+import pytest
+
 from folker.module.graphql.action import GraphQLStageAction
 
 
+@pytest.mark.action_correctness
+@pytest.mark.action_graphql
 class TestGraphQLStageActionValidation:
     def test_validate_empty(self):
         action = GraphQLStageAction()

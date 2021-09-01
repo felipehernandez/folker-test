@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 from folker.model import Context
 from folker.model.error import SourceException
+from folker.parameters import Configuration
 
 
 class ColorLogger(ABC):
@@ -39,28 +40,44 @@ class FileLogger(ABC):
     report: [str]
     current_index = 0
 
-    def __init__(self, file_name: str) -> None:
-        super().__init__()
-        self.file_name = file_name
+    def __init__(self, config: Configuration) -> None:
+        self.file_name = config.log_file
         self.report = []
+        super().__init__()
 
     # Util
     def _delayed_log(self, text, end=None):
-        self.report.append(text + (end if end else '\n'))
+        self.report.append((text, end))
 
     def _log(self, text, end=None):
-        self.report.append(text + (end if end else '\n'))
+        self.report.append((text, end))
         self._write_to_file()
 
     def _write_to_file(self):
         f = open(self.file_name, 'a+')
-        for report_entry in self.report:
-            f.write(report_entry)
+        for report_entry, report_end in self.report:
+            print(report_entry, end=report_end, file=f)
         f.close()
         self.report = []
 
 
 class SystemLogger(ABC):
+    debug: bool
+    trace: bool
+
+    def __init__(self, config: Configuration) -> None:
+        self.debug = config.debug_mode
+        self.trace = config.trace_mode
+
+    # Setup
+    @abstractmethod
+    def system_setup_start(self):
+        pass
+
+    @abstractmethod
+    def system_setup_completed(self):
+        pass
+
     # Setup
     @abstractmethod
     def loading_profile_files(self):
@@ -107,6 +124,12 @@ class SystemLogger(ABC):
 
 
 class TestLogger(ABC):
+    debug: bool
+    trace: bool
+
+    def __init__(self, config: Configuration) -> None:
+        self.debug = config.debug_mode
+        self.trace = config.trace_mode
 
     # Test
     @abstractmethod

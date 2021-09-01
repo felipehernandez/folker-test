@@ -1,8 +1,6 @@
 import importlib
 import os
 
-from folker.parameters import is_debug, is_trace
-
 profiles, templates, stage_templates = {}, {}, {}
 
 # load assistants

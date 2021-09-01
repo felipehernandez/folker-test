@@ -7,6 +7,7 @@ from folker.model.context import Context
 from folker.module.rest.action import RestStageAction, RestMethod
 
 
+@pytest.mark.action_rest
 class TestRestAction:
     action: RestStageAction
 
@@ -29,7 +30,7 @@ class TestRestAction:
         mocked_response.text = 'response_text'
         mocked_response.json.return_value = 'response_json'
 
-        context = self.action.execute(logger, context=Context())
+        context = self.action.execute(logger=logger, context=Context())
 
         assert {} == context.test_variables
         assert 200 == context.stage_variables['status_code']

@@ -1,9 +1,12 @@
 from unittest.mock import Mock, call
 
+import pytest
+
 from folker.model import Context
 from folker.module.gcp.datastore.action import DatastoreStageAction
 
 
+@pytest.mark.action_gcp_datastore
 def test_gcp_datastore_put(mocker):
     entity_data = {}
     action = DatastoreStageAction(method='PUT',
@@ -30,6 +33,7 @@ def test_gcp_datastore_put(mocker):
     datastore_client.put.assert_called_with(entity)
 
 
+@pytest.mark.action_gcp_datastore
 def test_gcp_datastore_get_existing(mocker):
     action = DatastoreStageAction(method='GET',
                                   host='aHost',
@@ -58,6 +62,7 @@ def test_gcp_datastore_get_existing(mocker):
     assert result_context.stage_variables.get('entity') == {'entity': 'value'}
 
 
+@pytest.mark.action_gcp_datastore
 def test_gcp_datastore_get_not_existing(mocker):
     action = DatastoreStageAction(method='GET',
                                   host='aHost',
@@ -79,6 +84,7 @@ def test_gcp_datastore_get_not_existing(mocker):
     assert result_context.stage_variables.get('entity') is None
 
 
+@pytest.mark.action_gcp_datastore
 def test_gcp_datastore_delete(mocker):
     action = DatastoreStageAction(method='DELETE',
                                   host='aHost',
@@ -98,6 +104,7 @@ def test_gcp_datastore_delete(mocker):
     datastore_client.delete.assert_called_with('ITEM_KEY')
 
 
+@pytest.mark.action_gcp_datastore
 def test_gcp_datastore_query(mocker):
     action = DatastoreStageAction(method='QUERY',
                                   host='aHost',
@@ -117,6 +124,7 @@ def test_gcp_datastore_query(mocker):
     assert result_context.stage_variables.get('result') == ['entity1', 'entity2']
 
 
+@pytest.mark.action_gcp_datastore
 def test_gcp_datastore_bulkdelete(mocker):
     action = DatastoreStageAction(method='BULK_DELETE',
                                   host='aHost',

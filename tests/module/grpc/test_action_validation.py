@@ -1,6 +1,10 @@
+import pytest
+
 from folker.module.grpc.action import GrpcStageAction
 
 
+@pytest.mark.action_correctness
+@pytest.mark.action_grpc
 class TestGrpcActionValidation:
     def test_validate_basic_correct(self):
         action = GrpcStageAction(host='a_host',

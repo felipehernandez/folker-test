@@ -1,10 +1,13 @@
 import sys
 from unittest.mock import Mock, patch
 
+import pytest
+
 from folker.model.context import Context
 from folker.module.grpc.action import GrpcStageAction
 
 
+@pytest.mark.action_grpc
 class TestGrpcAction:
     @patch('grpc.insecure_channel')
     def test_execution_get(self, mocked_grpc):
@@ -27,7 +30,7 @@ class TestGrpcAction:
         mocked_response = Mock(return_value='returned_value')
         mocked_method.return_value = mocked_response
 
-        context = action.execute(logger, context=Context())
+        context = action.execute(logger=logger, context=Context())
 
         mocked_grpc.assert_called_with('a_host')
         mocked_stub.assert_called_with(mocked_channel)
@@ -56,7 +59,7 @@ class TestGrpcAction:
         mocked_response.__iter__ = Mock(return_value=iter(['item1', 'item2']))
         mocked_method.return_value = mocked_response
 
-        context = action.execute(logger, context=Context())
+        context = action.execute(logger=logger, context=Context())
 
         mocked_grpc.assert_called_with('a_host')
         mocked_stub.assert_called_with(mocked_channel)

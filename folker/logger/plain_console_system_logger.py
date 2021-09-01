@@ -1,14 +1,12 @@
-from folker.logger.logger import SystemLogger, FileLogger
+from folker.logger import SystemLogger
 from folker.parameters import Configuration
 
 
-class FileSystemLogger(SystemLogger, FileLogger):
+class PlainConsoleSystemLogger(SystemLogger):
 
     def __init__(self, config: Configuration) -> None:
-        FileLogger.__init__(self, config)
         SystemLogger.__init__(self, config)
 
-    # Setup
     def system_setup_start(self):
         if self.trace:
             self._log('SETUP : start')
@@ -86,4 +84,6 @@ class FileSystemLogger(SystemLogger, FileLogger):
         if expected and int(expected) != executed:
             self._log('Expected: {} - Executed: {}'.format(expected, executed))
 
-        self._write_to_file()
+    # Util
+    def _log(self, text, end=None):
+        print(text, end=end)

@@ -1,7 +1,10 @@
+import pytest
+
 from folker.module.grpc.action import GrpcStageAction
 from folker.module.void.action import VoidStageAction
 
 
+@pytest.mark.action_grpc
 class TestGrpcActionEnrichment:
     def test_enrich_override(self):
         original = GrpcStageAction(host='a_host',

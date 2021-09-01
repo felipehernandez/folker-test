@@ -1,6 +1,10 @@
+import pytest
+
 from folker.module.gcp.pubsub.action import PubSubStageAction, PubSubMethod
 
 
+@pytest.mark.action_correctness
+@pytest.mark.action_gcp_pubsub
 class TestPubSubActionValidation:
     def test_validate_correct_publish(self):
         action = PubSubStageAction(method=PubSubMethod.PUBLISH.name,

@@ -2,22 +2,15 @@ FROM python:3.9-slim
 
 WORKDIR /
 
-COPY folker folker
-COPY ./folker.py folker.py
-COPY ./requirements.txt requirements.txt
-
 RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+
+COPY folker folker
+COPY ./setup.py setup.py
+RUN pip install -e .
 
 COPY example/protos protos
 COPY example/code testcode
 COPY example/credentials credentials
 COPY example/test test
 
-#RUN python3 folker.py -t dummy -t print --trace
-#RUN python3 folker.py -t dummy -t print -n 2 --trace
-#RUN python3 folker.py -p test-profile -n 28 --trace
-
-WORKDIR /
-
-ENTRYPOINT ["python", "folker.py"]
+ENTRYPOINT ["folker-test"]

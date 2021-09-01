@@ -1,6 +1,10 @@
+import pytest
+
 from folker.module.protobuf.action import ProtobufStageAction, ProtobufMethod
 
 
+@pytest.mark.action_correctness
+@pytest.mark.action_protobuf
 class TestProtobufActionValidation:
     def test_validate_empty(self):
         action = ProtobufStageAction()

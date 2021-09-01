@@ -6,6 +6,7 @@ from folker.model.context import Context
 from folker.module.kafka.action import KafkaStageAction, KafkaMethod
 
 
+@pytest.mark.action_kafka
 class TestKafkaAction:
     action: KafkaStageAction
 
@@ -65,7 +66,7 @@ class TestKafkaAction:
         message1.value = 'a-message'.encode()
         KafkaConsumer.return_value = [message1]
 
-        context = self.action.execute(logger, context=Context())
+        context = self.action.execute(logger=logger, context=Context())
 
         KafkaConsumer.assert_called_once_with('a-topic',
                                               group_id=None,

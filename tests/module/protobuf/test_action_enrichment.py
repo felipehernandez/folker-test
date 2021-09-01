@@ -1,7 +1,10 @@
+import pytest
+
 from folker.module.protobuf.action import ProtobufStageAction, ProtobufMethod
 from folker.module.void.action import VoidStageAction
 
 
+@pytest.mark.action_protobuf
 class TestProtobufActionEnrichment:
     def test_enrich_empty_create(self):
         original = ProtobufStageAction(method=ProtobufMethod.CREATE.name)

@@ -5,10 +5,11 @@ from folker.model.context import Context
 from folker.model.error.assertions import TestFailException, MalformedAssertionException, \
     UnresolvableAssertionException
 from folker.model.stage.assertions import StageAssertions
+from folker.parameters import Configuration
 
 
 class TestStageAssertions:
-    logger: ConsoleParallelTestLogger = ConsoleParallelTestLogger()
+    logger: ConsoleParallelTestLogger = ConsoleParallelTestLogger(Configuration())
 
     def test_given_no_assertions_then_no_execution(self):
         stage = StageAssertions(assertions=[])

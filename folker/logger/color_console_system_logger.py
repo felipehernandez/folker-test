@@ -1,25 +1,38 @@
 from folker.logger import SystemLogger
 from folker.logger.logger import ColorLogger
-from folker.parameters import is_debug, is_trace
+from folker.parameters import Configuration
 
 
-class ConsoleSystemLogger(SystemLogger, ColorLogger):
+class ColorConsoleSystemLogger(SystemLogger, ColorLogger):
+    SYSTEM_COLOR = ColorLogger.COLOR_HIGH_CYAN
+
+    def __init__(self, config: Configuration) -> None:
+        ColorLogger.__init__(self, )
+        SystemLogger.__init__(self, config)
+
+    def system_setup_start(self):
+        if self.trace:
+            self._log(self.SYSTEM_COLOR, 'SETUP : start')
+
+    def system_setup_completed(self):
+        if self.trace:
+            self._log(self.SYSTEM_COLOR, 'SETUP : completed')
 
     # Setup
     def loading_profile_files(self):
-        if is_debug():
+        if self.debug:
             self._log(self.COLOR_HIGH_CYAN, 'Loading profile files')
 
     def loading_template_files(self):
-        if is_debug():
+        if self.debug:
             self._log(self.COLOR_HIGH_CYAN, 'Loading template files')
 
     def loading_test_files(self):
-        if is_debug():
+        if self.debug:
             self._log(self.COLOR_HIGH_CYAN, 'Loading test files')
 
     def loading_file(self, filename):
-        if is_trace():
+        if self.trace:
             self._log(self.COLOR_HIGH_YELLOW, 'File: {filename}'.format(filename=filename))
 
     def loading_file_error(self, file_name: str, exception: Exception):
@@ -27,7 +40,7 @@ class ConsoleSystemLogger(SystemLogger, ColorLogger):
                                                                           str(exception)))
 
     def loading_files_completed(self, files):
-        if is_debug():
+        if self.debug:
             self._log(self.COLOR_WHITE, 'Loaded files: [')
             for file in files:
                 self._log(self.COLOR_WHITE, '\t{}'.format(file))
@@ -35,15 +48,15 @@ class ConsoleSystemLogger(SystemLogger, ColorLogger):
 
     # Protos
     def loading_proto_files(self):
-        if is_debug():
+        if self.debug:
             self._log(self.COLOR_HIGH_CYAN, 'Loading proto files')
 
     def loading_proto_file(self, filename):
-        if is_trace():
+        if self.trace:
             self._log(self.COLOR_HIGH_YELLOW, 'Proto file: {filename}'.format(filename=filename))
 
     def loading_proto_file_skipped(self, filename):
-        if is_trace():
+        if self.trace:
             self._log(self.COLOR_GREY, 'Skipped Proto file: {filename}'.format(filename=filename))
 
     def loading_proto_file_error(self, file_name: str, proto_command: str, exception: Exception):
@@ -53,7 +66,7 @@ class ConsoleSystemLogger(SystemLogger, ColorLogger):
                                                                 str(exception)))
 
     def loading_proto_files_completed(self, files):
-        if is_debug():
+        if self.debug:
             self._log(self.COLOR_WHITE, 'Loaded proto files: [')
             for file in files:
                 self._log(self.COLOR_WHITE, '\t{}'.format(file))

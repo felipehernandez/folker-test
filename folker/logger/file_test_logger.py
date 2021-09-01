@@ -5,7 +5,6 @@ from folker.logger import TestLogger
 from folker.logger.logger import FileLogger
 from folker.model import Context
 from folker.model.error import SourceException
-from folker.parameters import is_debug, is_trace
 
 
 class FileTestLogger(TestLogger, FileLogger):
@@ -73,14 +72,14 @@ class FileTestLogger(TestLogger, FileLogger):
         return serialized
 
     def action_executed(self, stage_context: dict):
-        if is_trace():
+        if self.trace:
             self._log('STAGE CONTEXT: {}'.format(stage_context))
 
     def message(self, message):
         self._log(message)
 
     def action_debug(self, message):
-        if is_debug():
+        if self.debug:
             self._log(message)
 
     def action_error(self, message):
@@ -95,7 +94,7 @@ class FileTestLogger(TestLogger, FileLogger):
 
     # Assertions
     def assertion_success(self, assertion: str):
-        if is_debug():
+        if self.debug:
             self._log('\t{}'.format(assertion))
 
     def assertion_fail(self, assertion: str, variables: dict):
@@ -109,6 +108,6 @@ class FileTestLogger(TestLogger, FileLogger):
         if success is not total:
             self._log(
                 '\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success, failures, total))
-        elif is_debug():
+        elif self.debug:
             self._log(
                 '\tAsserts: Success[ {} ] Fail[ {} ] Total[ {} ]'.format(success, failures, total))
