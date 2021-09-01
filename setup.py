@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='folker-test',
-    version='0.1.0',
+    version='2.1.0',
     license='proprietary',
     description='Test and simple tasks automation tool',
 
