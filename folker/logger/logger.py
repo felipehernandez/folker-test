@@ -11,7 +11,6 @@ class ColorLogger(ABC):
     COLOR_BLACK = '\033[0;30m'
     COLOR_RED = '\033[0;31m'
     COLOR_GREEN = '\033[0;32m'
-    COLOR_GREEN = '\033[0;32m'
     COLOR_YELLOW = '\033[0;33m'
     COLOR_BLUE = '\033[0;34m'
     COLOR_PINK = '\033[0;35m'
@@ -59,68 +58,6 @@ class FileLogger(ABC):
             print(report_entry, end=report_end, file=f)
         f.close()
         self.report = []
-
-
-class SystemLogger(ABC):
-    debug: bool
-    trace: bool
-
-    def __init__(self, config: Configuration) -> None:
-        self.debug = config.debug_mode
-        self.trace = config.trace_mode
-
-    # Setup
-    @abstractmethod
-    def system_setup_start(self):
-        pass
-
-    @abstractmethod
-    def system_setup_completed(self):
-        pass
-
-    # Setup
-    @abstractmethod
-    def loading_profile_files(self):
-        pass
-
-    @abstractmethod
-    def loading_template_files(self): pass
-
-    @abstractmethod
-    def loading_test_files(self): pass
-
-    @abstractmethod
-    def loading_file(self, filename): pass
-
-    @abstractmethod
-    def loading_file_error(self, file_name: str, exception: Exception): pass
-
-    @abstractmethod
-    def loading_files_completed(self, files): pass
-
-    # Protos
-    @abstractmethod
-    def loading_proto_files(self): pass
-
-    @abstractmethod
-    def loading_proto_file_skipped(self, filename): pass
-
-    @abstractmethod
-    def loading_proto_file(self, filename): pass
-
-    @abstractmethod
-    def loading_proto_file_error(self, file_name: str, proto_command: str, exception: Exception):
-        pass
-
-    @abstractmethod
-    def loading_proto_files_completed(self, files): pass
-
-    # Wrap up
-    @abstractmethod
-    def assert_execution_result(self, total, success, failures): pass
-
-    @abstractmethod
-    def assert_number_tests_executed(self, expected: int, executed: int): pass
 
 
 class TestLogger(ABC):

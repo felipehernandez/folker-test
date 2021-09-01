@@ -22,8 +22,8 @@ class Test(Validatable):
                  description: str = None,
                  parallel: bool = False,
                  foreach: dict = {},
-                 tags: [str] = [],
-                 stages: [Stage] = []
+                 tags: [str] = None,
+                 stages: [Stage] = None
                  ) -> None:
         super().__init__()
         self.id = id
@@ -31,8 +31,8 @@ class Test(Validatable):
         self.description = description
         self.parallel = parallel
         self.foreach = foreach
-        self.tags = tags
-        self.stages = stages
+        self.tags = tags if tags else []
+        self.stages = stages if stages else []
 
     def __bool__(self):
         if self.name is None:

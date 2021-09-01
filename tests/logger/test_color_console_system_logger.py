@@ -1,20 +1,72 @@
 import pytest
 
-from folker.logger.color_console_system_logger import ColorConsoleSystemLogger
+from folker.logger.system_logger import ColorConsoleSystemLogger, Color
 
 
 @pytest.mark.logger
-class TestSystemSetupColorConsoleSystemLogger:
+class TestVisualColorConsoleSystemLogger:
+    def full_log(self, logger):
+        logger.system_setup_start()
+        logger.loading_proto_files()
+        logger.loading_file_skipped('a_skipped_file')
+        logger.loading_file_ok('an_ok_file')
+        logger.loading_file_error('an_error_file', 'error')
+        logger.loading_proto_files_completed(['a_file', 'another_file'])
+        logger.system_setup_completed()
+
+        logger.execution_setup_start()
+
+        logger.loading_profile_files()
+        logger.loading_file_ok('an_ok_file')
+        logger.loading_file_error('an_error_file', 'error')
+        logger.loading_files_completed(['a_file', 'another_file'])
+
+        logger.loaded_profile('a_profile')
+        logger.loading_template_files()
+        logger.loading_file_ok('an_ok_file')
+        logger.loading_file_error('an_error_file', 'error')
+        logger.loading_files_completed(['a_file', 'another_file'])
+
+        logger.loaded_template('a_template_id')
+        logger.loaded_template_stage('a_template_stage_id')
+        logger.loaded_template('another_template_id')
+        logger.loaded_template_stage('another_template_stage_id')
+        logger.loading_files_completed(['a_file', 'another_file'])
+
+        logger.loading_test_files()
+        logger.loading_file_ok('an_ok_file')
+        logger.loading_file_error('an_error_file', 'error')
+        logger.loading_files_completed(['a_file', 'another_file'])
+
+        logger.filtering_tests()
+        logger.test_filter_out_skip_tags('a_test', {'skip_tag_1', 'skip_tag_2'})
+        logger.test_filter_in_execution_tags('a_test', {'skip_tag_1', 'skip_tag_2'})
+        logger.test_filter_out_execution_tags('a_test')
+        logger.test_filter_in_skip_tags('a_test')
+
+        logger.execution_report(3, ['a_test', 'another_test'], ['yet_another_test'], None)
+        logger.execution_report(3, ['a_test', 'another_test'], ['yet_another_test'], 2)
+
+    def test_full_log_normal(self, normal_configuration):
+        system_logger = ColorConsoleSystemLogger(config=normal_configuration)
+        self.full_log(system_logger)
+
+    def test_full_log_debug(self, debug_configuration):
+        system_logger = ColorConsoleSystemLogger(config=debug_configuration)
+        self.full_log(system_logger)
+
+    def test_full_log_trace(self, trace_configuration):
+        system_logger = ColorConsoleSystemLogger(config=trace_configuration)
+        self.full_log(system_logger)
+
+
+@pytest.mark.logger
+class TestNormalSystemStartupColorConsoleSystemLogger:
     """
-    Test all logging for system setup stage
+    Test all logging for system setup stage on normal mode
     """
 
-    def test_system_setup_start_on_normal(self, capsys, normal_configuration):
-        """
-        GIVEN normal_configuration
-        WHEN system_setup_start
-        THEN no output
-        """
+    def test_system_setup_start(self, capsys, normal_configuration):
         system_logger = ColorConsoleSystemLogger(config=normal_configuration)
 
         system_logger.system_setup_start()
@@ -22,67 +74,34 @@ class TestSystemSetupColorConsoleSystemLogger:
         captured = capsys.readouterr()
         assert captured.out == ''
 
-    def test_system_setup_start_on_debug(self, capsys, debug_configuration):
-        """
-        GIVEN debug_configuration
-        WHEN system_setup_start
-        THEN no output
-        """
+
+@pytest.mark.logger
+class TestDebugSystemStartupColorConsoleSystemLogger:
+    """
+    Test all logging for system setup stage on debug mode
+    """
+
+    def test_system_setup_start(self, capsys, debug_configuration):
         system_logger = ColorConsoleSystemLogger(config=debug_configuration)
 
         system_logger.system_setup_start()
 
         captured = capsys.readouterr()
-        assert captured.out == ''
+        assert captured.out == Color.HIGH_WHITE.code() + '#' * 100 + Color.DEFAULT.code() + '\n' \
+               + Color.HIGH_WHITE.code() + 'SYSTEM SETUP : start' + Color.DEFAULT.code() + '\n'
 
-    def test_system_setup_start_on_trace(self, capsys, trace_configuration):
-        """
-        GIVEN trace_configuration
-        WHEN system_setup_start
-        THEN output
-        """
+
+@pytest.mark.logger
+class TestTraceSystemStartupColorConsoleSystemLogger:
+    """
+    Test all logging for system setup stage on trace mode
+    """
+
+    def test_system_setup_start(self, capsys, trace_configuration):
         system_logger = ColorConsoleSystemLogger(config=trace_configuration)
 
         system_logger.system_setup_start()
 
         captured = capsys.readouterr()
-        assert 'SETUP : start' in captured.out
-
-    def test_system_setup_completed_on_normal(self, capsys, normal_configuration):
-        """
-        GIVEN normal_configuration
-        WHEN system_setup_completed
-        THEN no output
-        """
-        system_logger = ColorConsoleSystemLogger(config=normal_configuration)
-
-        system_logger.system_setup_completed()
-
-        captured = capsys.readouterr()
-        assert captured.out == ''
-
-    def test_system_setup_completed_on_debug(self, capsys, debug_configuration):
-        """
-        GIVEN normal_configuration
-        WHEN system_setup_completed
-        THEN not output
-        """
-        system_logger = ColorConsoleSystemLogger(config=debug_configuration)
-
-        system_logger.system_setup_completed()
-
-        captured = capsys.readouterr()
-        assert captured.out == ''
-
-    def test_system_setup_completed_on_trace(self, capsys, trace_configuration):
-        """
-        GIVEN trace_configuration
-        WHEN system_setup_completed
-        THEN output
-        """
-        system_logger = ColorConsoleSystemLogger(config=trace_configuration)
-
-        system_logger.system_setup_completed()
-
-        captured = capsys.readouterr()
-        assert 'SETUP : completed' in captured.out
+        assert captured.out == Color.HIGH_WHITE.code() + '#' * 100 + Color.DEFAULT.code() + '\n' \
+               + Color.HIGH_WHITE.code() + 'SYSTEM SETUP : start' + Color.DEFAULT.code() + '\n'

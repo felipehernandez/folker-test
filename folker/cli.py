@@ -1,11 +1,12 @@
 from folker.executor import ParallelExecutor, SequentialExecutor
-from folker.load.files import load_profile_files, load_and_initialize_template_files, \
+from folker.load.files import load_profile_files, load_template_files, \
     load_test_files
 from folker.load.protos import generate_protos
-from folker.logger import logger_factory, SystemLogger
+from folker.logger import logger_factory
+from folker.logger.system_logger import SystemLogger
 from folker.model import Test
 from folker.model.error import TestSuiteResultException, TestSuiteNumberExecutionsException
-from folker.parameters import parameterised, Configuration
+from folker.parameters import Configuration, parameterised
 
 
 @parameterised
@@ -32,9 +33,11 @@ def run(config: Configuration):
                              cumulative_success=success)
 
     # Report
-    system_logger.assert_execution_result(executed, sorted(success), sorted(failures))
+    system_logger.execution_report(executed=executed,
+                                   success=sorted(success),
+                                   failures=sorted(failures),
+                                   expected=config.expected_test_count)
     expected_number_of_tests = config.expected_test_count
-    system_logger.assert_number_tests_executed(expected_number_of_tests, executed)
     if len(success) != executed:
         raise TestSuiteResultException(failures)
     if expected_number_of_tests and int(expected_number_of_tests) != executed:
@@ -48,18 +51,46 @@ def run_system_setup(system_logger: SystemLogger):
 
 
 def run_execution_setup(config: Configuration, system_logger: SystemLogger):
+    system_logger.execution_setup_start()
     load_profile_files(config=config, logger=system_logger)
-    load_and_initialize_template_files(config=config, logger=system_logger)
+    load_template_files(config=config, logger=system_logger)
     tests = load_test_files(config=config, logger=system_logger)
 
-    return filter_tests_by_tags(config=config, tests=tests)
+    return filter_tests_by_tags(system_logger=system_logger, config=config, tests=tests)
 
 
-def filter_tests_by_tags(config: Configuration, tests: [Test]):
-    tags = config.execute_tags
-    if len(tags) == 0:
+def filter_tests_by_tags(system_logger: SystemLogger, config: Configuration, tests: [Test]):
+    system_logger.filtering_tests()
+    ignore_skip_tags = len(config.skip_tags) == 0
+    ignore_execute_tags = len(config.execute_tags) == 0
+
+    if ignore_skip_tags and ignore_execute_tags:
+        for test in tests:
+            pass
         return tests
-    return [test for test in tests if all(tag in test.tags for tag in tags)]
+
+    filtered_tests = []
+    for test in tests:
+        test_tags = set(test.tags)
+        if not ignore_skip_tags:
+            matching_skip_tags = config.skip_tags.intersection(test_tags)
+            if len(matching_skip_tags) > 0:
+                system_logger.test_filter_out_skip_tags(test.name, matching_skip_tags)
+                continue
+        if not ignore_execute_tags:
+            matching_execute_tags = config.execute_tags.intersection(test_tags)
+            if len(matching_execute_tags) > 0:
+                system_logger.test_filter_in_execution_tags(matching_execute_tags)
+                filtered_tests.append(test)
+                continue
+            else:
+                system_logger.test_filter_out_execution_tags()
+                continue
+
+        system_logger.test_filter_in_skip_tags()
+        filtered_tests.append(test)
+
+    return filtered_tests
 
 
 def execute_tests(config: Configuration,

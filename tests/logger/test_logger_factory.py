@@ -1,9 +1,9 @@
 import pytest
 
 from folker.logger import logger_factory
-from folker.logger.color_console_system_logger import ColorConsoleSystemLogger
-from folker.logger.file_system_logger import FileSystemLogger
-from folker.logger.plain_console_system_logger import PlainConsoleSystemLogger
+from folker.logger import PlainFileSystemLogger,\
+    PlainConsoleSystemLogger, \
+    ColorConsoleSystemLogger
 from folker.parameters import Configuration
 
 
@@ -14,7 +14,7 @@ class TestLoggerFactory:
 
         logger = logger_factory.system_logger(config=config)
 
-        assert type(logger) is FileSystemLogger
+        assert type(logger) is PlainFileSystemLogger
 
     def test_given_no_log_file_and_plain_logger_type_then_plain_console_system_logger(self):
         config = Configuration(log_file=None,

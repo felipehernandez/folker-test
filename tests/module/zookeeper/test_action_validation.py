@@ -4,7 +4,7 @@ from folker.module.zookeeper.action import ZookeeperStageAction, ZookeeperMethod
 
 
 @pytest.mark.action_correctness
-@pytest.mark.action_gcp_zookeeper
+@pytest.mark.action_zookeeper
 class TestZookeeperActionValidation:
     def test_validate_empty(self):
         action = ZookeeperStageAction()

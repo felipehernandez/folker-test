@@ -4,12 +4,12 @@ import yaml
 
 from folker import templates, stage_templates, profiles
 from folker.load.schemas import TestSchema, ProfileSchema
-from folker.logger import SystemLogger
+from folker.logger.system_logger import SystemLogger
 from folker.model import Test
 from folker.parameters import Configuration
 
 
-def load_and_initialize_template_files(config: Configuration, logger: SystemLogger) -> [Test]:
+def load_template_files(config: Configuration, logger: SystemLogger) -> [Test]:
     schema = TestSchema()
     logger.loading_template_files()
     schemas = load_schemas(config=config,
@@ -20,8 +20,10 @@ def load_and_initialize_template_files(config: Configuration, logger: SystemLogg
 
     for schema in schemas:
         templates[schema.id] = schema
+        logger.loaded_template(schema.id)
         for stage in schema.stages:
             stage_templates[stage.id] = stage
+            logger.loaded_template_stage(stage.id)
 
     return templates, stage_templates
 
@@ -78,9 +80,9 @@ def _should_load_file(filename: str, template: bool, selected_test_files: [str])
 
 def load_schema(filename: str, schema, valid_test_files, logger: SystemLogger):
     file_path = filename.resolve().as_uri()[7:]
-    logger.loading_file(filename)
     try:
         test_definition = load_definition(file_path, schema)
+        logger.loading_file_ok(filename)
         valid_test_files.append(file_path)
         return test_definition
     except Exception as e:
@@ -103,5 +105,6 @@ def load_profile_files(config: Configuration, logger: SystemLogger):
 
     for schema in schemas:
         profiles[schema.name] = schema
+        logger.loaded_profile(schema.name)
 
     return profiles

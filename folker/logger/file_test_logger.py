@@ -1,8 +1,7 @@
 import json
 from enum import Enum
 
-from folker.logger import TestLogger
-from folker.logger.logger import FileLogger
+from folker.logger.logger import FileLogger, TestLogger
 from folker.model import Context
 from folker.model.error import SourceException
 
