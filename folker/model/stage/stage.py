@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from folker.logger.logger import TestLogger
+from folker.logger import TestLogger
 from folker.model.context import Context
 from folker.model.error.error import SourceException
 from folker.model.stage.assertions import StageAssertions

@@ -4,7 +4,7 @@ from folker.logger.system_logger import PlainConsoleSystemLogger
 
 
 @pytest.mark.logger
-class TestVisualColorConsoleSystemLogger:
+class TestVisualPlainConsoleSystemLogger:
     def full_log(self, logger):
         logger.system_setup_start()
         logger.loading_proto_files()
@@ -154,5 +154,5 @@ class TestTraceSystemStartupPlainConsoleSystemLogger:
         system_logger.system_setup_completed()
 
         captured = capsys.readouterr()
-        assert captured.out == captured.out == '-' * 100 + '\n' \
+        assert captured.out == '-' * 100 + '\n' \
                + 'SYSTEM SETUP : completed\n'

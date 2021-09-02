@@ -1,7 +1,7 @@
 import subprocess
 from pathlib import Path
 
-from folker.logger.system_logger import SystemLogger
+from folker.logger import SystemLogger
 
 
 def generate_protos(logger: SystemLogger):

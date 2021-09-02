@@ -1,105 +1,8 @@
 from abc import ABC, abstractmethod
-from enum import Enum, auto
 from typing import List, Set
 
+from folker.logger.logger import LogEntry, LogEntryType, ColorLogger, ConsoleColor
 from folker.parameters import Configuration
-
-
-class LogEntryType(Enum):
-    BLANK = auto()
-    SYSTEM_INFO = auto()
-    SYSTEM_DEBUG = auto()
-    SYSTEM_TRACE = auto()
-    SYSTEM_TRACE_SKIPPED = auto()
-    SYSTEM_TRACE_OK = auto()
-    SYSTEM_TRACE_WARN = auto()
-    SYSTEM_TRACE_FAIL = auto()
-    REPORT_INFO = auto()
-    REPORT_FAILURE = auto()
-    REPORT_FAILURE_DEBUG = auto()
-    REPORT_SUCCESS = auto()
-    REPORT_SUCCESS_DEBUG = auto()
-
-
-class LogEntry:
-    type: LogEntryType
-    text: str
-    end: str
-
-    def __init__(self, type: LogEntryType, text: str, end: str = None) -> None:
-        self.type = type
-        self.text = text
-        self.end = end
-
-    @classmethod
-    def blank_line(cls):
-        return LogEntry(type=LogEntryType.BLANK, text='', end=None)
-
-
-class Color(Enum):
-    DEFAULT = auto()
-
-    BLACK = auto()
-    RED = auto()
-    GREEN = auto()
-    YELLOW = auto()
-    BLUE = auto()
-    PINK = auto()
-    CYAN = auto()
-    WHITE = auto()
-    GREY = auto()
-
-    HIGH_WHITE = auto()
-    HIGH_RED = auto()
-    HIGH_GREEN = auto()
-    HIGH_YELLOW = auto()
-    HIGH_BLUE = auto()
-    HIGH_PINK = auto()
-    HIGH_CYAN = auto()
-    HIGH_GREY = auto()
-
-    def code(self):
-        return {
-            self.DEFAULT: '\033[0m',
-
-            self.BLACK: '\033[0;30m',
-            self.RED: '\033[0;31m',
-            self.GREEN: '\033[0;32m',
-            self.YELLOW: '\033[0;33m',
-            self.BLUE: '\033[0;34m',
-            self.PINK: '\033[0;35m',
-            self.CYAN: '\033[0;36m',
-            self.WHITE: '\033[0;38m',
-            self.GREY: '\033[0;37m',
-
-            self.HIGH_GREY: '\033[0;99m',
-            self.HIGH_WHITE: '\033[0;97m',
-            self.HIGH_RED: '\033[0;91m',
-            self.HIGH_GREEN: '\033[0;92m',
-            self.HIGH_YELLOW: '\033[0;93m',
-            self.HIGH_BLUE: '\033[0;94m',
-            self.HIGH_PINK: '\033[0;95m',
-            self.HIGH_CYAN: '\033[0;96m',
-        }.get(self, '\033[0m')
-
-
-class ColorLogger(ABC):
-    COLOR_MAPPINGS = {
-        LogEntryType.BLANK: Color.DEFAULT,
-        LogEntryType.SYSTEM_INFO: Color.HIGH_WHITE,
-        LogEntryType.SYSTEM_DEBUG: Color.WHITE,
-        LogEntryType.SYSTEM_TRACE: Color.GREY,
-        LogEntryType.SYSTEM_TRACE_SKIPPED: Color.GREY,
-        LogEntryType.SYSTEM_TRACE_OK: Color.GREEN,
-        LogEntryType.SYSTEM_TRACE_WARN: Color.YELLOW,
-        LogEntryType.SYSTEM_TRACE_FAIL: Color.RED,
-
-        LogEntryType.REPORT_INFO: Color.HIGH_WHITE,
-        LogEntryType.REPORT_FAILURE: Color.HIGH_RED,
-        LogEntryType.REPORT_FAILURE_DEBUG: Color.RED,
-        LogEntryType.REPORT_SUCCESS: Color.HIGH_GREEN,
-        LogEntryType.REPORT_SUCCESS_DEBUG: Color.GREEN,
-    }
 
 
 class SystemLogger(ABC):
@@ -141,24 +44,24 @@ class SystemLogger(ABC):
     def loading_file_skipped(self, filename):
         if self.trace:
             self.report.append(LogEntry(type=LogEntryType.SYSTEM_TRACE,
-                                        text='\t{} '.format(filename),
+                                        text=f'\t{filename} ',
                                         end=''))
             self.report.append(LogEntry(type=LogEntryType.SYSTEM_TRACE_SKIPPED, text='SKIP'))
 
     def loading_file_ok(self, filename):
         if self.trace:
             self.report.append(LogEntry(type=LogEntryType.SYSTEM_TRACE,
-                                        text='\t{} '.format(filename),
+                                        text=f'\t{filename} ',
                                         end=''))
             self.report.append(LogEntry(type=LogEntryType.SYSTEM_TRACE_OK, text='OK'))
 
     def loading_file_error(self, filename, e):
         if self.trace:
             self.report.append(LogEntry(type=LogEntryType.SYSTEM_TRACE,
-                                        text='\t{} '.format(filename),
+                                        text=f'\t{filename} ',
                                         end=''))
             self.report.append(LogEntry(type=LogEntryType.SYSTEM_TRACE_FAIL,
-                                        text='{} - {}'.format('ERROR', e)))
+                                        text=f'ERROR - {e}'))
 
     def loading_proto_files_completed(self, processed_files):
         # if self.debug:
@@ -247,27 +150,27 @@ class SystemLogger(ABC):
     def test_filter_out_skip_tags(self, test_name: str, matching_skip_tags: Set[str]):
         if self.debug:
             self.report.append(LogEntry(type=LogEntryType.SYSTEM_DEBUG,
-                                        text='\t{} '.format(test_name),
+                                        text=f'\t{test_name} ',
                                         end=''))
             self.report.append(
                 LogEntry(type=LogEntryType.SYSTEM_TRACE_WARN,
-                         text='SKIP - Skip tag matching : {}'.format(matching_skip_tags)))
+                         text=f'SKIP - Skip tag matching : {matching_skip_tags}'))
         self._log()
 
     def test_filter_in_execution_tags(self, test_name: str, matching_execute_tags: Set[str]):
         if self.debug:
             self.report.append(LogEntry(type=LogEntryType.SYSTEM_DEBUG,
-                                        text='\t{} '.format(test_name),
+                                        text=f'\t{test_name} ',
                                         end=''))
             self.report.append(
                 LogEntry(type=LogEntryType.SYSTEM_TRACE_OK,
-                         text='EXECUTE - Execute tag matching : {}'.format(matching_execute_tags)))
+                         text=f'EXECUTE - Execute tag matching : {matching_execute_tags}'))
         self._log()
 
     def test_filter_out_execution_tags(self, test_name: str):
         if self.debug:
             self.report.append(LogEntry(type=LogEntryType.SYSTEM_DEBUG,
-                                        text='\t{} '.format(test_name),
+                                        text=f'\t{test_name} ',
                                         end=''))
             self.report.append(
                 LogEntry(type=LogEntryType.SYSTEM_TRACE_WARN,
@@ -277,7 +180,7 @@ class SystemLogger(ABC):
     def test_filter_in_skip_tags(self, test_name: str):
         if self.debug:
             self.report.append(LogEntry(type=LogEntryType.SYSTEM_DEBUG,
-                                        text='\t{} '.format(test_name),
+                                        text=f'\t{test_name} ',
                                         end=''))
             self.report.append(
                 LogEntry(type=LogEntryType.SYSTEM_TRACE_OK,
@@ -299,30 +202,30 @@ class SystemLogger(ABC):
             self._log_report_successes(successes)
 
         self.report.append(LogEntry(type=LogEntryType.REPORT_INFO,
-                                    text='Total: {}'.format(total),
+                                    text=f'Total: {total}',
                                     end=''))
         if expected and int(expected) != total:
             self.report.append(LogEntry(type=LogEntryType.REPORT_FAILURE,
-                                        text=' - Expected: {}'.format(total)))
+                                        text=f' - Expected: {total}'))
         else:
             self.report.append(LogEntry.blank_line())
         self._log()
 
     def _log_report_failures(self, failures):
         self.report.append(LogEntry(type=LogEntryType.REPORT_FAILURE,
-                                    text='Failures: ({})'.format(len(failures))))
+                                    text=f'Failures: ({len(failures)})'))
         if self.debug:
             for failure in failures:
                 self.report.append(LogEntry(type=LogEntryType.REPORT_FAILURE_DEBUG,
-                                            text='\t{}'.format(failure)))
+                                            text=f'\t{failure}'))
 
     def _log_report_successes(self, successes):
         self.report.append(LogEntry(type=LogEntryType.REPORT_SUCCESS,
-                                    text='Success: ({})'.format(len(successes))))
+                                    text=f'Success: ({len(successes)})'))
         if self.debug:
             for success in successes:
                 self.report.append(LogEntry(type=LogEntryType.REPORT_SUCCESS_DEBUG,
-                                            text='\t{}'.format(success)))
+                                            text=f'\t{success}'))
 
 
 class PlainConsoleSystemLogger(SystemLogger):
@@ -335,9 +238,8 @@ class PlainConsoleSystemLogger(SystemLogger):
 class ColorConsoleSystemLogger(SystemLogger, ColorLogger):
     def _log(self):
         for log_entry in self.report:
-            text = '{}{}{}'.format(self.COLOR_MAPPINGS.get(log_entry.type, Color.DEFAULT).code(),
-                                   log_entry.text,
-                                   Color.DEFAULT.code())
+            prefix_color = self.COLOR_MAPPINGS.get(log_entry.type, ConsoleColor.DEFAULT).code()
+            text = f'{prefix_color}{log_entry.text}{ConsoleColor.DEFAULT.code()}'
             print(text, end=log_entry.end)
         self.report = []
 

@@ -1,6 +1,6 @@
 import pytest
 
-from folker.logger.system_logger import ColorConsoleSystemLogger, Color
+from folker.logger.system_logger import ColorConsoleSystemLogger, ConsoleColor
 
 
 @pytest.mark.logger
@@ -87,8 +87,8 @@ class TestDebugSystemStartupColorConsoleSystemLogger:
         system_logger.system_setup_start()
 
         captured = capsys.readouterr()
-        assert captured.out == Color.HIGH_WHITE.code() + '#' * 100 + Color.DEFAULT.code() + '\n' \
-               + Color.HIGH_WHITE.code() + 'SYSTEM SETUP : start' + Color.DEFAULT.code() + '\n'
+        assert captured.out == ConsoleColor.HIGH_WHITE.code() + '#' * 100 + ConsoleColor.DEFAULT.code() + '\n' \
+               + ConsoleColor.HIGH_WHITE.code() + 'SYSTEM SETUP : start' + ConsoleColor.DEFAULT.code() + '\n'
 
 
 @pytest.mark.logger
@@ -103,5 +103,5 @@ class TestTraceSystemStartupColorConsoleSystemLogger:
         system_logger.system_setup_start()
 
         captured = capsys.readouterr()
-        assert captured.out == Color.HIGH_WHITE.code() + '#' * 100 + Color.DEFAULT.code() + '\n' \
-               + Color.HIGH_WHITE.code() + 'SYSTEM SETUP : start' + Color.DEFAULT.code() + '\n'
+        assert captured.out == ConsoleColor.HIGH_WHITE.code() + '#' * 100 + ConsoleColor.DEFAULT.code() + '\n' \
+               + ConsoleColor.HIGH_WHITE.code() + 'SYSTEM SETUP : start' + ConsoleColor.DEFAULT.code() + '\n'
