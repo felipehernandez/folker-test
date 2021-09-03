@@ -12,8 +12,11 @@ class TestPubSubAction:
     @patch('os.path.exists')
     @patch('folker.module.gcp.pubsub.action.SubscriberClient')
     @patch('folker.module.gcp.pubsub.action.PublisherClient')
-    def test_simple_publish_execution(self, MockPublisher, MockSubscriber, mock_os):
-        logger = Mock()
+    def test_simple_publish_execution(self,
+                                      MockPublisher,
+                                      MockSubscriber,
+                                      mock_os,
+                                      plain_console_test_logger_on_trace):
         mock_os.return_value = True
         action = PubSubStageAction(method=PubSubMethod.PUBLISH.name,
                                    project='a-project',
@@ -25,7 +28,7 @@ class TestPubSubAction:
         MockPublisher.return_value.publish.return_value = future
         future.result.return_value = 'message-id'
 
-        context = action.execute(logger=logger, context=Context())
+        context = action.execute(logger=plain_console_test_logger_on_trace, context=Context())
 
         assert {} == context.test_variables
         assert 'elapsed_time' in context.stage_variables
@@ -36,8 +39,11 @@ class TestPubSubAction:
     @patch('os.path.exists')
     @patch('folker.module.gcp.pubsub.action.SubscriberClient')
     @patch('folker.module.gcp.pubsub.action.PublisherClient')
-    def test_simple_ack_subscription_execution(self, MockPublisher, MockSubscriber, mock_os):
-        logger = Mock()
+    def test_simple_ack_subscription_execution(self,
+                                               MockPublisher,
+                                               MockSubscriber,
+                                               mock_os,
+                                               plain_console_test_logger_on_trace):
         mock_os.return_value = True
 
         action = PubSubStageAction(method=PubSubMethod.SUBSCRIBE.name,
@@ -52,7 +58,7 @@ class TestPubSubAction:
         received_message.message.message_id = 'message-id'
         received_message.message.data.decode.return_value = 'a-message'
 
-        context = action.execute(logger=logger, context=Context())
+        context = action.execute(logger=plain_console_test_logger_on_trace, context=Context())
 
         assert {} == context.test_variables
         assert 'elapsed_time' in context.stage_variables
@@ -65,8 +71,11 @@ class TestPubSubAction:
         @patch('os.path.exists')
         @patch('folker.module.gcp.pubsub.action.SubscriberClient')
         @patch('folker.module.gcp.pubsub.action.PublisherClient')
-        def test_simple_nack_subscription_execution(self, MockPublisher, MockSubscriber, mock_os):
-            logger = Mock()
+        def test_simple_nack_subscription_execution(self,
+                                                    MockPublisher,
+                                                    MockSubscriber,
+                                                    mock_os,
+                                                    plain_console_test_logger_on_trace):
             mock_os.return_value = True
 
             action = PubSubStageAction(method=PubSubMethod.SUBSCRIBE.name,
@@ -81,7 +90,7 @@ class TestPubSubAction:
             received_message.message.message_id = 'message-id'
             received_message.message.data.decode.return_value = 'a-message'
 
-            context = action.execute(logger, context=Context())
+            context = action.execute(logger=plain_console_test_logger_on_trace, context=Context())
 
             assert {} == context.test_variables
             assert 'elapsed_time' in context.stage_variables

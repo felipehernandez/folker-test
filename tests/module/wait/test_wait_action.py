@@ -1,5 +1,3 @@
-from unittest.mock import Mock
-
 import pytest
 
 from folker.model.context import Context
@@ -15,12 +13,11 @@ class TestWaitAction:
         self.action = WaitStageAction()
         yield
 
-    def test_execution(self):
-        logger = Mock()
-
+    def test_execution(self, plain_console_test_logger_on_trace):
         self.action.time = 0.1
 
-        context = self.action.execute(logger=logger, context=Context())
+        context = self.action.execute(logger=(plain_console_test_logger_on_trace),
+                                      context=Context())
 
         assert {} == context.test_variables
         assert 'elapsed_time' in context.stage_variables
