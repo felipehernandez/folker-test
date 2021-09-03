@@ -88,7 +88,7 @@ class Stage(Validatable):
 
     def execute(self, logger: TestLogger, context: Context):
         if self.skip_stage_execution(context):
-            logger.stage_skip(context.replace_variables(self.name), context)
+            logger.stage_skip(context.replace_variables(self.name))
             return context
 
         contexts = context.replicate_on_stage(self.foreach)
