@@ -33,8 +33,8 @@ def run(config: Configuration):
                              cumulative_success=success)
 
     # Report
-    system_logger.execution_report(executed=executed,
-                                   success=sorted(success),
+    system_logger.execution_report(total=executed,
+                                   successes=sorted(success),
                                    failures=sorted(failures),
                                    expected=config.expected_test_count)
     expected_number_of_tests = config.expected_test_count
