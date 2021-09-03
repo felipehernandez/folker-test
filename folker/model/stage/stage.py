@@ -111,7 +111,7 @@ class Stage(Validatable):
 
     def _execute(self, logger: TestLogger, context: Context):
         name = context.replace_variables(self.name)
-        logger.stage_start(name, context)
+        logger.stage_start(name)
 
         try:
             context = self.action.execute(logger=logger, context=context)
