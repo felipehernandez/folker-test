@@ -66,7 +66,7 @@ def filter_tests_by_tags(system_logger: SystemLogger, config: Configuration, tes
 
     if ignore_skip_tags and ignore_execute_tags:
         for test in tests:
-            pass
+            system_logger.test_filter_in_skip_tags(test.name)
         return tests
 
     filtered_tests = []
@@ -78,16 +78,17 @@ def filter_tests_by_tags(system_logger: SystemLogger, config: Configuration, tes
                 system_logger.test_filter_out_skip_tags(test.name, matching_skip_tags)
                 continue
         if not ignore_execute_tags:
-            matching_execute_tags = config.execute_tags.intersection(test_tags)
-            if len(matching_execute_tags) > 0:
-                system_logger.test_filter_in_execution_tags(matching_execute_tags)
+            matching_tags = config.execute_tags.intersection(test_tags)
+            if len(matching_tags) > 0:
+                system_logger.test_filter_in_execution_tags(test_name=test.name,
+                                                            matching_execute_tags=matching_tags)
                 filtered_tests.append(test)
                 continue
             else:
-                system_logger.test_filter_out_execution_tags()
+                system_logger.test_filter_out_execution_tags(test.name)
                 continue
 
-        system_logger.test_filter_in_skip_tags()
+        system_logger.test_filter_in_skip_tags(test.name)
         filtered_tests.append(test)
 
     return filtered_tests

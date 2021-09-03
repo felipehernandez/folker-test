@@ -46,14 +46,14 @@ class SystemLogger(ABC):
             self.report.append(LogEntry(type=LogEntryType.SYSTEM_TRACE,
                                         text=f'\t{filename} ',
                                         end=''))
-            self.report.append(LogEntry(type=LogEntryType.SYSTEM_TRACE_SKIPPED, text='SKIP'))
+            self.report.append(LogEntry(type=LogEntryType.SYSTEM_TRACE_SKIPPED, text='<SKIP>'))
 
     def loading_file_ok(self, filename):
         if self.trace:
             self.report.append(LogEntry(type=LogEntryType.SYSTEM_TRACE,
                                         text=f'\t{filename} ',
                                         end=''))
-            self.report.append(LogEntry(type=LogEntryType.SYSTEM_TRACE_OK, text='OK'))
+            self.report.append(LogEntry(type=LogEntryType.SYSTEM_TRACE_OK, text='<OK>'))
 
     def loading_file_error(self, filename, e):
         if self.trace:
@@ -61,7 +61,7 @@ class SystemLogger(ABC):
                                         text=f'\t{filename} ',
                                         end=''))
             self.report.append(LogEntry(type=LogEntryType.SYSTEM_TRACE_FAIL,
-                                        text=f'ERROR - {e}'))
+                                        text=f'<ERROR> - {e}'))
 
     def loading_proto_files_completed(self, processed_files):
         # if self.debug:
@@ -154,7 +154,7 @@ class SystemLogger(ABC):
                                         end=''))
             self.report.append(
                 LogEntry(type=LogEntryType.SYSTEM_TRACE_WARN,
-                         text=f'SKIP - Skip tag matching : {matching_skip_tags}'))
+                         text=f'<SKIP> - Skip tag matching : {matching_skip_tags}'))
         self._log()
 
     def test_filter_in_execution_tags(self, test_name: str, matching_execute_tags: Set[str]):
@@ -164,7 +164,7 @@ class SystemLogger(ABC):
                                         end=''))
             self.report.append(
                 LogEntry(type=LogEntryType.SYSTEM_TRACE_OK,
-                         text=f'EXECUTE - Execute tag matching : {matching_execute_tags}'))
+                         text=f'<EXECUTE> - Execute tag matching : {matching_execute_tags}'))
         self._log()
 
     def test_filter_out_execution_tags(self, test_name: str):
@@ -174,7 +174,7 @@ class SystemLogger(ABC):
                                         end=''))
             self.report.append(
                 LogEntry(type=LogEntryType.SYSTEM_TRACE_WARN,
-                         text='SKIP - No execute tag matching'))
+                         text='<SKIP> - No execute tag matching'))
         self._log()
 
     def test_filter_in_skip_tags(self, test_name: str):
@@ -184,7 +184,7 @@ class SystemLogger(ABC):
                                         end=''))
             self.report.append(
                 LogEntry(type=LogEntryType.SYSTEM_TRACE_OK,
-                         text='EXECUTE - No skip tag matching'))
+                         text='<EXECUTE> - No skip tag matching'))
         self._log()
 
     # Report
