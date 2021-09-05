@@ -16,8 +16,8 @@ class TestKafkaAction:
         yield
 
     @patch('folker.module.kafka.action.KafkaProducer')
-    def test_simple_publish_execution(self, KafkaProducer):
-        logger = Mock()
+    def test_simple_publish_execution(self, KafkaProducer, plain_console_test_logger_on_trace):
+        logger = plain_console_test_logger_on_trace
 
         self.action.method = KafkaMethod.PUBLISH
         self.action.host = 'a-host'
@@ -49,9 +49,7 @@ class TestKafkaAction:
         assert context.stage_variables['offset'] == 'an-offset'
 
     @patch('folker.module.kafka.action.KafkaConsumer')
-    def test_simple_subscription_execution(self, KafkaConsumer):
-        logger = Mock()
-
+    def test_simple_subscription_execution(self, KafkaConsumer, plain_console_test_logger_on_trace):
         self.action.method = KafkaMethod.SUBSCRIBE
         self.action.project = 'a-project'
         self.action.host = 'a-host'
@@ -66,7 +64,8 @@ class TestKafkaAction:
         message1.value = 'a-message'.encode()
         KafkaConsumer.return_value = [message1]
 
-        context = self.action.execute(logger=logger, context=Context())
+        context = self.action.execute(logger=(plain_console_test_logger_on_trace),
+                                      context=Context())
 
         KafkaConsumer.assert_called_once_with('a-topic',
                                               group_id=None,

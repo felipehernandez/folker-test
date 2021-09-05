@@ -1,3 +1,5 @@
+from typing import List
+
 from folker import profiles
 from folker.executor import DEFAULT_PROFILE
 from folker.logger import logger_factory, LoggerType
@@ -7,7 +9,7 @@ from folker.parameters import Configuration
 
 
 class SequentialExecutor:
-    def execute(self, config: Configuration, tests: [Test]):
+    def execute(self, config: Configuration, tests: [Test]) -> (List[str], List[str]):
         success_tests = []
         fail_tests = []
         param_profile = list(config.profiles)[0] if config.profiles else None

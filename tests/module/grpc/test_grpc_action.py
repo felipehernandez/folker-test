@@ -10,9 +10,7 @@ from folker.module.grpc.action import GrpcStageAction
 @pytest.mark.action_grpc
 class TestGrpcAction:
     @patch('grpc.insecure_channel')
-    def test_execution_get(self, mocked_grpc):
-        logger = Mock()
-
+    def test_execution_get(self, mocked_grpc, plain_console_test_logger_on_trace):
         action = GrpcStageAction(host='a_host',
                                  package='a_package',
                                  stub='a_stub',
@@ -30,7 +28,7 @@ class TestGrpcAction:
         mocked_response = Mock(return_value='returned_value')
         mocked_method.return_value = mocked_response
 
-        context = action.execute(logger=logger, context=Context())
+        context = action.execute(logger=plain_console_test_logger_on_trace, context=Context())
 
         mocked_grpc.assert_called_with('a_host')
         mocked_stub.assert_called_with(mocked_channel)
@@ -38,9 +36,7 @@ class TestGrpcAction:
         assert mocked_response == context.stage_variables['response']
 
     @patch('grpc.insecure_channel')
-    def test_execution_get_list(self, mocked_grpc):
-        logger = Mock()
-
+    def test_execution_get_list(self, mocked_grpc, plain_console_test_logger_on_trace):
         action = GrpcStageAction(host='a_host',
                                  package='a_package',
                                  stub='a_stub',
@@ -59,7 +55,7 @@ class TestGrpcAction:
         mocked_response.__iter__ = Mock(return_value=iter(['item1', 'item2']))
         mocked_method.return_value = mocked_response
 
-        context = action.execute(logger=logger, context=Context())
+        context = action.execute(logger=plain_console_test_logger_on_trace, context=Context())
 
         mocked_grpc.assert_called_with('a_host')
         mocked_stub.assert_called_with(mocked_channel)

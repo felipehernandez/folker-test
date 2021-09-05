@@ -22,8 +22,8 @@ class Test(Validatable):
                  description: str = None,
                  parallel: bool = False,
                  foreach: dict = {},
-                 tags: [str] = [],
-                 stages: [Stage] = []
+                 tags: [str] = None,
+                 stages: [Stage] = None
                  ) -> None:
         super().__init__()
         self.id = id
@@ -31,8 +31,8 @@ class Test(Validatable):
         self.description = description
         self.parallel = parallel
         self.foreach = foreach
-        self.tags = tags
-        self.stages = stages
+        self.tags = tags if tags else []
+        self.stages = stages if stages else []
 
     def __bool__(self):
         if self.name is None:
@@ -40,14 +40,14 @@ class Test(Validatable):
 
         for stage in self.stages:
             if not stage:
-                self.validation_report.merge_with_prefix('test[{name}].'.format(name=self.name),
+                self.validation_report.merge_with_prefix(f'test[{self.name}].',
                                                          stage.validation_report)
 
         return bool(self.validation_report)
 
     def execute(self, logger: TestLogger, context: Context = None):
         if context is None:
-            context = Context.EMPTY_CONTEXT()
+            context = Context.empty_context()
         execution_contexts = context.replicate_on_test(self.foreach)
         executions_result = True
 

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from folker.logger.logger import TestLogger
+from folker.logger import TestLogger
 from ..validation import Validatable
 
 

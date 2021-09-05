@@ -17,6 +17,7 @@ class Configuration:
     log_file: str
     logger_type: LoggerType
     execute_tags: set
+    skip_tags: set
     profiles: set
     context: dict
     secrets: dict
@@ -32,6 +33,7 @@ class Configuration:
                  log_file: str = None,
                  logger_type: str = None,
                  tags: {str} = None,
+                 skip_tags: {str} = None,
                  profiles: {str} = None,
                  context: dict = None,
                  secrets: dict = None,
@@ -47,16 +49,16 @@ class Configuration:
             if logger_type \
             else Configuration.LoggerType.COLOR
         self.test_files = test_files
-        self.test_files_re = '**/{}'.format(test_files_re
-                                            if test_files_re
-                                            else DEFAULT_TEST_FILES_RE)
-        self.template_files_re = '**/{}'.format(DEFAULT_TEMPLATE_FILES_RE)
-        self.profile_files_re = '**/{}'.format(DEFAULT_PROFILE_FILES_RE)
-        self.execute_tags = tags if tags else set()
+        resolved_test_files_re = test_files_re if test_files_re else DEFAULT_TEST_FILES_RE
+        self.test_files_re = f'**/{resolved_test_files_re}'
+        self.template_files_re = f'**/{DEFAULT_TEMPLATE_FILES_RE}'
+        self.profile_files_re = f'**/{DEFAULT_PROFILE_FILES_RE}'
+        self.execute_tags = set(tags) if tags else set()
+        self.skip_tags = set(skip_tags) if skip_tags else set()
         self.profiles = profiles if profiles else set()
         self.context = context if context else dict()
         self.secrets = secrets if secrets else dict()
-        self.expected_test_count = expected_test_count
+        self.expected_test_count = int(expected_test_count) if expected_test_count else None
 
 
 def parameterised(func):
@@ -78,8 +80,9 @@ def parameterised(func):
                   help='Log to file XXX.XX')
     @click.option('--logger-type',
                   'logger_type',
-                  type=click.Choice([logger_type.name for logger_type in Configuration.LoggerType],
-                                    case_sensitive=False),
+                  type=click.Choice(
+                      [logger_type.name for logger_type in Configuration.LoggerType],
+                      case_sensitive=False),
                   default=Configuration.LoggerType.COLOR.name,
                   show_default=True,
                   help='Logger type')

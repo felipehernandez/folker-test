@@ -1,184 +1,137 @@
-from abc import ABC, abstractmethod
+from abc import ABC
+from enum import Enum, auto
 
-from folker.model import Context
-from folker.model.error import SourceException
-from folker.parameters import Configuration
+
+class LogEntryType(Enum):
+    BLANK = auto()
+    SYSTEM_INFO = auto()
+    SYSTEM_DEBUG = auto()
+    SYSTEM_TRACE = auto()
+    SYSTEM_TRACE_SKIPPED = auto()
+    SYSTEM_TRACE_OK = auto()
+    SYSTEM_TRACE_WARN = auto()
+    SYSTEM_TRACE_FAIL = auto()
+    REPORT_INFO = auto()
+    REPORT_FAILURE = auto()
+    REPORT_FAILURE_DEBUG = auto()
+    REPORT_SUCCESS = auto()
+    REPORT_SUCCESS_DEBUG = auto()
+    TEST_INFO = auto()
+    TEST_DEBUG = auto()
+    TEST_SUCCESS = auto()
+    TEST_FAILURE = auto()
+    TEST_FAILURE_DETAILS = auto()
+    STAGE_INFO = auto()
+    STAGE_SKIP = auto()
+    ACTION_DEBUG = auto()
+    ACTION_TRACE = auto()
+    ACTION_WARN = auto()
+    ACTION_ERROR = auto()
+    ACTION_PRINT = auto()
+    ACTION_LOG_PRINT = auto()
+    ACTION_ASSERTION_SUCCESS = auto()
+    ACTION_ASSERTION_FAIL = auto()
+    ACTION_ASSERTION_ERROR = auto()
+    ACTION_ASSERTION_REPORT_OK = auto()
+    ACTION_ASSERTION_REPORT_FAIL = auto()
+
+
+class LogEntry:
+    type: LogEntryType
+    text: str
+    end: str
+
+    def __init__(self, type: LogEntryType, text: str, end: str = None) -> None:
+        self.type = type
+        self.text = text
+        self.end = end
+
+    @classmethod
+    def blank_line(cls):
+        return LogEntry(type=LogEntryType.BLANK, text='', end=None)
+
+
+class ConsoleColor(Enum):
+    DEFAULT = auto()
+
+    BLACK = auto()
+    RED = auto()
+    GREEN = auto()
+    YELLOW = auto()
+    BLUE = auto()
+    PINK = auto()
+    CYAN = auto()
+    WHITE = auto()
+    GREY = auto()
+
+    HIGH_WHITE = auto()
+    HIGH_RED = auto()
+    HIGH_GREEN = auto()
+    HIGH_YELLOW = auto()
+    HIGH_BLUE = auto()
+    HIGH_PINK = auto()
+    HIGH_CYAN = auto()
+    HIGH_GREY = auto()
+
+    def code(self):
+        return {
+            self.DEFAULT: '\033[0m',
+
+            self.BLACK: '\033[0;30m',
+            self.RED: '\033[0;31m',
+            self.GREEN: '\033[0;32m',
+            self.YELLOW: '\033[0;33m',
+            self.BLUE: '\033[0;34m',
+            self.PINK: '\033[0;35m',
+            self.CYAN: '\033[0;36m',
+            self.WHITE: '\033[0;38m',
+            self.GREY: '\033[0;37m',
+
+            self.HIGH_GREY: '\033[0;99m',
+            self.HIGH_WHITE: '\033[0;97m',
+            self.HIGH_RED: '\033[0;91m',
+            self.HIGH_GREEN: '\033[0;92m',
+            self.HIGH_YELLOW: '\033[0;93m',
+            self.HIGH_BLUE: '\033[0;94m',
+            self.HIGH_PINK: '\033[0;95m',
+            self.HIGH_CYAN: '\033[0;96m',
+        }.get(self, '\033[0m')
 
 
 class ColorLogger(ABC):
-    COLOR_DEFAULT = '\033[0m'
+    COLOR_MAPPINGS = {
+        LogEntryType.BLANK: ConsoleColor.DEFAULT,
 
-    COLOR_BLACK = '\033[0;30m'
-    COLOR_RED = '\033[0;31m'
-    COLOR_GREEN = '\033[0;32m'
-    COLOR_GREEN = '\033[0;32m'
-    COLOR_YELLOW = '\033[0;33m'
-    COLOR_BLUE = '\033[0;34m'
-    COLOR_PINK = '\033[0;35m'
-    COLOR_CYAN = '\033[0;36m'
-    COLOR_WHITE = '\033[0;37m'
-    COLOR_GREY = '\033[0;38m'
+        LogEntryType.SYSTEM_INFO: ConsoleColor.HIGH_WHITE,
+        LogEntryType.SYSTEM_DEBUG: ConsoleColor.WHITE,
+        LogEntryType.SYSTEM_TRACE: ConsoleColor.GREY,
+        LogEntryType.SYSTEM_TRACE_SKIPPED: ConsoleColor.GREY,
+        LogEntryType.SYSTEM_TRACE_OK: ConsoleColor.GREEN,
+        LogEntryType.SYSTEM_TRACE_WARN: ConsoleColor.YELLOW,
+        LogEntryType.SYSTEM_TRACE_FAIL: ConsoleColor.RED,
 
-    COLOR_HIGH_BLACK = '\033[0;97m'
-    COLOR_HIGH_RED = '\033[0;91m'
-    COLOR_HIGH_GREEN = '\033[0;92m'
-    COLOR_HIGH_YELLOW = '\033[0;93m'
-    COLOR_HIGH_BLUE = '\033[0;94m'
-    COLOR_HIGH_PINK = '\033[0;95m'
-    COLOR_HIGH_CYAN = '\033[0;96m'
-    COLOR_HIGH_WHITE = '\033[0;99m'
+        LogEntryType.REPORT_INFO: ConsoleColor.HIGH_WHITE,
+        LogEntryType.REPORT_FAILURE: ConsoleColor.HIGH_RED,
+        LogEntryType.REPORT_FAILURE_DEBUG: ConsoleColor.RED,
+        LogEntryType.REPORT_SUCCESS: ConsoleColor.HIGH_GREEN,
+        LogEntryType.REPORT_SUCCESS_DEBUG: ConsoleColor.GREEN,
 
-    def _log_color(self, color, text, end=None) -> str:
-        if end is not None:
-            return '{}{}{}{}'.format(color, text, self.COLOR_DEFAULT, end)
-        else:
-            return '{}{}{}'.format(color, text, self.COLOR_DEFAULT)
-
-
-class FileLogger(ABC):
-    file_name: str
-    report: [str]
-    current_index = 0
-
-    def __init__(self, config: Configuration) -> None:
-        self.file_name = config.log_file
-        self.report = []
-        super().__init__()
-
-    # Util
-    def _delayed_log(self, text, end=None):
-        self.report.append((text, end))
-
-    def _log(self, text, end=None):
-        self.report.append((text, end))
-        self._write_to_file()
-
-    def _write_to_file(self):
-        f = open(self.file_name, 'a+')
-        for report_entry, report_end in self.report:
-            print(report_entry, end=report_end, file=f)
-        f.close()
-        self.report = []
-
-
-class SystemLogger(ABC):
-    debug: bool
-    trace: bool
-
-    def __init__(self, config: Configuration) -> None:
-        self.debug = config.debug_mode
-        self.trace = config.trace_mode
-
-    # Setup
-    @abstractmethod
-    def system_setup_start(self):
-        pass
-
-    @abstractmethod
-    def system_setup_completed(self):
-        pass
-
-    # Setup
-    @abstractmethod
-    def loading_profile_files(self):
-        pass
-
-    @abstractmethod
-    def loading_template_files(self): pass
-
-    @abstractmethod
-    def loading_test_files(self): pass
-
-    @abstractmethod
-    def loading_file(self, filename): pass
-
-    @abstractmethod
-    def loading_file_error(self, file_name: str, exception: Exception): pass
-
-    @abstractmethod
-    def loading_files_completed(self, files): pass
-
-    # Protos
-    @abstractmethod
-    def loading_proto_files(self): pass
-
-    @abstractmethod
-    def loading_proto_file_skipped(self, filename): pass
-
-    @abstractmethod
-    def loading_proto_file(self, filename): pass
-
-    @abstractmethod
-    def loading_proto_file_error(self, file_name: str, proto_command: str, exception: Exception):
-        pass
-
-    @abstractmethod
-    def loading_proto_files_completed(self, files): pass
-
-    # Wrap up
-    @abstractmethod
-    def assert_execution_result(self, total, success, failures): pass
-
-    @abstractmethod
-    def assert_number_tests_executed(self, expected: int, executed: int): pass
-
-
-class TestLogger(ABC):
-    debug: bool
-    trace: bool
-
-    def __init__(self, config: Configuration) -> None:
-        self.debug = config.debug_mode
-        self.trace = config.trace_mode
-
-    # Test
-    @abstractmethod
-    def test_start(self, test_name: str, test_description: str = None): pass
-
-    @abstractmethod
-    def test_finish(self): pass
-
-    @abstractmethod
-    def test_finish_error(self, e: SourceException): pass
-
-    # Stage
-    @abstractmethod
-    def stage_start(self, stage_name: str, context: Context): pass
-
-    @abstractmethod
-    def stage_skip(self, stage_name: str, context: Context): pass
-
-    # Action
-    @abstractmethod
-    def action_prelude(self, action: dict, context: Context): pass
-
-    @abstractmethod
-    def action_conclusion(self, action: dict, context: Context): pass
-
-    @abstractmethod
-    def message(self, message): pass
-
-    @abstractmethod
-    def action_error(self, message): pass
-
-    @abstractmethod
-    def action_warn(self, message): pass
-
-    @abstractmethod
-    def action_debug(self, message): pass
-
-    # Assertions
-    @abstractmethod
-    def assertion_success(self, assertion: str): pass
-
-    @abstractmethod
-    def assertion_fail(self, assertion: str, variables: dict): pass
-
-    @abstractmethod
-    def assertion_error(self, assertion: str, exception: Exception = None): pass
-
-    @abstractmethod
-    def assert_test_result(self, total, success, failures): pass
-
-    # Log
-    def log_text(self, log: str): pass
+        LogEntryType.TEST_INFO: ConsoleColor.HIGH_CYAN,
+        LogEntryType.TEST_DEBUG: ConsoleColor.BLUE,
+        LogEntryType.TEST_SUCCESS: ConsoleColor.HIGH_GREEN,
+        LogEntryType.TEST_FAILURE: ConsoleColor.HIGH_RED,
+        LogEntryType.TEST_FAILURE_DETAILS: ConsoleColor.RED,
+        LogEntryType.STAGE_INFO: ConsoleColor.HIGH_YELLOW,
+        LogEntryType.STAGE_SKIP: ConsoleColor.YELLOW,
+        LogEntryType.ACTION_DEBUG: ConsoleColor.PINK,
+        LogEntryType.ACTION_TRACE: ConsoleColor.GREY,
+        LogEntryType.ACTION_WARN: ConsoleColor.YELLOW,
+        LogEntryType.ACTION_ERROR: ConsoleColor.HIGH_RED,
+        LogEntryType.ACTION_PRINT: ConsoleColor.HIGH_CYAN,
+        LogEntryType.ACTION_LOG_PRINT: ConsoleColor.HIGH_WHITE,
+        LogEntryType.ACTION_ASSERTION_SUCCESS: ConsoleColor.GREEN,
+        LogEntryType.ACTION_ASSERTION_FAIL: ConsoleColor.RED,
+        LogEntryType.ACTION_ASSERTION_ERROR: ConsoleColor.HIGH_RED,
+        LogEntryType.ACTION_ASSERTION_REPORT_OK: ConsoleColor.CYAN,
+        LogEntryType.ACTION_ASSERTION_REPORT_FAIL: ConsoleColor.HIGH_RED,
+    }

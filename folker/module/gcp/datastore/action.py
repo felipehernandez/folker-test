@@ -122,11 +122,11 @@ class DatastoreStageAction(StageAction):
         credentials_path = os.getcwd() + 'credentials/gcp/gcp-credentials.json'
         credentials_path.replace('//', '/')
         if os.path.exists(credentials_path):
-            logger.action_debug('Credentials found at {}'.format(credentials_path))
+            logger.action_debug(f'Credentials found at {credentials_path}')
             self.credentials_path = credentials_path
             os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = self.credentials_path
         else:
-            logger.action_warn('No credentials found at {}'.format(credentials_path))
+            logger.action_warn(f'No credentials found at {credentials_path}')
 
         if self.host:
             os.environ["DATASTORE_EMULATOR_HOST"] = self.host
@@ -168,7 +168,7 @@ class DatastoreStageAction(StageAction):
 
         for keys in _divide_chunks(keyss, 500):
             datastore_client.delete_multi(keys)
-            logger.action_debug('Bulk deleted {} items of {}'.format(len(keys), total_keys_size))
+            logger.action_debug(f'Bulk deleted {len(keys)} items of {total_keys_size}')
 
     def _query(self, logger: TestLogger, context: Context, datastore_client):
         query = datastore_client.query(kind=self.key.get('kind'))

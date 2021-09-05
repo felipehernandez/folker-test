@@ -165,7 +165,7 @@ class PubSubStageAction(StageAction):
             if self.host \
             else PublisherClient()
 
-        project_path = 'projects/{project_id}'.format(project_id=self.project)
+        project_path = f'projects/{self.project}'
         topics = self.publisher.list_topics(project=project_path)
 
         topic_prefix = project_path + '/topics/'
@@ -177,7 +177,7 @@ class PubSubStageAction(StageAction):
             if self.host \
             else SubscriberClient()
 
-        project_path = 'projects/{project_id}'.format(project_id=self.project)
+        project_path = f'projects/{self.project}'
         subscriptions = self.subscriber.list_subscriptions(project=project_path)
 
         subscription_prefix = project_path + '/subscriptions/'

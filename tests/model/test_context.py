@@ -14,7 +14,7 @@ class TestContainsVariableReference:
 
 class TestContextConstructors:
     def test_empty_context(self):
-        empty_context = Context.EMPTY_CONTEXT()
+        empty_context = Context.empty_context()
 
         assert {} == empty_context.stage_variables
         assert {} == empty_context.test_variables
