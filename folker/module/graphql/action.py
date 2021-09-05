@@ -63,9 +63,9 @@ class GraphQLStageAction(StageAction):
         url = self._build_url()
         query = ''
         if self.query:
-            query = 'query Query {{ {} }}'.format(self.query)
+            query = f'query Query {{ {self.query} }}'
         else:
-            query = 'mutation Mutation {{ {} }}'.format(self.mutation)
+            query = f'mutation Mutation {{ {self.mutation} }}'
 
         query = gql(query)
 

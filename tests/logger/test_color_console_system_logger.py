@@ -87,8 +87,13 @@ class TestDebugSystemStartupColorConsoleSystemLogger:
         system_logger.system_setup_start()
 
         captured = capsys.readouterr()
-        assert captured.out == ConsoleColor.HIGH_WHITE.code() + '#' * 100 + ConsoleColor.DEFAULT.code() + '\n' \
-               + ConsoleColor.HIGH_WHITE.code() + 'SYSTEM SETUP : start' + ConsoleColor.DEFAULT.code() + '\n'
+        open_color = ConsoleColor.HIGH_WHITE.code()
+        close_color = ConsoleColor.DEFAULT.code()
+        expected_output = (
+            f'{open_color}{"#" * 100}{close_color}\n'
+            f'{open_color}SYSTEM SETUP : start{close_color}\n'
+        )
+        assert captured.out == expected_output
 
 
 @pytest.mark.logger
@@ -103,5 +108,10 @@ class TestTraceSystemStartupColorConsoleSystemLogger:
         system_logger.system_setup_start()
 
         captured = capsys.readouterr()
-        assert captured.out == ConsoleColor.HIGH_WHITE.code() + '#' * 100 + ConsoleColor.DEFAULT.code() + '\n' \
-               + ConsoleColor.HIGH_WHITE.code() + 'SYSTEM SETUP : start' + ConsoleColor.DEFAULT.code() + '\n'
+        open_color = ConsoleColor.HIGH_WHITE.code()
+        close_color = ConsoleColor.DEFAULT.code()
+        expected_output = (
+            f'{open_color}{"#" * 100}{close_color}\n'
+            f'{open_color}SYSTEM SETUP : start{close_color}\n'
+        )
+        assert captured.out == expected_output

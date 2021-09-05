@@ -75,7 +75,7 @@ class Stage(Validatable):
             self.validation_report.missing_fields.add('stage.id')
 
         if not self.action:
-            self.validation_report.merge_with_prefix('stage[{name}].'.format(name=self.name),
+            self.validation_report.merge_with_prefix(f'stage[{self.name}].',
                                                      self.action.validation_report)
         if not self.save:
             self.validation_report + self.save.validation_report
@@ -86,7 +86,7 @@ class Stage(Validatable):
 
         return bool(self.validation_report)
 
-    def execute(self, logger: TestLogger, context: Context):
+    def execute(self, logger: TestLogger, context: Context) -> Context:
         if self.skip_stage_execution(context):
             logger.stage_skip(context.replace_variables(self.name))
             return context

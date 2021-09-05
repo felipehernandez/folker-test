@@ -20,10 +20,8 @@ class ValidationReport:
         self.wrong_fields.update(other.wrong_fields)
 
     def merge_with_prefix(self, prefix: str, report: 'ValidationReport'):
-        self.missing_fields.update({'{prefix}{field}'.format(prefix=prefix, field=field)
-                                    for field in report.missing_fields})
-        self.wrong_fields.update({'{prefix}{field}'.format(prefix=prefix, field=field)
-                                  for field in report.wrong_fields})
+        self.missing_fields.update({f'{prefix}{field}' for field in report.missing_fields})
+        self.wrong_fields.update({f'{prefix}{field}' for field in report.wrong_fields})
 
     def generate_error(self):
         if not self:

@@ -49,11 +49,10 @@ class Configuration:
             if logger_type \
             else Configuration.LoggerType.COLOR
         self.test_files = test_files
-        self.test_files_re = '**/{}'.format(test_files_re
-                                            if test_files_re
-                                            else DEFAULT_TEST_FILES_RE)
-        self.template_files_re = '**/{}'.format(DEFAULT_TEMPLATE_FILES_RE)
-        self.profile_files_re = '**/{}'.format(DEFAULT_PROFILE_FILES_RE)
+        resolved_test_files_re = test_files_re if test_files_re else DEFAULT_TEST_FILES_RE
+        self.test_files_re = f'**/{resolved_test_files_re}'
+        self.template_files_re = f'**/{DEFAULT_TEMPLATE_FILES_RE}'
+        self.profile_files_re = f'**/{DEFAULT_PROFILE_FILES_RE}'
         self.execute_tags = set(tags) if tags else set()
         self.skip_tags = set(skip_tags) if skip_tags else set()
         self.profiles = profiles if profiles else set()

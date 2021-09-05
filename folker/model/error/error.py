@@ -20,8 +20,6 @@ class SourceException(Exception):
         formatted_details = ''
         for detail in self.details:
             formatted_details = formatted_details + \
-                                '\n\t{}: {}'.format(detail, self.details.get(detail).__str__())
+                                f'\n\t{detail}: {self.details.get(detail).__str__()}'
 
-        return '{error} / {cause}\nDetails: {details}'.format(error=self.error,
-                                                              cause=self.cause,
-                                                              details=formatted_details)
+        return f'{self.error} / {self.cause}\nDetails: {formatted_details}'

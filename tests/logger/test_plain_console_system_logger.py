@@ -103,8 +103,11 @@ class TestDebugSystemStartupPlainConsoleSystemLogger:
         system_logger.system_setup_start()
 
         captured = capsys.readouterr()
-        assert captured.out == '#' * 100 + '\n' \
-               + 'SYSTEM SETUP : start\n'
+        expected_output = (
+            f'{"#" * 100}\n'
+            f'SYSTEM SETUP : start\n'
+        )
+        assert captured.out == expected_output
 
     def test_loading_proto_files(self, capsys, debug_configuration):
         system_logger = PlainConsoleSystemLogger(config=debug_configuration)
@@ -112,8 +115,11 @@ class TestDebugSystemStartupPlainConsoleSystemLogger:
         system_logger.loading_proto_files()
 
         captured = capsys.readouterr()
-        assert captured.out == '-' * 100 + '\n' \
-               + 'Proto files : generating sources\n'
+        expected_output = (
+            f'{"-" * 100}\n'
+            f'Proto files : generating sources\n'
+        )
+        assert captured.out == expected_output
 
     def test_system_setup_completed(self, capsys, normal_configuration):
         system_logger = PlainConsoleSystemLogger(config=normal_configuration)
@@ -136,8 +142,11 @@ class TestTraceSystemStartupPlainConsoleSystemLogger:
         system_logger.system_setup_start()
 
         captured = capsys.readouterr()
-        assert captured.out == '#' * 100 + '\n' \
-               + 'SYSTEM SETUP : start\n'
+        expected_output = (
+            f'{"#" * 100}\n'
+            f'SYSTEM SETUP : start\n'
+        )
+        assert captured.out == expected_output
 
     def test_loading_proto_files(self, capsys, trace_configuration):
         system_logger = PlainConsoleSystemLogger(config=trace_configuration)
@@ -145,8 +154,11 @@ class TestTraceSystemStartupPlainConsoleSystemLogger:
         system_logger.loading_proto_files()
 
         captured = capsys.readouterr()
-        assert captured.out == '-' * 100 + '\n' \
-               + 'Proto files : generating sources' + '\n'
+        expected_output = (
+            f'{"-" * 100}\n'
+            f'Proto files : generating sources\n'
+        )
+        assert captured.out == expected_output
 
     def test_system_setup_completed(self, capsys, trace_configuration):
         system_logger = PlainConsoleSystemLogger(config=trace_configuration)
@@ -154,5 +166,8 @@ class TestTraceSystemStartupPlainConsoleSystemLogger:
         system_logger.system_setup_completed()
 
         captured = capsys.readouterr()
-        assert captured.out == '-' * 100 + '\n' \
-               + 'SYSTEM SETUP : completed\n'
+        expected_output = (
+            f'{"-" * 100}\n'
+            f'SYSTEM SETUP : completed\n'
+        )
+        assert captured.out == expected_output

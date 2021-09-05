@@ -32,8 +32,11 @@ class TestDebugSystemStartupPlainFileSystemLogger:
 
         system_logger.system_setup_start()
 
-        assert log_file.read() == '#' * 100 + '\n' \
-               + 'SYSTEM SETUP : start\n'
+        expected_output = (
+            f'{"#" * 100}\n'
+            f'SYSTEM SETUP : start\n'
+        )
+        assert log_file.read() == expected_output
 
 
 @pytest.mark.logger
@@ -49,5 +52,8 @@ class TestNormalSystemStartupPlainFileSystemLogger:
 
         system_logger.system_setup_start()
 
-        assert log_file.read() == '#' * 100 + '\n' \
-               + 'SYSTEM SETUP : start\n'
+        expected_output = (
+            f'{"#" * 100}\n'
+            f'SYSTEM SETUP : start\n'
+        )
+        assert log_file.read() == expected_output

@@ -40,14 +40,14 @@ class Test(Validatable):
 
         for stage in self.stages:
             if not stage:
-                self.validation_report.merge_with_prefix('test[{name}].'.format(name=self.name),
+                self.validation_report.merge_with_prefix(f'test[{self.name}].',
                                                          stage.validation_report)
 
         return bool(self.validation_report)
 
     def execute(self, logger: TestLogger, context: Context = None):
         if context is None:
-            context = Context.EMPTY_CONTEXT()
+            context = Context.empty_context()
         execution_contexts = context.replicate_on_test(self.foreach)
         executions_result = True
 

@@ -80,19 +80,30 @@ class TestNormalTestPlainConsoleSequentialTestLogger:
 
     def test_test_start_with_description(self, capsys, normal_configuration):
         logger = PlainConsoleSequentialTestLogger(config=normal_configuration)
+        test_name = 'a_name'
+        test_description = 'a_description'
 
-        logger.test_start(test_name='a_name', test_description='a_description')
+        logger.test_start(test_name=test_name, test_description=test_description)
 
         captured = capsys.readouterr()
-        assert captured.out == '-' * 100 + '\n' \
-               + 'TEST: ' + 'a_name' + '\n' \
-               + 'a_description' + '\n'
+        expected_output = (
+            f'{"-" * 100}\n'
+            f'TEST: {test_name}\n'
+            f'{test_description}\n'
+        )
+        assert captured.out == expected_output
 
     def test_test_start_without_description(self, capsys, normal_configuration):
         logger = PlainConsoleSequentialTestLogger(config=normal_configuration)
+        test_name = 'a_name'
 
-        logger.test_start(test_name='a_name')
+        logger.test_start(test_name=test_name)
 
         captured = capsys.readouterr()
         assert captured.out == '-' * 100 + '\n' \
                + 'TEST: ' + 'a_name' + '\n'
+        expected_output = (
+            f'{"-" * 100}\n'
+            f'TEST: {test_name}\n'
+        )
+        assert captured.out == expected_output

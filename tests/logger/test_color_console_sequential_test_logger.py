@@ -63,31 +63,34 @@ class TestNormalTestColorConsoleSequentialTestLogger:
 
     def test_test_start_with_description(self, capsys, normal_configuration):
         logger = ColorConsoleSequentialTestLogger(config=normal_configuration)
+        test_name = 'a_name',
+        test_description = 'a_description'
 
-        logger.test_start(test_name='a_name', test_description='a_description')
+        logger.test_start(test_name=test_name, test_description=test_description)
 
         captured = capsys.readouterr()
-        expected_output = ('{open_color_name}{delimiter}{close_color}\n' \
-                           + '{open_color_name}TEST: {test_name}{close_color}\n' \
-                           + '{open_color_description}{test_description}{close_color}\n') \
-            .format(open_color_name=ConsoleColor.HIGH_CYAN.code(),
-                    open_color_description=ConsoleColor.BLUE.code(),
-                    delimiter='-' * 100,
-                    close_color=ConsoleColor.DEFAULT.code(),
-                    test_name='a_name',
-                    test_description='a_description')
+        open_color_name = ConsoleColor.HIGH_CYAN.code()
+        open_color_description = ConsoleColor.BLUE.code()
+        close_color = ConsoleColor.DEFAULT.code()
+        expected_output = (
+            f'{open_color_name}{"-" * 100}{close_color}\n'
+            f'{open_color_name}TEST: {test_name}{close_color}\n'
+            f'{open_color_description}{test_description}{close_color}\n'
+        )
         assert captured.out == expected_output
 
     def test_test_start_without_description(self, capsys, normal_configuration):
         logger = ColorConsoleSequentialTestLogger(config=normal_configuration)
+        test_name = 'a_name'
 
-        logger.test_start(test_name='a_name')
+        logger.test_start(test_name=test_name)
 
         captured = capsys.readouterr()
-        expected_output = ('{open_color}{delimiter}{close_color}\n' \
-                           + '{open_color}TEST: {test_name}{close_color}\n') \
-            .format(open_color=ConsoleColor.HIGH_CYAN.code(),
-                    delimiter='-' * 100,
-                    close_color=ConsoleColor.DEFAULT.code(),
-                    test_name='a_name')
+        open_color = ConsoleColor.HIGH_CYAN.code()
+        delimiter = '-' * 100
+        close_color = ConsoleColor.DEFAULT.code()
+        expected_output = (
+            f'{open_color}{delimiter}{close_color}\n'
+            f'{open_color}TEST: {test_name}{close_color}\n'
+        )
         assert captured.out == expected_output
