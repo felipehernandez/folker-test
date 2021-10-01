@@ -26,7 +26,7 @@ setup(
         'google-cloud-datastore==2.1.6',
         'gql==2.0.0',
         'grpcio==1.41.0',
-        'grpcio-tools==1.39.0',
+        'grpcio-tools==1.41.0',
         'httplib2==0.19.1',
         'idna==2.10',
         'marshmallow==3.13.0',
