@@ -1,6 +1,10 @@
+import pytest
+
 from folker.module.postgres.action import PostgresStageAction, PostgresMethod
 
 
+@pytest.mark.action_correctness
+@pytest.mark.action_postgres
 class TestPostgresRestActionValidation:
     def test_validate_empty(self):
         action = PostgresStageAction()

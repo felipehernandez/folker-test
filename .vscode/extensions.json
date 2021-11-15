@@ -1,7 +1,7 @@
 {
-    "recommendations": [
-        "ms-python.python",
-        "magicstack.magicpython",
-        "visualstudioexptteam.vscodeintellicode"
-    ]
+  "recommendations": [
+    "ms-python.python",
+    "magicstack.magicpython",
+    "visualstudioexptteam.vscodeintellicode"
+  ]
 }

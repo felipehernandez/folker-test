@@ -1,3 +1,4 @@
+from itertools import repeat
 from multiprocessing.pool import Pool
 from os import cpu_count
 
@@ -6,29 +7,30 @@ from folker.executor import DEFAULT_PROFILE
 from folker.logger import logger_factory, LoggerType
 from folker.model import Context
 from folker.model import Test
-from folker.parameters import capture_parameters_context, \
-    parameterised_profile, \
-    capture_parameters_secrets
+from folker.parameters import Configuration
 
 
-def _test_execution(test: Test):
-    profile = profiles.get(parameterised_profile(), DEFAULT_PROFILE)
+def _test_execution(config: Configuration, test: Test):
+    param_profile = list(config.profiles)[0] if config.profiles else None
+    profile = profiles.get(param_profile, DEFAULT_PROFILE)
     context = Context(
         test_variables={
             **(profile.context),
-            **(capture_parameters_context())
+            **(config.context)
         },
         secrets={
             **(profile.secrets),
-            **(capture_parameters_secrets())
+            **(config.secrets)
         })
-    return test.execute(logger_factory.build_test_logger(LoggerType.PARALLEL), context), test.name
+
+    test_logger = logger_factory.build_test_logger(config, LoggerType.PARALLEL)
+    return (test.execute(logger=test_logger, context=context), test.name)
 
 
 class ParallelExecutor:
-    def execute(self, parallel_tests: [Test]):
+    def execute(self, config: Configuration, tests: [Test]):
         pool = Pool(cpu_count())
-        results = pool.map(_test_execution, parallel_tests)
+        results = pool.starmap(_test_execution, zip(repeat(config), tests))
         pool.close()
         return [name for (result, name) in results if result], \
                [name for (result, name) in results if not result]

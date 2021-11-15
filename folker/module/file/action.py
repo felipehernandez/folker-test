@@ -96,7 +96,7 @@ class FileStageAction(StageAction):
             if os.path.exists(self.file):
                 os.remove(self.file)
             else:
-                logger.action_warn("File {} did not exists".format(self.file))
+                logger.action_warn(f"File {self.file} did not exists")
         except Exception as e:
             logger.action_error(str(e))
             context.save_on_stage('error', e)

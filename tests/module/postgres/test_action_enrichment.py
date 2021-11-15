@@ -1,7 +1,10 @@
+import pytest
+
 from folker.module.postgres.action import PostgresStageAction, PostgresMethod
 from folker.module.void.action import VoidStageAction
 
 
+@pytest.mark.action_kafka
 class TestRestActionEnrichment:
     def test_enrich_empty(self):
         original = PostgresStageAction(method=PostgresMethod.SELECT.name)

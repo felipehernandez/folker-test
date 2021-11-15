@@ -1,18 +1,13 @@
-from folker.parameters import is_trace
 from folker.logger import TestLogger
 
 
 def loggable_action(func):
-    def wrapper(self, *args, **kargs):
-        if is_trace():
-            logger: TestLogger = kargs['logger']
-            logger.action_prelude(action=self.__dict__, context=kargs['context'])
+    def wrapper(self, logger: TestLogger, *args, **kargs):
+        logger.action_prelude(action=self.__dict__, context=kargs['context'])
 
-        context = func(self, *args, **kargs)
+        context = func(self, logger=logger, *args, **kargs)
 
-        if is_trace():
-            logger: TestLogger = kargs['logger']
-            logger.action_conclusion(action=self.__dict__, context=context)
+        logger.action_conclusion(action=self.__dict__, context=context)
 
         return context
 

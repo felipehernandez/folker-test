@@ -1,6 +1,10 @@
+import pytest
+
 from folker.module.gcp.datastore.action import DatastoreStageAction, DatastoreMethod
 
 
+@pytest.mark.action_correctness
+@pytest.mark.action_gcp_datastore
 class TestDatastoreActionValidation:
     def test_validate_empty(self):
         action = DatastoreStageAction()

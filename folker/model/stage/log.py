@@ -1,4 +1,4 @@
-from folker.logger.logger import TestLogger
+from folker.logger import TestLogger
 from folker.model.context import Context
 from folker.model.stage import StageStep
 

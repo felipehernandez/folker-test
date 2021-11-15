@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from folker.logger.logger import TestLogger
+from folker.logger import TestLogger
 from folker.model.context import Context
 from folker.model.error.error import SourceException
 from folker.model.stage.assertions import StageAssertions
@@ -75,7 +75,7 @@ class Stage(Validatable):
             self.validation_report.missing_fields.add('stage.id')
 
         if not self.action:
-            self.validation_report.merge_with_prefix('stage[{name}].'.format(name=self.name),
+            self.validation_report.merge_with_prefix(f'stage[{self.name}].',
                                                      self.action.validation_report)
         if not self.save:
             self.validation_report + self.save.validation_report
@@ -86,9 +86,9 @@ class Stage(Validatable):
 
         return bool(self.validation_report)
 
-    def execute(self, logger: TestLogger, context: Context):
+    def execute(self, logger: TestLogger, context: Context) -> Context:
         if self.skip_stage_execution(context):
-            logger.stage_skip(context.replace_variables(self.name), context)
+            logger.stage_skip(context.replace_variables(self.name))
             return context
 
         contexts = context.replicate_on_stage(self.foreach)
@@ -111,7 +111,7 @@ class Stage(Validatable):
 
     def _execute(self, logger: TestLogger, context: Context):
         name = context.replace_variables(self.name)
-        logger.stage_start(name, context)
+        logger.stage_start(name)
 
         try:
             context = self.action.execute(logger=logger, context=context)

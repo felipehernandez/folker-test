@@ -1,6 +1,10 @@
+import pytest
+
 from folker.module.gmail.action import GmailStageAction, GmailMethod
 
 
+@pytest.mark.action_correctness
+@pytest.mark.action_gmail
 class TestGmailStageActionValidation:
     def test_validate_empty(self):
         action = GmailStageAction()

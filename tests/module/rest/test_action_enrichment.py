@@ -1,7 +1,10 @@
+import pytest
+
 from folker.module.rest.action import RestStageAction, RestMethod
 from folker.module.void.action import VoidStageAction
 
 
+@pytest.mark.action_rest
 class TestRestActionEnrichment:
     def test_enrich_empty_get(self):
         original = RestStageAction(method=RestMethod.GET.name)

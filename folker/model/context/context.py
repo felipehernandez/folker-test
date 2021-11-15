@@ -65,16 +65,13 @@ class Context:
                and self.stage_variables == other.stage_variables
 
     def __str__(self):
-        return '{secrets}-{test_variables}-{stage_variables}' \
-            .format(secrets=str(self.secrets),
-                    test_variables=str(self.test_variables),
-                    stage_variables=str(self.stage_variables))
+        return f'{str(self.secrets)}-{str(self.test_variables)}-{str(self.stage_variables)}'
 
     def __repr__(self):
         return self.__str__()
 
-    @staticmethod
-    def EMPTY_CONTEXT():
+    @classmethod
+    def empty_context(cls):
         return Context({}, {}, {})
 
     def replicate_on_test(self, variables: dict):

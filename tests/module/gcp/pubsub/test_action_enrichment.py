@@ -1,8 +1,10 @@
+import pytest
+
 from folker.module.gcp.pubsub.action import PubSubStageAction, PubSubMethod
-from folker.module.grpc.action import GrpcStageAction
 from folker.module.void.action import VoidStageAction
 
 
+@pytest.mark.action_gcp_pubsub
 class TestPubSubActionEnrichment:
     def test_enrich_override(self):
         original = PubSubStageAction(method=PubSubMethod.PUBLISH.name,

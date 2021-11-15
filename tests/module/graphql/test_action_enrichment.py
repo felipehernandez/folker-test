@@ -1,7 +1,10 @@
+import pytest
+
 from folker.module.graphql.action import GraphQLStageAction
 from folker.module.void.action import VoidStageAction
 
 
+@pytest.mark.action_graphql
 class TestGraphQLActionEnrichment:
     def test_enrich_empty_query(self):
         original = GraphQLStageAction()

@@ -98,10 +98,8 @@ class PostgresStageAction(StageAction):
                                           host=self.host,
                                           port=self.port,
                                           database=self.database)
-            logger.action_debug('Connected to {}:{}/{} as {}'.format(self.host,
-                                                                     self.port,
-                                                                     self.database,
-                                                                     self.user))
+            logger.action_debug(
+                f'Connected to {self.host}:{self.port}/{self.database} as {self.user}')
 
             cursor = connection.cursor()
             cursor.execute(self.sql)
@@ -126,9 +124,7 @@ class PostgresStageAction(StageAction):
             if (connection):
                 cursor.close()
                 connection.close()
-                logger.action_debug('Disconnected from {}:{}/{} as {}'.format(self.host,
-                                                                              self.port,
-                                                                              self.database,
-                                                                              self.user))
+                logger.action_debug(
+                    f'Disconnected from {self.host}:{self.port}/{self.database} as {self.user}')
 
         return context

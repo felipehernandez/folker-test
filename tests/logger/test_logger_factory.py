@@ -1,58 +1,122 @@
-from folker.logger import build_system_logger, build_test_logger, LoggerType
-from folker.logger.console_parallel_test_logger import ConsoleParallelTestLogger
-from folker.logger.console_sequential_test_logger import ConsoleSequentialTestLogger
-from folker.logger.console_system_logger import ConsoleSystemLogger
-from folker.logger.file_parallel_test_logger import FileParallelTestLogger
-from folker.logger.file_sequential_test_logger import FileSequentialTestLogger
-from folker.logger.file_system_logger import FileSystemLogger
+import pytest
+
+from folker.logger import logger_factory, LoggerType
+from folker.logger.system_logger import PlainFileSystemLogger, PlainConsoleSystemLogger, \
+    ColorConsoleSystemLogger
+from folker.logger.test_logger import PlainFileParallelTestLogger, PlainFileSequentialTestLogger, \
+    PlainConsoleParallelTestLogger, PlainConsoleSequentialTestLogger, \
+    ColorConsoleSequentialTestLogger, ColorConsoleParallelTestLogger
+from folker.parameters import Configuration
 
 
-def test_build_system_logger_when_log_to_file(mocker):
-    mocker.patch('folker.logger.logger_factory.log_to_file', return_value='A_FILE')
+@pytest.mark.logger
+class TestLoggerFactorySystem:
+    def test_given_log_file_then_file_system_logger(self):
+        config = Configuration(log_file='a_file.log')
 
-    logger = build_system_logger()
+        logger = logger_factory.system_logger(config=config)
 
-    assert isinstance(logger, FileSystemLogger), 'Wrong logger'
-    assert 'A_FILE' == logger.file_name
+        assert type(logger) is PlainFileSystemLogger
 
+    def test_given_no_log_file_and_plain_logger_type_then_plain_console_system_logger(self):
+        config = Configuration(log_file=None,
+                               logger_type=Configuration.LoggerType.PLAIN.name)
 
-def test_build_system_logger_when_log_to_console(mocker):
-    mocker.patch('folker.logger.logger_factory.log_to_file', return_value=None)
+        logger = logger_factory.system_logger(config=config)
 
-    logger = build_system_logger()
+        assert type(logger) is PlainConsoleSystemLogger
 
-    assert isinstance(logger, ConsoleSystemLogger), 'Wrong logger'
+    def test_given_no_log_file_and_color_logger_type_then_color_console_system_logger(self):
+        config = Configuration(log_file=None,
+                               logger_type=Configuration.LoggerType.COLOR.name)
 
+        logger = logger_factory.system_logger(config=config)
 
-def test_build_test_logger_when_log_to_file_and_sequential(mocker):
-    mocker.patch('folker.logger.logger_factory.log_to_file', return_value='A_FILE')
-
-    logger = build_test_logger(LoggerType.SEQUENTIAL)
-
-    assert isinstance(logger, FileSequentialTestLogger), 'Wrong logger'
-    assert 'A_FILE' == logger.file_name
-
-
-def test_build_test_logger_when_log_to_console_and_sequential(mocker):
-    mocker.patch('folker.logger.logger_factory.log_to_file', return_value=None)
-
-    logger = build_test_logger(LoggerType.SEQUENTIAL)
-
-    assert isinstance(logger, ConsoleSequentialTestLogger), 'Wrong logger'
+        assert type(logger) is ColorConsoleSystemLogger
 
 
-def test_build_test_logger_when_log_to_file_and_parallel(mocker):
-    mocker.patch('folker.logger.logger_factory.log_to_file', return_value='A_FILE')
+@pytest.mark.logger
+class TestLoggerFactoryTest:
+    def test_given_file_default(self):
+        config = Configuration(log_file='a_file.log')
 
-    logger = build_test_logger(LoggerType.PARALLEL)
+        logger = logger_factory.build_test_logger(config=config)
 
-    assert isinstance(logger, FileParallelTestLogger), 'Wrong logger'
-    assert 'A_FILE' == logger.file_name
+        assert type(logger) is PlainFileParallelTestLogger
 
+    def test_given_file_sequential(self):
+        config = Configuration(log_file='a_file.log')
 
-def test_build_test_logger_when_log_to_console_and_parallel(mocker):
-    mocker.patch('folker.logger.logger_factory.log_to_file', return_value=None)
+        logger = logger_factory.build_test_logger(config=config, type=LoggerType.SEQUENTIAL)
 
-    logger = build_test_logger(LoggerType.PARALLEL)
+        assert type(logger) is PlainFileSequentialTestLogger
 
-    assert isinstance(logger, ConsoleParallelTestLogger), 'Wrong logger'
+    def test_given_file_sequential(self):
+        config = Configuration(log_file='a_file.log')
+
+        logger = logger_factory.build_test_logger(config=config, type=LoggerType.PARALLEL)
+
+        assert type(logger) is PlainFileParallelTestLogger
+
+    def test_given_console_default(self):
+        config = Configuration()
+
+        logger = logger_factory.build_test_logger(config=config)
+
+        assert type(logger) is ColorConsoleParallelTestLogger
+
+    def test_given_console_plain_when_sequential(self):
+        config = Configuration(logger_type=Configuration.LoggerType.PLAIN.name)
+
+        logger = logger_factory.build_test_logger(config=config, type=LoggerType.SEQUENTIAL)
+
+        assert type(logger) is PlainConsoleSequentialTestLogger
+
+    def test_given_console_plain_when_parallel(self):
+        config = Configuration(logger_type=Configuration.LoggerType.PLAIN.name)
+
+        logger = logger_factory.build_test_logger(config=config, type=LoggerType.PARALLEL)
+
+        assert type(logger) is PlainConsoleParallelTestLogger
+
+    def test_given_console_color_when_default(self):
+        config = Configuration(logger_type=Configuration.LoggerType.COLOR.name)
+
+        logger = logger_factory.build_test_logger(config=config)
+
+        assert type(logger) is ColorConsoleParallelTestLogger
+
+    def test_given_console_color_when_sequential(self):
+        config = Configuration(logger_type=Configuration.LoggerType.COLOR.name)
+
+        logger = logger_factory.build_test_logger(config=config, type=LoggerType.SEQUENTIAL)
+
+        assert type(logger) is ColorConsoleSequentialTestLogger
+
+    def test_given_console_color_when_parallel(self):
+        config = Configuration(logger_type=Configuration.LoggerType.COLOR.name)
+
+        logger = logger_factory.build_test_logger(config=config, type=LoggerType.PARALLEL)
+
+        assert type(logger) is ColorConsoleParallelTestLogger
+
+    def test_given_console_default_when_default(self):
+        config = Configuration()
+
+        logger = logger_factory.build_test_logger(config=config)
+
+        assert type(logger) is ColorConsoleParallelTestLogger
+
+    def test_given_console_default_when_sequential(self):
+        config = Configuration()
+
+        logger = logger_factory.build_test_logger(config=config, type=LoggerType.SEQUENTIAL)
+
+        assert type(logger) is ColorConsoleSequentialTestLogger
+
+    def test_given_console_default_when_parallel(self):
+        config = Configuration()
+
+        logger = logger_factory.build_test_logger(config=config, type=LoggerType.PARALLEL)
+
+        assert type(logger) is ColorConsoleParallelTestLogger

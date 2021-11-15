@@ -1,7 +1,10 @@
+import pytest
+
 from folker.module.printt.action import PrintStageAction
 from folker.module.void.action import VoidStageAction
 
 
+@pytest.mark.action_print
 class TestPrintActionEnrichment:
     def test_enrich_empty(self):
         original = PrintStageAction()

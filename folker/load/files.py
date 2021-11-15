@@ -6,30 +6,36 @@ from folker import templates, stage_templates, profiles
 from folker.load.schemas import TestSchema, ProfileSchema
 from folker.logger import SystemLogger
 from folker.model import Test
-from folker.parameters import test_file_regular_expression, \
-    parameterised_test_files, \
-    template_file_regular_expression, \
-    profile_file_regular_expression
+from folker.parameters import Configuration
 
 
-def load_and_initialize_template_files(logger: SystemLogger) -> [Test]:
+def load_template_files(config: Configuration, logger: SystemLogger) -> [Test]:
     schema = TestSchema()
     logger.loading_template_files()
-    schemas = load_schemas(logger, template_file_regular_expression(), schema, template=True)
+    schemas = load_schemas(config=config,
+                           logger=logger,
+                           file_name=config.template_files_re,
+                           schema=schema,
+                           template=True)
 
     for schema in schemas:
         templates[schema.id] = schema
+        logger.loaded_template(schema.id)
         for stage in schema.stages:
             stage_templates[stage.id] = stage
+            logger.loaded_template_stage(stage.id)
 
     return templates, stage_templates
 
 
-def load_test_files(logger: SystemLogger) -> [Test]:
+def load_test_files(config: Configuration, logger: SystemLogger) -> [Test]:
     schema = TestSchema()
     logger.loading_test_files()
-    test_file_re = test_file_regular_expression()
-    schemas = load_schemas(logger, test_file_re, schema)
+    schemas = load_schemas(config=config,
+                           logger=logger,
+                           file_name=config.test_files_re,
+                           schema=schema,
+                           template=False)
 
     return schemas
 
@@ -43,10 +49,14 @@ def _enrich_stages(schema_definition: Test):
         schema_definition.validation_report.generate_error()
 
 
-def load_schemas(logger: SystemLogger, file_name: str, schema, template: bool = False):
+def load_schemas(config: Configuration,
+                 logger: SystemLogger,
+                 file_name: str,
+                 schema,
+                 template: bool = False):
     schemas = []
     valid_files = []
-    selected_test_files = parameterised_test_files()
+    selected_test_files = config.test_files
 
     for filename in Path('./').absolute().glob(file_name):
         if _should_load_file(filename.name, template, selected_test_files):
@@ -70,9 +80,9 @@ def _should_load_file(filename: str, template: bool, selected_test_files: [str])
 
 def load_schema(filename: str, schema, valid_test_files, logger: SystemLogger):
     file_path = filename.resolve().as_uri()[7:]
-    logger.loading_file(filename)
     try:
         test_definition = load_definition(file_path, schema)
+        logger.loading_file_ok(filename)
         valid_test_files.append(file_path)
         return test_definition
     except Exception as e:
@@ -85,12 +95,16 @@ def load_definition(file_path, schema):
         return schema.load(safe_load)
 
 
-def load_profile_files(logger: SystemLogger):
-    schema = ProfileSchema()
+def load_profile_files(config: Configuration, logger: SystemLogger):
     logger.loading_profile_files()
-    schemas = load_schemas(logger, profile_file_regular_expression(), schema, template=True)
+    schemas = load_schemas(config=config,
+                           logger=logger,
+                           file_name=config.profile_files_re,
+                           schema=ProfileSchema(),
+                           template=True)
 
     for schema in schemas:
         profiles[schema.name] = schema
+        logger.loaded_profile(schema.name)
 
     return profiles

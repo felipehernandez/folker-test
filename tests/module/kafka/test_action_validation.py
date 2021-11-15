@@ -1,6 +1,10 @@
+import pytest
+
 from folker.module.kafka.action import KafkaStageAction, KafkaMethod
 
 
+@pytest.mark.action_correctness
+@pytest.mark.action_kafka
 class TestKafkaActionValidation:
     def test_validate_publish_with_key_correct(self):
         action = KafkaStageAction(method=KafkaMethod.PUBLISH.name,

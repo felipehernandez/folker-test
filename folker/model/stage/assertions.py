@@ -1,6 +1,6 @@
 from copy import copy
 
-from folker.logger.logger import TestLogger
+from folker.logger import TestLogger
 from folker.model.context import Context
 from folker.model.error.assertions import UnresolvableAssertionException, \
     MalformedAssertionException, \

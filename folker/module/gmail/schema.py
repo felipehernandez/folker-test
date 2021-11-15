@@ -1,7 +1,6 @@
 from marshmallow import Schema, fields, post_load
 
 from folker.module.gmail.action import GmailStageAction
-from folker.module.rest.action import RestStageAction
 
 
 class GmailActionSchema(Schema):

@@ -1,7 +1,10 @@
+import pytest
+
 from folker.module.file.action import FileStageAction, FileMethod
 from folker.module.void.action import VoidStageAction
 
 
+@pytest.mark.action_file
 class TestFileActionEnrichment:
     def test_enrich_file(self):
         original = FileStageAction(method=FileMethod.READ.name)

@@ -1,7 +1,10 @@
+import pytest
+
 from folker.module.wait import WaitActionSchema
 from folker.module.wait.action import WaitStageAction
 
 
+@pytest.mark.action_wait
 def test_schema_load_time():
     schema = WaitActionSchema()
 
@@ -10,6 +13,7 @@ def test_schema_load_time():
     assert isinstance(parsed_data['time'], str)
 
 
+@pytest.mark.action_wait
 def test_schema_load_missing_time():
     schema = WaitActionSchema()
 
@@ -18,6 +22,7 @@ def test_schema_load_missing_time():
     assert 'time' not in parsed_data
 
 
+@pytest.mark.action_wait
 def test_action_build():
     schema = WaitActionSchema()
 

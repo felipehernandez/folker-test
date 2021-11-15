@@ -1,6 +1,10 @@
+import pytest
+
 from folker.module.code.action import CodeStageAction
 
 
+@pytest.mark.action_correctness
+@pytest.mark.action_code
 class TestCodeStageActionValidation:
     def test_validate_empty(self):
         action = CodeStageAction()

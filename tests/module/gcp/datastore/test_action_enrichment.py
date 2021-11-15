@@ -1,8 +1,10 @@
+import pytest
+
 from folker.module.gcp.datastore.action import DatastoreMethod, DatastoreStageAction
-from folker.module.gcp.pubsub.action import PubSubStageAction
 from folker.module.void.action import VoidStageAction
 
 
+@pytest.mark.action_gcp_datastore
 class TestDatastoreActionEnrichment:
     def test_enrich_override_entity(self):
         original = DatastoreStageAction(method=DatastoreMethod.GET.name,

@@ -1,6 +1,10 @@
+import pytest
+
 from folker.module.wait.action import WaitStageAction
 
 
+@pytest.mark.action_correctness
+@pytest.mark.action_wait
 class TestWaitActionValidation:
     def test_validate_empty(self):
         action = WaitStageAction()

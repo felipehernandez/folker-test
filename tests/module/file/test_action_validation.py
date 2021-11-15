@@ -1,6 +1,10 @@
+import pytest
+
 from folker.module.file.action import FileStageAction, FileMethod
 
 
+@pytest.mark.action_correctness
+@pytest.mark.action_file
 class TestFileActionValidation:
     def test_validate_empty(self):
         action = FileStageAction()

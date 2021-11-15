@@ -7,6 +7,7 @@ from folker.model.context import Context
 from folker.module.rest.action import RestStageAction, RestMethod
 
 
+@pytest.mark.action_rest
 class TestRestAction:
     action: RestStageAction
 
@@ -16,9 +17,7 @@ class TestRestAction:
         yield
 
     @patch.object(requests, 'get')
-    def test_execution_get(self, requests_get):
-        logger = Mock()
-
+    def test_execution_get(self, requests_get, plain_console_test_logger_on_trace):
         self.action.method = RestMethod.GET
         self.action.host = 'http://localhost:8080'
 
@@ -29,7 +28,8 @@ class TestRestAction:
         mocked_response.text = 'response_text'
         mocked_response.json.return_value = 'response_json'
 
-        context = self.action.execute(logger, context=Context())
+        context = self.action.execute(logger=(plain_console_test_logger_on_trace),
+                                      context=Context())
 
         assert {} == context.test_variables
         assert 200 == context.stage_variables['status_code']
