@@ -35,7 +35,7 @@ setup(
         'psycopg2-binary==2.9.2',
         'pylint==2.11.1',
         'pyOpenSSL==20.0.1',
-        'PyYAML==5.4.1',
+        'PyYAML==6.0',
         'requests==2.25.1',
         'kafka-python==2.0.2',
         'kazoo==2.8.0',
