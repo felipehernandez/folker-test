@@ -29,7 +29,7 @@ setup(
         'grpcio-tools==1.41.1',
         'httplib2==0.20.2',
         'idna==2.10',
-        'marshmallow==3.13.0',
+        'marshmallow==3.14.1',
         'marshmallow-oneofschema==3.0.1',
         'oauth2client==4.1.3',
         'psycopg2-binary==2.9.1',
