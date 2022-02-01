@@ -34,8 +34,8 @@ class RestStageAction(StageAction):
                  method: str = None,
                  host: str = None,
                  uri: str = None,
-                 params: dict = {},
-                 headers: dict = {},
+                 params: dict = None,
+                 headers: dict = None,
                  body=None,
                  data=None,
                  json=None,
@@ -50,12 +50,11 @@ class RestStageAction(StageAction):
 
         self.host = host
         self.uri = uri
-        self.query_parameters = params if params else {}
+        self.params = params if params else {}
         self.headers = headers if headers else {}
         self.body = body
         self.body_json = json
         self.data = data
-        self.params = params
 
     def __add__(self, enrichment: 'RestStageAction'):
         result = self.__copy__()
@@ -90,7 +89,7 @@ class RestStageAction(StageAction):
     @timed_action
     def execute(self, logger: TestLogger, context: Context) -> Context:
         try:
-            call_parameters = self._build_request_parameters()
+            call_parameters = self.build_request_parameters()
             self._log_debug(logger=logger, method=self.method.name, **call_parameters)
 
             response = {
@@ -119,21 +118,29 @@ class RestStageAction(StageAction):
 
         return context
 
-    def _build_request_parameters(self):
+    def build_request_parameters(self) -> dict:
         call_parameters = {'url': self._build_url(), 'headers': self.headers}
 
-        if self.body:
-            call_parameters['data'] = self.body
-        elif self.data:
-            call_parameters['data'] = self.data
+        if self._is_form_data():
+            call_parameters['headers'].pop('Content-Type')
+            call_parameters['files'] = self.data
+
         elif self.body_json:
             call_parameters['headers']['Content-Type'] = 'application/json'
             call_parameters['json'] = self.body_json
 
-        if self.params:
-            call_parameters['params'] = self.params
+        elif self.body:
+            call_parameters['data'] = self.body
+
+        elif self.data:
+            call_parameters['data'] = self.data
+
+        call_parameters['params'] = self.params
 
         return call_parameters
+
+    def _is_form_data(self):
+        return 'Content-Type' in self.headers and self.headers['Content-Type'] == 'multipart/form-data'
 
     def _build_url(self):
         return (self.host + '/' + self.uri) if self.uri else self.host
