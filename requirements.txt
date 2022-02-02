@@ -9,8 +9,8 @@ google-auth-oauthlib
 google-cloud-pubsub==1.6.0
 google-cloud-datastore==2.4.0
 gql==2.0.0
-grpcio==1.42.0
-grpcio-tools==1.42.0
+grpcio==1.43.0
+grpcio-tools==1.43.0
 httplib2==0.20.2
 idna==2.10
 marshmallow==3.14.1
@@ -24,7 +24,7 @@ pytest-cov==3.0.0
 pytest-html==3.1.1
 pytest-mock==3.6.1
 PyYAML==6.0
-requests==2.25.1
+requests==2.27.1
 kafka-python==2.0.2
 kazoo==2.8.0
 mergedeep==1.3.4
