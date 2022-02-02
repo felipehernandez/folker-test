@@ -36,7 +36,7 @@ setup(
         'pylint==2.12.2',
         'pyOpenSSL==20.0.1',
         'PyYAML==6.0',
-        'requests==2.25.1',
+        'requests==2.27.1',
         'kafka-python==2.0.2',
         'kazoo==2.8.0',
         'mergedeep==1.3.4',
