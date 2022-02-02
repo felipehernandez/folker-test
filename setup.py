@@ -34,7 +34,7 @@ setup(
         'oauth2client==4.1.3',
         'psycopg2-binary==2.9.2',
         'pylint==2.12.2',
-        'pyOpenSSL==20.0.1',
+        'pyOpenSSL==22.0.0',
         'PyYAML==6.0',
         'requests==2.27.1',
         'kafka-python==2.0.2',
