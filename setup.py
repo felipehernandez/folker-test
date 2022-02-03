@@ -27,7 +27,7 @@ setup(
         'gql==2.0.0',
         'grpcio==1.43.0',
         'grpcio-tools==1.43.0',
-        'httplib2==0.20.2',
+        'httplib2==0.20.4',
         'idna==2.10',
         'marshmallow==3.14.1',
         'marshmallow-oneofschema==3.0.1',
