@@ -6,7 +6,7 @@ parameters:
     default: "2.2"
 
 orbs:
-  python: circleci/python@1.5.0
+  python: circleci/python@2.0.1
 
 executors:
   docker-builder:
