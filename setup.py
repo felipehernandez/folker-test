@@ -33,7 +33,7 @@ setup(
         'marshmallow-oneofschema==3.0.1',
         'oauth2client==4.1.3',
         'psycopg2-binary==2.9.3',
-        'pylint==2.12.2',
+        'pylint==2.13.5',
         'pyOpenSSL==22.0.0',
         'PyYAML==6.0',
         'requests==2.27.1',
