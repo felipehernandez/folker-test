@@ -119,12 +119,12 @@ class RabbitMQStageAction(StageAction):
         return BlockingConnection(ConnectionParameters(**connection_properties))
 
     def _publish(self, logger: TestLogger, context: Context):
-        connection = self.create_connection()
-
-        self._log_debug(logger, exchange=self.exchange, message=str(self.message))
-        channel = connection.channel()
-
         try:
+            connection = self.create_connection()
+
+            self._log_debug(logger, exchange=self.exchange, message=str(self.message))
+            channel = connection.channel()
+
             channel.basic_publish(exchange=self.exchange,
                                   routing_key='',
                                   body=self.message.encode())
@@ -135,10 +135,10 @@ class RabbitMQStageAction(StageAction):
             context.save_on_stage('error', str(e))
 
     def _subscribe(self, logger: TestLogger, context: Context):
-        connection = self.create_connection()
-        channel = connection.channel()
-
         try:
+            connection = self.create_connection()
+            channel = connection.channel()
+
             method_frame, header_frame, body = channel.basic_get(queue=self.queue, auto_ack=self.ack)
 
             connection.close()
