@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='folker-test',
-    version='2.1.0',
+    version='2.3',
     license='proprietary',
     description='Test and simple tasks automation tool',
 
@@ -29,17 +29,18 @@ setup(
         'grpcio-tools==1.43.0',
         'httplib2==0.20.4',
         'idna==2.10',
+        'kafka-python==2.0.2',
+        'kazoo==2.8.0',
         'marshmallow==3.14.1',
         'marshmallow-oneofschema==3.0.1',
+        'mergedeep==1.3.4',
         'oauth2client==4.1.3',
+        'pika==1.2.1',
         'psycopg2-binary==2.9.3',
         'pylint==2.13.8',
         'pyOpenSSL==22.0.0',
         'PyYAML==6.0',
         'requests==2.27.1',
-        'kafka-python==2.0.2',
-        'kazoo==2.8.0',
-        'mergedeep==1.3.4',
     ],
 
     entry_points={
