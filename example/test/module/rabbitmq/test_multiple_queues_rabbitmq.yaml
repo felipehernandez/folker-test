@@ -1,0 +1,59 @@
+name: RabbitMQ multiple queues Test
+description: Test for RabbitMQ Stage publishing to 1 and subscribing to multiple
+tags:
+  - dummy
+  - rabbitmq
+
+stages:
+  - name: setup
+    action:
+      type: VOID
+    save:
+      host: rabbitmq
+#      host: localhost
+      port: 5672
+      vhost: test
+
+  - name: publish message
+    action:
+      type: RABBITMQ
+      method: PUBLISH
+      host: ${host}
+      port: ${port}
+      vhost: ${vhost}
+      exchange: test-exchange-multiple
+      message: hello world
+    log:
+      - 'Elapsed time: ${elapsed_time}'
+
+  - name: subscribe 1
+    action:
+      type: RABBITMQ
+      method: SUBSCRIBE
+      host: ${host}
+      port: ${port}
+      vhost: ${vhost}
+      queue: test-exchange-multiple.queue-multiple-1
+      ack: True
+    log:
+      - 'Queue: ${queue}'
+      - 'Message: ${message}'
+      - 'Ack-ed: ${ack-ed}'
+    assert:
+      - ${message} == 'hello world'
+
+  - name: subscribe 2
+    action:
+      type: RABBITMQ
+      method: SUBSCRIBE
+      host: ${host}
+      port: ${port}
+      vhost: ${vhost}
+      queue: test-exchange-multiple.queue-multiple-2
+      ack: True
+    log:
+      - 'Queue: ${queue}'
+      - 'Message: ${message}'
+      - 'Ack-ed: ${ack-ed}'
+    assert:
+      - ${message} == 'hello world'

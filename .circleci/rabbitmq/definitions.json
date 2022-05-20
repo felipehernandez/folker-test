@@ -1,0 +1,80 @@
+{
+  "queues": [
+    {
+      "name": "test-exchange-single.queue-single-1",
+      "vhost": "test",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "DLX",
+        "x-dead-letter-routing-key": "test-exchange-single.queue-single-1"
+      }
+    },
+    {
+      "name": "test-exchange-multiple.queue-multiple-1",
+      "vhost": "test",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "DLX",
+        "x-dead-letter-routing-key": "test-exchange-multiple.queue-multiple-1"
+      }
+    },
+    {
+      "name": "test-exchange-multiple.queue-multiple-2",
+      "vhost": "test",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "DLX",
+        "x-dead-letter-routing-key": "test-exchange-multiple.queue-multiple-2"
+      }
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "test-exchange-single",
+      "vhost": "test",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "test-exchange-multiple",
+      "vhost": "test",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "test-exchange-single",
+      "vhost": "test",
+      "destination": "test-exchange-single.queue-single-1",
+      "destination_type": "queue",
+      "routing_key": "#",
+      "arguments": {}
+    },
+    {
+      "source": "test-exchange-multiple",
+      "vhost": "test",
+      "destination": "test-exchange-multiple.queue-multiple-1",
+      "destination_type": "queue",
+      "routing_key": "#",
+      "arguments": {}
+    },
+    {
+      "source": "test-exchange-multiple",
+      "vhost": "test",
+      "destination": "test-exchange-multiple.queue-multiple-2",
+      "destination_type": "queue",
+      "routing_key": "#",
+      "arguments": {}
+    }
+  ]
+}

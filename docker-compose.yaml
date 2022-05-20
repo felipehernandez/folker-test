@@ -76,6 +76,19 @@ services:
     depends_on:
       - zookeeper
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_VHOST: test
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ./.circleci/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./.circleci/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
+
   integration-tests-template:
     build:
       context: .
@@ -201,3 +214,10 @@ services:
     command: -t zookeeper -n 4 --trace
     depends_on:
       - zookeeper
+  integration-tests-rabbitmq:
+    build:
+      context: .
+      dockerfile: Dockerfile-integration
+    command: -t rabbitmq -n 2 --trace
+    depends_on:
+      - rabbitmq
