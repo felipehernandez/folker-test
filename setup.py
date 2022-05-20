@@ -14,7 +14,7 @@ setup(
     packages=['folker'],
 
     install_requires=[
-        'certifi==2022.5.18',
+        'certifi==2022.5.18.1',
         'chardet==4.0.0',
         'click==7.1.2',
         'coverage',
