@@ -22,8 +22,8 @@ setup(
         'google-api-python-client==1.12.11',
         'google-auth-httplib2',
         'google-auth-oauthlib',
-        'google-cloud-pubsub==1.7.1',
-        'google-cloud-datastore==2.6.0',
+        'google-cloud-pubsub==1.7.2',
+        'google-cloud-datastore==2.7.0',
         'gql==2.0.0',
         'grpcio==1.46.3',
         'grpcio-tools==1.46.3',
@@ -37,10 +37,10 @@ setup(
         'oauth2client==4.1.3',
         'pika==1.2.1',
         'psycopg2-binary==2.9.3',
-        'pylint==2.13.9',
+        'pylint==2.14.1',
         'pyOpenSSL==22.0.0',
         'PyYAML==6.0',
-        'requests==2.27.1',
+        'requests==2.28.0',
     ],
 
     entry_points={
