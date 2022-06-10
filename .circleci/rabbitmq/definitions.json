@@ -1,80 +1,137 @@
 {
-  "queues": [
-    {
-      "name": "test-exchange-single.queue-single-1",
-      "vhost": "test",
-      "durable": true,
-      "auto_delete": false,
-      "arguments": {
-        "x-dead-letter-exchange": "DLX",
-        "x-dead-letter-routing-key": "test-exchange-single.queue-single-1"
-      }
-    },
-    {
-      "name": "test-exchange-multiple.queue-multiple-1",
-      "vhost": "test",
-      "durable": true,
-      "auto_delete": false,
-      "arguments": {
-        "x-dead-letter-exchange": "DLX",
-        "x-dead-letter-routing-key": "test-exchange-multiple.queue-multiple-1"
-      }
-    },
-    {
-      "name": "test-exchange-multiple.queue-multiple-2",
-      "vhost": "test",
-      "durable": true,
-      "auto_delete": false,
-      "arguments": {
-        "x-dead-letter-exchange": "DLX",
-        "x-dead-letter-routing-key": "test-exchange-multiple.queue-multiple-2"
-      }
-    }
-  ],
-  "exchanges": [
-    {
-      "name": "test-exchange-single",
-      "vhost": "test",
-      "type": "topic",
-      "durable": true,
-      "auto_delete": false,
-      "internal": false,
-      "arguments": {}
-    },
-    {
-      "name": "test-exchange-multiple",
-      "vhost": "test",
-      "type": "topic",
-      "durable": true,
-      "auto_delete": false,
-      "internal": false,
-      "arguments": {}
-    }
-  ],
-  "bindings": [
-    {
-      "source": "test-exchange-single",
-      "vhost": "test",
-      "destination": "test-exchange-single.queue-single-1",
-      "destination_type": "queue",
-      "routing_key": "#",
-      "arguments": {}
-    },
-    {
-      "source": "test-exchange-multiple",
-      "vhost": "test",
-      "destination": "test-exchange-multiple.queue-multiple-1",
-      "destination_type": "queue",
-      "routing_key": "#",
-      "arguments": {}
-    },
-    {
-      "source": "test-exchange-multiple",
-      "vhost": "test",
-      "destination": "test-exchange-multiple.queue-multiple-2",
-      "destination_type": "queue",
-      "routing_key": "#",
-      "arguments": {}
-    }
-  ]
+    "rabbit_version": "3.10.5",
+    "rabbitmq_version": "3.10.5",
+    "product_name": "RabbitMQ",
+    "product_version": "3.10.5",
+    "users":
+    [
+        {
+            "name": "guest",
+            "password": "guest",
+            "tags":
+            [
+                "administrator"
+            ],
+            "limits":
+            {}
+        }
+    ],
+    "vhosts":
+    [
+        {
+            "name": "test"
+        }
+    ],
+    "permissions":
+    [
+        {
+            "user": "guest",
+            "vhost": "test",
+            "configure": ".*",
+            "write": ".*",
+            "read": ".*"
+        }
+    ],
+    "topic_permissions":
+    [],
+    "parameters":
+    [],
+    "global_parameters":
+    [
+        {
+            "name": "internal_cluster_id",
+            "value": "rabbitmq-cluster-id-sFl0oRnndIMF4aTpl3nc5g"
+        }
+    ],
+    "policies":
+    [],
+    "queues":
+    [
+        {
+            "name": "test-exchange-multiple.queue-multiple-2",
+            "vhost": "test",
+            "durable": true,
+            "auto_delete": false,
+            "arguments":
+            {
+                "x-dead-letter-exchange": "DLX",
+                "x-dead-letter-routing-key": "test-exchange-multiple.queue-multiple-2"
+            }
+        },
+        {
+            "name": "test-exchange-multiple.queue-multiple-1",
+            "vhost": "test",
+            "durable": true,
+            "auto_delete": false,
+            "arguments":
+            {
+                "x-dead-letter-exchange": "DLX",
+                "x-dead-letter-routing-key": "test-exchange-multiple.queue-multiple-1"
+            }
+        },
+        {
+            "name": "test-exchange-single.queue-single-1",
+            "vhost": "test",
+            "durable": true,
+            "auto_delete": false,
+            "arguments":
+            {
+                "x-dead-letter-exchange": "DLX",
+                "x-dead-letter-routing-key": "test-exchange-single.queue-single-1"
+            }
+        }
+    ],
+    "exchanges":
+    [
+        {
+            "name": "test-exchange-multiple",
+            "vhost": "test",
+            "type": "topic",
+            "durable": true,
+            "auto_delete": false,
+            "internal": false,
+            "arguments":
+            {}
+        },
+        {
+            "name": "test-exchange-single",
+            "vhost": "test",
+            "type": "topic",
+            "durable": true,
+            "auto_delete": false,
+            "internal": false,
+            "arguments":
+            {}
+        }
+    ],
+    "bindings":
+    [
+        {
+            "source": "test-exchange-multiple",
+            "vhost": "test",
+            "destination": "test-exchange-multiple.queue-multiple-1",
+            "destination_type": "queue",
+            "routing_key": "#",
+            "arguments":
+            {}
+        },
+        {
+            "source": "test-exchange-multiple",
+            "vhost": "test",
+            "destination": "test-exchange-multiple.queue-multiple-2",
+            "destination_type": "queue",
+            "routing_key": "#",
+            "arguments":
+            {}
+        },
+        {
+            "source": "test-exchange-single",
+            "vhost": "test",
+            "destination": "test-exchange-single.queue-single-1",
+            "destination_type": "queue",
+            "routing_key": "#",
+            "arguments":
+            {}
+        }
+    ]
 }
