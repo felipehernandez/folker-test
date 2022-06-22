@@ -26,7 +26,7 @@ setup(
         'google-cloud-datastore==2.7.1',
         'gql==2.0.0',
         'grpcio==1.47.0',
-        'grpcio-tools==1.46.3',
+        'grpcio-tools==1.47.0',
         'httplib2==0.20.4',
         'idna==2.10',
         'kafka-python==2.0.2',
