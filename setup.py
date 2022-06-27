@@ -15,7 +15,7 @@ setup(
 
     install_requires=[
         'certifi==2022.6.15',
-        'chardet==4.0.0',
+        'chardet==5.0.0',
         'click==7.1.2',
         'coverage',
         'google==3.0.0',
