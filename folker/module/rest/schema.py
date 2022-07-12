@@ -11,6 +11,7 @@ class RestActionSchema(Schema):
     uri = fields.String()
     params = fields.Dict(keys=fields.String(), values=fields.String())
     headers = fields.Dict(keys=fields.String(), values=fields.String())
+    authorization = fields.Dict(keys=fields.String(), values=fields.String())
     body = fields.String()
     json = fields.Dict()
     data = fields.Dict()

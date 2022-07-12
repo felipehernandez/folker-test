@@ -26,6 +26,7 @@ class RestStageAction(StageAction):
     uri: str
     params = dict()
     headers = dict()
+    authorization: dict = dict()
     body = str
     body_json = str
     data = dict()
@@ -36,6 +37,7 @@ class RestStageAction(StageAction):
                  uri: str = None,
                  params: dict = None,
                  headers: dict = None,
+                 authorization: dict = None,
                  body=None,
                  data=None,
                  json=None,
@@ -52,6 +54,7 @@ class RestStageAction(StageAction):
         self.uri = uri
         self.params = params if params else {}
         self.headers = headers if headers else {}
+        self.authorization = authorization if authorization else {}
         self.body = body
         self.body_json = json
         self.data = data
@@ -67,6 +70,7 @@ class RestStageAction(StageAction):
             result.uri = enrichment.uri
         result.params = {**self.params, **enrichment.params}
         result.headers = {**self.headers, **enrichment.headers}
+        result.authorization = {**self.authorization, **enrichment.authorization}
         if enrichment.body:
             result.body = enrichment.body
         if enrichment.data:
@@ -120,6 +124,9 @@ class RestStageAction(StageAction):
 
     def build_request_parameters(self) -> dict:
         call_parameters = {'url': self._build_url(), 'headers': self.headers}
+
+        if self.authorization:
+            call_parameters['auth'] = (self.authorization['user'], self.authorization['password'])
 
         if self._is_form_data():
             call_parameters['headers'].pop('Content-Type')
