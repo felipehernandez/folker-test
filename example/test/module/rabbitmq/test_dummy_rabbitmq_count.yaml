@@ -26,6 +26,19 @@ stages:
     log:
       - 'Clear: ${result}'
 
+  - name: count messages
+    action:
+      type: RABBITMQ
+      method: COUNT
+      host: ${host}
+      port: ${port}
+      vhost: ${vhost}
+      queue: ${queue}
+    log:
+      - 'Number of messages: ${result}'
+    assert:
+      - ${result} == 0
+
   - name: publish message
     action:
       type: RABBITMQ
@@ -38,18 +51,15 @@ stages:
     log:
       - 'Elapsed time: ${elapsed_time}'
 
-  - name: subscribe
+  - name: count messages
     action:
       type: RABBITMQ
-      method: SUBSCRIBE
+      method: COUNT
       host: ${host}
       port: ${port}
       vhost: ${vhost}
       queue: ${queue}
-      ack: True
     log:
-      - 'Queue: ${queue}'
-      - 'Message: ${message}'
-      - 'Ack-ed: ${ack-ed}'
+      - 'Number of messages: ${result}'
     assert:
-      - ${message} == 'hello world'
+      - ${result} == 1
