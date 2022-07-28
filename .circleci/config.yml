@@ -3,7 +3,7 @@ version: 2.1
 parameters:
   image-version:
     type: string
-    default: "2.3"
+    default: "2.4"
 
 orbs:
   python: circleci/python@2.0.3
@@ -244,4 +244,3 @@ workflows:
           image-label: latest
           requires:
             - build-docker-image
-

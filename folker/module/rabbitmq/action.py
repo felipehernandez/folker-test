@@ -2,7 +2,7 @@ import json
 from copy import deepcopy
 from enum import Enum, auto
 
-from pika import BlockingConnection, ConnectionParameters
+import pika
 
 from folker.decorator import loggable_action, resolvable_variables, timed_action
 from folker.logger import TestLogger
@@ -14,6 +14,8 @@ from folker.module.void.action import VoidStageAction
 class RabbitMQMethod(Enum):
     PUBLISH = auto()
     SUBSCRIBE = auto()
+    COUNT = auto()
+    CLEAR = auto()
 
 
 class RabbitMQStageAction(StageAction):
@@ -22,6 +24,9 @@ class RabbitMQStageAction(StageAction):
     host: str
     port: str
     vhost: str
+
+    user: str
+    password: str
 
     exchange: str
     message: str
@@ -34,6 +39,8 @@ class RabbitMQStageAction(StageAction):
                  host: str = None,
                  port: str = None,
                  vhost: str = None,
+                 user: str = None,
+                 password: str = None,
                  exchange: str = None,
                  message=None,
                  queue: str = None,
@@ -50,6 +57,9 @@ class RabbitMQStageAction(StageAction):
         self.host = host
         self.port = port
         self.vhost = vhost
+
+        self.user = user
+        self.password = password
 
         self.exchange = exchange
         self.message = message
@@ -71,6 +81,10 @@ class RabbitMQStageAction(StageAction):
             result.port = enrichment.port
         if enrichment.vhost:
             result.vhost = enrichment.vhost
+        if enrichment.user:
+            result.user = enrichment.user
+        if enrichment.password:
+            result.password = enrichment.password
         if enrichment.exchange:
             result.exchange = enrichment.exchange
         if enrichment.message:
@@ -105,6 +119,8 @@ class RabbitMQStageAction(StageAction):
         {
             RabbitMQMethod.PUBLISH: self._publish,
             RabbitMQMethod.SUBSCRIBE: self._subscribe,
+            RabbitMQMethod.COUNT: self._count,
+            RabbitMQMethod.CLEAR: self._clear,
         }.get(self.method)(logger, context)
 
         return context
@@ -115,8 +131,10 @@ class RabbitMQStageAction(StageAction):
             connection_properties['port'] = self.port
         if self.vhost:
             connection_properties['virtual_host'] = self.vhost
+        if self.user and self.password:
+            connection_properties['credentials'] = pika.PlainCredentials(self.user, self.password)
 
-        return BlockingConnection(ConnectionParameters(**connection_properties))
+        return pika.BlockingConnection(pika.ConnectionParameters(**connection_properties))
 
     def _publish(self, logger: TestLogger, context: Context):
         try:
@@ -151,6 +169,33 @@ class RabbitMQStageAction(StageAction):
             context.save_on_stage('ack-ed', self.ack)
         except Exception as e:
             logger.action_error(e)
+            context.save_on_stage('error', str(e))
+
+    def _count(self, logger: TestLogger, context: Context):
+        try:
+            connection = self.create_connection()
+            channel = connection.channel()
+
+            queue = channel.queue_declare(queue=self.queue, passive=True)
+            queue_len = queue.method.message_count
+
+            context.save_on_stage('result', queue_len)
+        except Exception as e:
+            logger.action_error(e)
+            context.save_on_stage('error', str(e))
+
+    def _clear(self, logger: TestLogger, context: Context):
+        try:
+            connection = self.create_connection()
+            channel = connection.channel()
+
+            result: pika.frame.Method = channel.queue_purge(queue=self.queue)
+
+            context.save_on_stage('result', True)
+            context.save_on_stage('num_messages', result.method.message_count)
+        except Exception as e:
+            logger.action_error(e)
+            context.save_on_stage('result', False)
             context.save_on_stage('error', str(e))
 
     @staticmethod
