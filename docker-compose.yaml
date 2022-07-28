@@ -78,10 +78,6 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management
-    environment:
-      RABBITMQ_DEFAULT_PASS: guest
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_VHOST: test
     ports:
       - 5672:5672
       - 15672:15672
@@ -218,6 +214,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-integration
-    command: -t rabbitmq -n 2 --trace
+    command: -t rabbitmq -n 4 --trace
     depends_on:
       - rabbitmq

@@ -3,10 +3,10 @@ version: 2.1
 parameters:
   image-version:
     type: string
-    default: "2.3"
+    default: "2.4"
 
 orbs:
-  python: circleci/python@1.5.0
+  python: circleci/python@2.0.3
 
 executors:
   docker-builder:
@@ -51,7 +51,11 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      - run: eval docker-compose run integration-tests-<<parameters.tests>>
+      - run: |
+          for i in $(seq 1 3); do
+            eval docker-compose run integration-tests-<<parameters.tests>> && s=0 && break || s=$? && sleep 10;
+          done;
+          (exit $s)
 
   validate-integration-tests:
     executor: integration-test-runner
@@ -240,4 +244,3 @@ workflows:
           image-label: latest
           requires:
             - build-docker-image
-

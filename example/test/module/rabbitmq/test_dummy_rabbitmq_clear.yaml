@@ -1,0 +1,94 @@
+name: RabbitMQ Test
+description: Dummy Test for RabbitMQ Stage
+tags:
+  - dummy
+  - rabbitmq
+
+stages:
+  - name: setup
+    action:
+      type: VOID
+    save:
+      host: rabbitmq
+#      host: localhost
+      port: 5672
+      vhost: test
+      queue: test-exchange-single.queue-single-1
+
+  - name: clear messages
+    action:
+      type: RABBITMQ
+      method: CLEAR
+      host: ${host}
+      port: ${port}
+      vhost: ${vhost}
+      queue: ${queue}
+    log:
+      - 'Clear: ${result}'
+
+  - name: count messages
+    action:
+      type: RABBITMQ
+      method: COUNT
+      host: ${host}
+      port: ${port}
+      vhost: ${vhost}
+      queue: ${queue}
+    log:
+      - 'Number of messages: ${result}'
+    assert:
+      - ${result} == 0
+
+  - name: publish message
+    action:
+      type: RABBITMQ
+      method: PUBLISH
+      host: ${host}
+      port: ${port}
+      vhost: ${vhost}
+      exchange: test-exchange-single
+      message: hello world
+    log:
+      - 'Elapsed time: ${elapsed_time}'
+
+  - name: count messages
+    action:
+      type: RABBITMQ
+      method: COUNT
+      host: ${host}
+      port: ${port}
+      vhost: ${vhost}
+      queue: ${queue}
+    log:
+      - 'Number of messages: ${result}'
+    assert:
+      - ${result} == 1
+
+  - name: clear messages
+    action:
+      type: RABBITMQ
+      method: CLEAR
+      host: ${host}
+      port: ${port}
+      vhost: ${vhost}
+      queue: ${queue}
+    log:
+      - 'Clear: ${result}'
+      - 'Result: ${result}'
+      - 'Deleted messages: ${num_messages}'
+    assert:
+      - ${result} == True
+      - ${num_messages} == 1
+
+  - name: count messages
+    action:
+      type: RABBITMQ
+      method: COUNT
+      host: ${host}
+      port: ${port}
+      vhost: ${vhost}
+      queue: ${queue}
+    log:
+      - 'Number of messages: ${result}'
+    assert:
+      - ${result} == 0
