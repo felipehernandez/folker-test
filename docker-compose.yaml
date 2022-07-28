@@ -214,6 +214,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-integration
-    command: -t rabbitmq -n 2 --trace
+    command: -t rabbitmq -n 4 --trace
     depends_on:
       - rabbitmq
