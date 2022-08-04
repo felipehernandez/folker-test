@@ -11,6 +11,9 @@ class RabbitMQActionSchema(Schema):
     port = fields.String()
     vhost = fields.String()
 
+    user = fields.String()
+    password = fields.String()
+
     exchange = fields.String()
     message = fields.String()
 
