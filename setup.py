@@ -25,7 +25,7 @@ setup(
         'google-cloud-pubsub==1.7.2',
         'google-cloud-datastore==2.8.1',
         'gql==2.0.0',
-        'grpcio==1.49.0',
+        'grpcio==1.49.1',
         'grpcio-tools==1.48.1',
         'httplib2==0.20.4',
         'idna==3.4',
