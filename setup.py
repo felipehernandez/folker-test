@@ -38,7 +38,7 @@ setup(
         'pika==1.3.0',
         'psycopg2-binary==2.9.3',
         'pylint==2.15.3',
-        'pyOpenSSL==22.0.0',
+        'pyOpenSSL==22.1.0',
         'PyYAML==6.0',
         'requests==2.28.1',
     ],
