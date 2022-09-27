@@ -19,7 +19,7 @@ setup(
         'click==8.1.3',
         'coverage',
         'google==3.0.0',
-        'google-api-python-client==2.62.0',
+        'google-api-python-client==2.63.0',
         'google-auth-httplib2',
         'google-auth-oauthlib',
         'google-cloud-pubsub==1.7.2',
