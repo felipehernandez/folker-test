@@ -194,7 +194,7 @@ workflows:
             - build
             - validate-integration-tests
       - publish-docker-image:
-          name: publich-beta
+          name: publics-beta
           image-label: beta
           requires:
             - build-docker-image
@@ -240,7 +240,7 @@ workflows:
             - build
             - validate-integration-tests
       - publish-docker-image:
-          name: publich-latest
+          name: publish-latest
           image-label: latest
           requires:
             - build-docker-image
