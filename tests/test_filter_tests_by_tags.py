@@ -26,7 +26,7 @@ class TestFilterTestByTags:
         captured = capsys.readouterr()
         assert captured.out == '-' * 100 + '\n' \
                + 'Test files : filtering' + '\n' \
-               + f'\t{test_name} <EXECUTE> - No tags restriction defined' + '\n'
+               + f'<EXECUTE> {test_name} - No tags restriction defined' + '\n'
 
     def test_tags_no_filtering(self, capsys, plain_console_system_logger_on_trace):
         """
@@ -49,7 +49,7 @@ class TestFilterTestByTags:
         captured = capsys.readouterr()
         assert captured.out == '-' * 100 + '\n' \
                + 'Test files : filtering' + '\n' \
-               + f'\t{test_name} <EXECUTE> - No tags restriction defined' + '\n'
+               + f'<EXECUTE> {test_name} - No tags restriction defined' + '\n'
 
     def test_no_tag_test_not_matching_execution_tags(self, capsys, plain_console_system_logger_on_trace):
         """
@@ -72,7 +72,7 @@ class TestFilterTestByTags:
         captured = capsys.readouterr()
         assert captured.out == '-' * 100 + '\n' \
                + 'Test files : filtering' + '\n' \
-               + f"\t{test_name} <SKIP> - Missing execution tags : ['a_tag']" + '\n'
+               + f"<SKIP>    {test_name} - Missing execution tags : ['a_tag']" + '\n'
 
     def test_tagged_test_matching_execution_tags(self, capsys, plain_console_system_logger_on_trace):
         """
@@ -95,7 +95,7 @@ class TestFilterTestByTags:
         captured = capsys.readouterr()
         assert captured.out == '-' * 100 + '\n' \
                + 'Test files : filtering' + '\n' \
-               + f"\t{test_name} <EXECUTE> - Execute tag matching : ['a_tag']" + '\n'
+               + f"<EXECUTE> {test_name} - Execute tag matching : ['a_tag']" + '\n'
 
     def test_tagged_test_not_matching_execution_tags(self, capsys, plain_console_system_logger_on_trace):
         """
@@ -118,7 +118,7 @@ class TestFilterTestByTags:
         captured = capsys.readouterr()
         assert captured.out == '-' * 100 + '\n' \
                + 'Test files : filtering' + '\n' \
-               + f"\t{test_name} <SKIP> - Missing execution tags : ['a_tag']" + '\n'
+               + f"<SKIP>    {test_name} - Missing execution tags : ['a_tag']" + '\n'
 
     def test_one_execution_tag_matching(self, capsys, plain_console_system_logger_on_trace):
         """
@@ -141,7 +141,7 @@ class TestFilterTestByTags:
         captured = capsys.readouterr()
         assert captured.out == '-' * 100 + '\n' \
                + 'Test files : filtering' + '\n' \
-               + f"\t{test_name} <EXECUTE> - Execute tag matching : ['a_tag', 'another_tag']" + '\n'
+               + f"<EXECUTE> {test_name} - Execute tag matching : ['a_tag', 'another_tag']" + '\n'
 
     def test_multiple_execution_tag_one_matching(self, capsys, plain_console_system_logger_on_trace):
         """
@@ -164,7 +164,7 @@ class TestFilterTestByTags:
         captured = capsys.readouterr()
         assert captured.out == '-' * 100 + '\n' \
                + 'Test files : filtering' + '\n' \
-               + f"\t{test_name} <SKIP> - Missing execution tags : ['another_tag']" + '\n'
+               + f"<SKIP>    {test_name} - Missing execution tags : ['another_tag']" + '\n'
 
     def test_no_tag_with_skip(self, capsys, plain_console_system_logger_on_trace):
         """
@@ -187,7 +187,7 @@ class TestFilterTestByTags:
         captured = capsys.readouterr()
         assert captured.out == '-' * 100 + '\n' \
                + 'Test files : filtering' + '\n' \
-               + f'\t{test_name} <EXECUTE> - No skip tag matching' + '\n'
+               + f'<EXECUTE> {test_name} - No skip tag matching' + '\n'
 
     def test_tag_matching_skip(self, capsys, plain_console_system_logger_on_trace):
         """
@@ -210,7 +210,7 @@ class TestFilterTestByTags:
         captured = capsys.readouterr()
         assert captured.out == '-' * 100 + '\n' \
                + 'Test files : filtering' + '\n' \
-               + f"\t{test_name} <SKIP> - Skip tag matching : ['a_tag']" + '\n'
+               + f"<SKIP>    {test_name} - Skip tag matching : ['a_tag']" + '\n'
 
     def test_one_tag_matching_skip(self, capsys, plain_console_system_logger_on_trace):
         """
@@ -233,7 +233,7 @@ class TestFilterTestByTags:
         captured = capsys.readouterr()
         assert captured.out == '-' * 100 + '\n' \
                + 'Test files : filtering' + '\n' \
-               + f"\t{test_name} <SKIP> - Skip tag matching : ['a_tag']" + '\n'
+               + f"<SKIP>    {test_name} - Skip tag matching : ['a_tag']" + '\n'
 
     def test_tag_not_matching_skip(self, capsys, plain_console_system_logger_on_trace):
         """
@@ -256,7 +256,7 @@ class TestFilterTestByTags:
         captured = capsys.readouterr()
         assert captured.out == '-' * 100 + '\n' \
                + 'Test files : filtering' + '\n' \
-               + f'\t{test_name} <EXECUTE> - No skip tag matching' + '\n'
+               + f'<EXECUTE> {test_name} - No skip tag matching' + '\n'
 
     def test_matching_one_skip_tags(self, capsys, plain_console_system_logger_on_trace):
         """
@@ -279,7 +279,7 @@ class TestFilterTestByTags:
         captured = capsys.readouterr()
         assert captured.out == '-' * 100 + '\n' \
                + 'Test files : filtering' + '\n' \
-               + f"\t{test_name} <SKIP> - Skip tag matching : ['a_tag']" + '\n'
+               + f"<SKIP>    {test_name} - Skip tag matching : ['a_tag']" + '\n'
 
     def test_one_execution_one_skip_tag_matching(self, capsys, plain_console_system_logger_on_trace):
         """
@@ -302,4 +302,4 @@ class TestFilterTestByTags:
         captured = capsys.readouterr()
         assert captured.out == '-' * 100 + '\n' \
                + 'Test files : filtering' + '\n' \
-               + f"\t{test_name} <SKIP> - Skip tag matching : ['another_tag']" + '\n'
+               + f"<SKIP>    {test_name} - Skip tag matching : ['another_tag']" + '\n'

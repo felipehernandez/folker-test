@@ -1,5 +1,5 @@
-name: RabbitMQ Test
-description: Dummy Test for RabbitMQ Stage
+name: RabbitMQ count Test
+description: Dummy Test for RabbitMQ Stage, aiming to test count functionality
 tags:
   - dummy
   - rabbitmq
