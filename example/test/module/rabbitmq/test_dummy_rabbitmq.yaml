@@ -1,4 +1,4 @@
-name: RabbitMQ Test
+name: RabbitMQ simple Test
 description: Dummy Test for RabbitMQ Stage
 tags:
   - dummy
