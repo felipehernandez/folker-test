@@ -1,4 +1,5 @@
 from enum import Enum, auto
+from typing import List
 
 import click
 
@@ -123,7 +124,8 @@ def parameterised(func):
                 trace: bool = False,
                 log_file: str = None,
                 logger_type: str = None,
-                tags: [str] = None,
+                tags: List[str] = None,
+                skip_tags: List[str] = None,
                 profiles: str = None,
                 context: (str, str) = None,
                 secrets: (str, str) = None,
@@ -137,6 +139,10 @@ def parameterised(func):
                                      for tag_group in tags
                                      for tag in tag_group.split(',')
                                      },
+                               skip_tags={skip_tag
+                                          for tag_group in skip_tags
+                                          for skip_tag in tag_group.split(',')
+                                          },
                                profiles={profile
                                          for profile_group in profiles
                                          for profile in profile_group.split(',')
