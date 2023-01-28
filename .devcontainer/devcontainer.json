@@ -31,11 +31,12 @@
 
 	"extensions": [
 		"ms-python.python",
-        "magicstack.magicpython",
-        "visualstudioexptteam.vscodeintellicode",
+		"magicstack.magicpython",
+		"visualstudioexptteam.vscodeintellicode",
 		"ms-python.vscode-pylance",
 		"mtxr.sqltools",
-		"mtxr.sqltools-driver-pg"
+		"mtxr.sqltools-driver-pg",
+		"GitHub.copilot"
 	],
 
 	"postCreateCommand": "pip install --user -r requirements.txt ; pip install -e .",
