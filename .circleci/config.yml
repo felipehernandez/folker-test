@@ -3,7 +3,7 @@ version: 2.1
 parameters:
   image-version:
     type: string
-    default: "2.5"
+    default: "3.0"
 
 orbs:
   python: circleci/python@2.1.1

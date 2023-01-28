@@ -10,6 +10,7 @@ jarvis.egg-info
 credentials/*
 .pytest_cache
 reports
+*egg-info
 
 # File extensions
 *.class
