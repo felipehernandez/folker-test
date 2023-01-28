@@ -91,6 +91,10 @@ def parameterised(func):
                   'tags',
                   multiple=True,
                   help='Run all tests with specified tags')
+    @click.option('-st', '--skip-tag',
+                  'skip_tags',
+                  multiple=True,
+                  help='Ignore all tests with specified tags')
     @click.option('-p', '--profile',
                   'profiles',
                   multiple=True,
