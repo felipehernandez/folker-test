@@ -1,3 +1,4 @@
+from typing import List
 from folker.executor import ParallelExecutor, SequentialExecutor
 from folker.load.files import load_profile_files, load_template_files, \
     load_test_files
@@ -59,14 +60,14 @@ def run_execution_setup(config: Configuration, system_logger: SystemLogger):
     return filter_tests_by_tags(system_logger=system_logger, config=config, tests=tests)
 
 
-def filter_tests_by_tags(system_logger: SystemLogger, config: Configuration, tests: [Test]):
+def filter_tests_by_tags(system_logger: SystemLogger, config: Configuration, tests: List[Test]):
     system_logger.filtering_tests()
     ignore_skip_tags = len(config.skip_tags) == 0
     ignore_execute_tags = len(config.execute_tags) == 0
 
     if ignore_skip_tags and ignore_execute_tags:
         for test in tests:
-            system_logger.test_filter_in_skip_tags(test.name)
+            system_logger.test_filter_tags(test.name)
         return tests
 
     filtered_tests = []
@@ -79,13 +80,13 @@ def filter_tests_by_tags(system_logger: SystemLogger, config: Configuration, tes
                 continue
         if not ignore_execute_tags:
             matching_tags = config.execute_tags.intersection(test_tags)
-            if len(matching_tags) > 0:
+            if len(matching_tags) == len(config.execute_tags):
                 system_logger.test_filter_in_execution_tags(test_name=test.name,
                                                             matching_execute_tags=matching_tags)
                 filtered_tests.append(test)
                 continue
             else:
-                system_logger.test_filter_out_execution_tags(test.name)
+                system_logger.test_filter_out_execution_tags(test.name, config.execute_tags.difference(matching_tags))
                 continue
 
         system_logger.test_filter_in_skip_tags(test.name)
@@ -93,9 +94,8 @@ def filter_tests_by_tags(system_logger: SystemLogger, config: Configuration, tes
 
     return filtered_tests
 
-
 def execute_tests(config: Configuration,
-                  tests: [Test],
+                  tests: List[Test],
                   executor,
                   executed_tests,
                   cumulative_failures,

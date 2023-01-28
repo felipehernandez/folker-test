@@ -41,7 +41,7 @@ class TestVisualPlainConsoleSystemLogger:
         logger.filtering_tests()
         logger.test_filter_out_skip_tags('a_test', {'skip_tag_1', 'skip_tag_2'})
         logger.test_filter_in_execution_tags('a_test', {'skip_tag_1', 'skip_tag_2'})
-        logger.test_filter_out_execution_tags('a_test')
+        logger.test_filter_out_execution_tags('a_test', 'missing_tag')
         logger.test_filter_in_skip_tags('a_test')
 
         logger.execution_report(3, ['a_test', 'another_test'], ['yet_another_test'], None)

@@ -154,7 +154,7 @@ class SystemLogger(ABC):
                                         end=''))
             self.report.append(
                 LogEntry(type=LogEntryType.SYSTEM_TRACE_WARN,
-                         text=f'<SKIP> - Skip tag matching : {matching_skip_tags}'))
+                         text=f'<SKIP> - Skip tag matching : {sorted(matching_skip_tags)}'))
         self._log()
 
     def test_filter_in_execution_tags(self, test_name: str, matching_execute_tags: Set[str]):
@@ -164,17 +164,27 @@ class SystemLogger(ABC):
                                         end=''))
             self.report.append(
                 LogEntry(type=LogEntryType.SYSTEM_TRACE_OK,
-                         text=f'<EXECUTE> - Execute tag matching : {matching_execute_tags}'))
+                         text=f'<EXECUTE> - Execute tag matching : {sorted(matching_execute_tags)}'))
         self._log()
 
-    def test_filter_out_execution_tags(self, test_name: str):
+    def test_filter_out_execution_tags(self, test_name: str, not_matching_tags: Set[str]):
         if self.debug:
             self.report.append(LogEntry(type=LogEntryType.SYSTEM_DEBUG,
                                         text=f'\t{test_name} ',
                                         end=''))
             self.report.append(
                 LogEntry(type=LogEntryType.SYSTEM_TRACE_WARN,
-                         text='<SKIP> - No execute tag matching'))
+                         text=f'<SKIP> - Missing execution tags : {sorted(not_matching_tags)}'))
+        self._log()
+
+    def test_filter_tags(self, test_name: str):
+        if self.debug:
+            self.report.append(LogEntry(type=LogEntryType.SYSTEM_DEBUG,
+                                        text=f'\t{test_name} ',
+                                        end=''))
+            self.report.append(
+                LogEntry(type=LogEntryType.SYSTEM_TRACE_OK,
+                         text='<EXECUTE> - No tags restriction defined'))
         self._log()
 
     def test_filter_in_skip_tags(self, test_name: str):
