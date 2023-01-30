@@ -18,3 +18,73 @@ services:
     volumes:
       - ..:/workspace:cached
     command: sleep infinity
+
+  # mockserver:
+  #   image: mockserver/mockserver:latest
+  #   ports:
+  #     - 1080:1080
+
+  # gcp-pubsub-emulator:
+  #   image: messagebird/gcloud-pubsub-emulator:latest
+  #   ports:
+  #     - 8681:8681
+  #   environment:
+  #     PUBSUB_PROJECT1: "folker-test-gcp-test,a_topic:a_subscription"
+
+  # gcp-datastore-emulator:
+  #   image: singularities/datastore-emulator
+  #   ports:
+  #     - 8684:8684
+  #   environment:
+  #     DATASTORE_PROJECT_ID: folker-test-gcp-test
+  #     DATASTORE_LISTEN_ADDRESS: 0.0.0.0:8684
+
+  # grpc-test-server:
+  #   image: folkertest/grpc-test-server:latest
+  #   ports:
+  #     - 8682:8682
+
+  # graphql-test-server:
+  #   image: folkertest/graphql-test-server:latest
+  #   ports:
+  #     - 8683:8683
+
+  # postgres-server:
+  #   image: postgres
+  #   ports:
+  #     - 5432:5432
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: docker
+
+  # zookeeper:
+  #   image: docker.io/bitnami/zookeeper:3
+  #   ports:
+  #     - 2181:2181
+  #   environment:
+  #     - ALLOW_ANONYMOUS_LOGIN=yes
+
+  # kafka:
+  #   image: docker.io/bitnami/kafka:3
+  #   ports:
+  #     - 9092:9092
+  #     - 9093:9093
+  #   environment:
+  #     ALLOW_PLAINTEXT_LISTENER: 'yes'
+  #     KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://localhost:9092,INTEGRATION://integration-tests-kafka:9094
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT,INTEGRATION:PLAINTEXT
+  #     KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092,INTEGRATION://0.0.0.0:9094
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #     KAFKA_CREATE_TOPICS: "topic_test:1:1"
+  #   depends_on:
+  #     - zookeeper
+
+  # rabbitmq:
+  #   image: rabbitmq:3-management
+  #   ports:
+  #     - 5672:5672
+  #     - 15672:15672
+  #   volumes:
+  #     - ./../.circleci/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+  #     - ./../.circleci/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
