@@ -126,28 +126,28 @@ workflows:
           matrix:
             parameters:
               tests:
-                - profile
-                - template
-                - parallel
-                - conditional
-                - foreach
-                - save
-                - void
-                - print
-                - wait
-                - rest
-                - postgres
-                - file
                 - code
-                - gmail
-                - protobuf
-                - grpc
-                - graphql
-                - kafka
-                - zookeeper
-                - pubsub
+                - conditional
                 - datastore
+                - file
+                - foreach
+                - gmail
+                - graphql
+                - grpc
+                - kafka
+                - rest
+                - parallel
+                - postgres
+                - print
+                - profile
+                - protobuf
+                - pubsub
                 - rabbitmq
+                - save
+                - template
+                - void
+                - wait
+                - zookeeper
           requires:
             - build
       - validate-integration-tests:
@@ -162,28 +162,28 @@ workflows:
           matrix:
             parameters:
               tests:
-                - profile
-                - template
-                - parallel
-                - conditional
-                - foreach
-                - save
-                - void
-                - print
-                - wait
-                - rest
-                - postgres
-                - file
                 - code
-                - gmail
-                - protobuf
-                - grpc
-                - graphql
-                - kafka
-                - zookeeper
-                - pubsub
+                - conditional
                 - datastore
+                - file
+                - foreach
+                - gmail
+                - graphql
+                - grpc
+                - kafka
+                - rest
+                - parallel
+                - postgres
+                - print
+                - profile
+                - protobuf
+                - pubsub
                 - rabbitmq
+                - save
+                - template
+                - void
+                - wait
+                - zookeeper
           requires:
             - build
       - validate-integration-tests:
@@ -208,28 +208,28 @@ workflows:
           matrix:
             parameters:
               tests:
-                - profile
-                - template
-                - parallel
-                - conditional
-                - foreach
-                - save
-                - void
-                - print
-                - wait
-                - rest
-                - postgres
-                - file
                 - code
-                - gmail
-                - protobuf
-                - grpc
-                - graphql
-                - kafka
-                - zookeeper
-                - pubsub
+                - conditional
                 - datastore
+                - file
+                - foreach
+                - gmail
+                - graphql
+                - grpc
+                - kafka
+                - rest
+                - parallel
+                - postgres
+                - print
+                - profile
+                - protobuf
+                - pubsub
                 - rabbitmq
+                - save
+                - template
+                - void
+                - wait
+                - zookeeper
           requires:
             - build
       - validate-integration-tests:
