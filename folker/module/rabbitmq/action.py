@@ -103,27 +103,13 @@ class RabbitMQStageAction(StageAction):
         ]
 
     def _validate_specific(self):
-        if hasattr(self, 'method') and RabbitMQMethod.PUBLISH is self.method:
-            if not hasattr(self, 'exchange') or not self.exchange:
-                self.validation_report.missing_fields.add('action.exchange')
-            if not hasattr(self, 'message') or not self.message:
-                self.validation_report.missing_fields.add('action.message')
-        if hasattr(self, 'method') and RabbitMQMethod.SUBSCRIBE is self.method:
-            if not hasattr(self, 'queue') or not self.queue:
-                self.validation_report.missing_fields.add('action.queue')
+        pass
 
     @loggable_action
     @resolvable_variables
     @timed_action
     def execute(self, logger: TestLogger, context: Context) -> Context:
-        {
-            RabbitMQMethod.PUBLISH: self._publish,
-            RabbitMQMethod.SUBSCRIBE: self._subscribe,
-            RabbitMQMethod.COUNT: self._count,
-            RabbitMQMethod.CLEAR: self._clear,
-        }.get(self.method)(logger, context)
-
-        return context
+        pass
 
     def create_connection(self):
         connection_properties = {'host': self.host}
@@ -136,7 +122,24 @@ class RabbitMQStageAction(StageAction):
 
         return pika.BlockingConnection(pika.ConnectionParameters(**connection_properties))
 
-    def _publish(self, logger: TestLogger, context: Context):
+    @staticmethod
+    def _log_debug(logger: TestLogger, **parameters):
+        logger.action_debug(json.dumps(parameters))
+
+class RabbitMQStagePublishAction(RabbitMQStageAction):
+    def __init__(self, **fields):
+        super().__init__(**fields)
+
+    def _validate_specific(self):
+        if not hasattr(self, 'exchange') or not self.exchange:
+            self.validation_report.missing_fields.add('action.exchange')
+        if not hasattr(self, 'message') or not self.message:
+            self.validation_report.missing_fields.add('action.message')
+
+    @loggable_action
+    @resolvable_variables
+    @timed_action
+    def execute(self, logger: TestLogger, context: Context) -> Context:
         try:
             connection = self.create_connection()
 
@@ -152,7 +155,20 @@ class RabbitMQStageAction(StageAction):
             logger.action_error(e)
             context.save_on_stage('error', str(e))
 
-    def _subscribe(self, logger: TestLogger, context: Context):
+        return context
+
+class RabbitMQStageSubscribeAction(RabbitMQStageAction):
+    def __init__(self, **fields):
+        super().__init__(**fields)
+
+    def _validate_specific(self):
+        if not hasattr(self, 'queue') or not self.queue:
+            self.validation_report.missing_fields.add('action.queue')
+
+    @loggable_action
+    @resolvable_variables
+    @timed_action
+    def execute(self, logger: TestLogger, context: Context) -> Context:
         try:
             connection = self.create_connection()
             channel = connection.channel()
@@ -171,7 +187,19 @@ class RabbitMQStageAction(StageAction):
             logger.action_error(e)
             context.save_on_stage('error', str(e))
 
-    def _count(self, logger: TestLogger, context: Context):
+        return context
+
+class RabbitMQStageCountAction(RabbitMQStageAction):
+    def __init__(self, **fields):
+        super().__init__(**fields)
+
+    def _validate_specific(self):
+        pass
+
+    @loggable_action
+    @resolvable_variables
+    @timed_action
+    def execute(self, logger: TestLogger, context: Context) -> Context:
         try:
             connection = self.create_connection()
             channel = connection.channel()
@@ -184,7 +212,19 @@ class RabbitMQStageAction(StageAction):
             logger.action_error(e)
             context.save_on_stage('error', str(e))
 
-    def _clear(self, logger: TestLogger, context: Context):
+        return context
+
+class RabbitMQStageClearAction(RabbitMQStageAction):
+    def __init__(self, **fields):
+        super().__init__(**fields)
+
+    def _validate_specific(self):
+        pass
+
+    @loggable_action
+    @resolvable_variables
+    @timed_action
+    def execute(self, logger: TestLogger, context: Context) -> Context:
         try:
             connection = self.create_connection()
             channel = connection.channel()
@@ -197,7 +237,4 @@ class RabbitMQStageAction(StageAction):
             logger.action_error(e)
             context.save_on_stage('result', False)
             context.save_on_stage('error', str(e))
-
-    @staticmethod
-    def _log_debug(logger: TestLogger, **parameters):
-        logger.action_debug(json.dumps(parameters))
+        return context
