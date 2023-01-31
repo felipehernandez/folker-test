@@ -158,7 +158,7 @@ class PostgresStageSelectAction(PostgresStageAction):
         super().__init__(**fields)
 
     def _has_data_to_fetch(self):
-        return False
+        return True
 
 
 class PostgresStageUpdateAction(PostgresStageAction):
