@@ -80,72 +80,13 @@ class KafkaStageAction(StageAction):
         return ["host", "method", "topic"]
 
     def _validate_specific(self):
-        if hasattr(self, "method") and KafkaMethod.PUBLISH is self.method:
-            if (not hasattr(self, "message") or not self.message) and (
-                not hasattr(self, "key") or not self.key
-            ):
-                self.validation_report.missing_fields.update(
-                    {"action.key", "action.message"}
-                )
+        pass
 
     @loggable_action
     @resolvable_variables
     @timed_action
     def execute(self, logger: TestLogger, context: Context) -> Context:
-        {
-            KafkaMethod.PUBLISH: self._publish,
-            KafkaMethod.SUBSCRIBE: self._subscribe,
-        }.get(self.method)(logger, context)
-
-        return context
-
-    def _publish(self, logger: TestLogger, context: Context):
-        producer = KafkaProducer(bootstrap_servers=[self.host])
-
-        future = producer.send(
-            topic=self.topic,
-            key=self.key.encode() if self.key else None,
-            value=self.message.encode() if self.message else None,
-            headers=self.headers,
-        )
-        try:
-            record_metadata = future.get(timeout=10)
-
-            context.save_on_stage("topic", record_metadata.topic)
-            context.save_on_stage("partition", record_metadata.partition)
-            context.save_on_stage("timestamp", record_metadata.timestamp)
-            context.save_on_stage("offset", record_metadata.offset)
-        except KafkaError as ex:
-            context.save_on_stage("error", str(ex))
-
-    def _subscribe(self, logger: TestLogger, context: Context):
-        consumer = KafkaConsumer(
-            self.topic,
-            group_id=self.group,
-            auto_offset_reset="earliest",
-            consumer_timeout_ms=10000,
-            bootstrap_servers=[self.host],
-        )
-        messages = []
-        for message in consumer:
-            messages.append(
-                {
-                    "headers": message.headers,
-                    "key": message.key.decode()
-                    if self._has_value(message, "key")
-                    else None,
-                    "offset": message.offset,
-                    "timestamp": message.timestamp,
-                    "topic": message.topic,
-                    "message": message.value.decode()
-                    if self._has_value(message, "message")
-                    else None,
-                }
-            )
-        context.save_on_stage("messages", messages)
-
-    def _has_value(self, message, attribute: str):
-        return hasattr(message, attribute) and getattr(message, attribute)
+        pass
 
 
 class KafkaStagePublishAction(KafkaStageAction):
