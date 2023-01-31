@@ -36,7 +36,8 @@
 		"ms-python.vscode-pylance",
 		"mtxr.sqltools",
 		"mtxr.sqltools-driver-pg",
-		"GitHub.copilot"
+		"GitHub.copilot",
+		"ms-python.pylint"
 	],
 
 	"postCreateCommand": "pip install --user -r requirements.txt ; pip install -e .",

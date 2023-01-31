@@ -49,13 +49,13 @@ services:
   #   ports:
   #     - 8683:8683
 
-  # postgres-server:
-  #   image: postgres
-  #   ports:
-  #     - 5432:5432
-  #   environment:
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: docker
+  postgres-server:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: docker
 
   # zookeeper:
   #   image: docker.io/bitnami/zookeeper:3
