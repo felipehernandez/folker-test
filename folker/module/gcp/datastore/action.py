@@ -2,6 +2,7 @@ import json
 import os
 from copy import deepcopy
 from enum import Enum, auto
+from typing import List
 
 from google.cloud.datastore import Client, Entity
 
@@ -75,7 +76,7 @@ class DatastoreStageAction(StageAction):
 
         return result
 
-    def mandatory_fields(self):
+    def mandatory_fields(self) -> List[str]:
         return ["project", "method", "key"]
 
     def _validate_specific(self):

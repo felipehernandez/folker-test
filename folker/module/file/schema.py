@@ -18,7 +18,6 @@ class FileActionSchema(Schema):
 
     @post_load
     def make_action(self, data, **kwargs):
-
         return {
             FileMethod.READ.name: FileStageReadAction,
             FileMethod.WRITE.name: FileStageWriteAction,

@@ -2,6 +2,7 @@ import json
 import os
 from copy import deepcopy
 from enum import Enum, auto
+from typing import List
 
 import grpc
 from google.cloud.pubsub import PublisherClient, SubscriberClient
@@ -93,7 +94,7 @@ class PubSubStageAction(StageAction):
 
         return result
 
-    def mandatory_fields(self):
+    def mandatory_fields(self) -> List[str]:
         return ["project", "method"]
 
     def _validate_specific(self):
