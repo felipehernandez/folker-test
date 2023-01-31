@@ -1,6 +1,11 @@
 from marshmallow import Schema, fields, post_load
 
-from folker.module.kafka.action import KafkaStageAction
+from folker.module.kafka.action import (
+    KafkaMethod,
+    KafkaStageAction,
+    KafkaStagePublishAction,
+    KafkaStageSubscribeAction,
+)
 
 
 class KafkaActionSchema(Schema):
@@ -17,4 +22,7 @@ class KafkaActionSchema(Schema):
 
     @post_load
     def make_action(self, data, **kwargs):
-        return KafkaStageAction(**data)
+        return {
+            KafkaMethod.PUBLISH.name: KafkaStagePublishAction,
+            KafkaMethod.SUBSCRIBE.name: KafkaStageSubscribeAction,
+        }.get(data["method"], KafkaStageAction)(**data)
