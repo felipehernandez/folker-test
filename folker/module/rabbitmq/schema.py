@@ -1,6 +1,13 @@
 from marshmallow import Schema, fields, post_load
 
-from folker.module.rabbitmq.action import RabbitMQStageAction
+from folker.module.rabbitmq.action import (
+    RabbitMQMethod,
+    RabbitMQStageAction,
+    RabbitMQStageClearAction,
+    RabbitMQStageCountAction,
+    RabbitMQStagePublishAction,
+    RabbitMQStageSubscribeAction,
+)
 
 
 class RabbitMQActionSchema(Schema):
@@ -22,4 +29,10 @@ class RabbitMQActionSchema(Schema):
 
     @post_load
     def make_action(self, data, **kwargs):
+        return {
+            RabbitMQMethod.PUBLISH.name: RabbitMQStagePublishAction,
+            RabbitMQMethod.SUBSCRIBE.name: RabbitMQStageSubscribeAction,
+            RabbitMQMethod.COUNT.name: RabbitMQStageCountAction,
+            RabbitMQMethod.CLEAR.name: RabbitMQStageClearAction,
+        }.get(data["method"], RabbitMQStageAction)(**data)
         return RabbitMQStageAction(**data)

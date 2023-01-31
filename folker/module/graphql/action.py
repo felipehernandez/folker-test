@@ -1,3 +1,4 @@
+from typing import List
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 
@@ -16,12 +17,14 @@ class GraphQLStageAction(StageAction):
 
     mutation: str
 
-    def __init__(self,
-                 host: str = None,
-                 uri: str = None,
-                 query: str = None,
-                 mutation: str = None,
-                 **kargs) -> None:
+    def __init__(
+        self,
+        host: str = None,
+        uri: str = None,
+        query: str = None,
+        mutation: str = None,
+        **kargs,
+    ) -> None:
         super().__init__()
 
         self.host = host
@@ -30,7 +33,7 @@ class GraphQLStageAction(StageAction):
         self.query = query
         self.mutation = mutation
 
-    def __add__(self, enrichment: 'GraphQLStageAction'):
+    def __add__(self, enrichment: "GraphQLStageAction"):
         result = self.__copy__()
         if isinstance(enrichment, VoidStageAction):
             return result
@@ -46,26 +49,27 @@ class GraphQLStageAction(StageAction):
 
         return result
 
-    def mandatory_fields(self) -> [str]:
-        return [
-            'host'
-        ]
+    def mandatory_fields(self) -> List[str]:
+        return ["host"]
 
     def _validate_specific(self):
-        if (not hasattr(self, 'query') or not self.__getattribute__('query')) and \
-                (not hasattr(self, 'mutation') or not self.__getattribute__('mutation')):
-            self.validation_report.missing_fields.update(['action.query', 'action.mutation'])
+        if (not hasattr(self, "query") or not self.__getattribute__("query")) and (
+            not hasattr(self, "mutation") or not self.__getattribute__("mutation")
+        ):
+            self.validation_report.missing_fields.update(
+                ["action.query", "action.mutation"]
+            )
 
     @loggable_action
     @resolvable_variables
     @timed_action
     def execute(self, logger: TestLogger, context: Context) -> Context:
         url = self._build_url()
-        query = ''
+        query = ""
         if self.query:
-            query = f'query Query {{ {self.query} }}'
+            query = f"query Query {{ {self.query} }}"
         else:
-            query = f'mutation Mutation {{ {self.mutation} }}'
+            query = f"mutation Mutation {{ {self.mutation} }}"
 
         query = gql(query)
 
@@ -75,7 +79,7 @@ class GraphQLStageAction(StageAction):
             headers={
                 "Content-type": "application/json",
             },
-            verify=False
+            verify=False,
         )
         client = Client(
             transport=transport,
@@ -83,9 +87,9 @@ class GraphQLStageAction(StageAction):
         )
         response = client.execute(query)
 
-        context.save_on_stage('response', response)
+        context.save_on_stage("response", response)
 
         return context
 
     def _build_url(self):
-        return (self.host + '/' + self.uri) if self.uri else self.host
+        return (self.host + "/" + self.uri) if self.uri else self.host
