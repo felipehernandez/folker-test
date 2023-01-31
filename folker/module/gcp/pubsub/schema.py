@@ -1,6 +1,13 @@
 from marshmallow import Schema, fields, post_load
 
-from folker.module.gcp.pubsub.action import PubSubStageAction
+from folker.module.gcp.pubsub.action import (
+    PubSubMethod,
+    PubSubStageAction,
+    PubSubStagePublishAction,
+    PubSubStageSubscribeAction,
+    PubSubStageSubscriptionsAction,
+    PubSubStageTopicsAction,
+)
 
 
 class PubSubActionSchema(Schema):
@@ -19,4 +26,9 @@ class PubSubActionSchema(Schema):
 
     @post_load
     def make_action(self, data, **kwargs):
-        return PubSubStageAction(**data)
+        return {
+            PubSubMethod.PUBLISH.name: PubSubStagePublishAction,
+            PubSubMethod.SUBSCRIBE.name: PubSubStageSubscribeAction,
+            PubSubMethod.TOPICS.name: PubSubStageTopicsAction,
+            PubSubMethod.SUBSCRIPTIONS.name: PubSubStageSubscriptionsAction,
+        }.get(data["method"], PubSubStageAction)(**data)

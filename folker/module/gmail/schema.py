@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, post_load
 
-from folker.module.gmail.action import GmailStageAction
+from folker.module.gmail.action import GmailMethod, GmailStageAction, GmailStageSendAction
 
 
 class GmailActionSchema(Schema):
@@ -17,4 +17,6 @@ class GmailActionSchema(Schema):
 
     @post_load
     def make_action(self, data, **kwargs):
-        return GmailStageAction(**data)
+        return {
+            GmailMethod.SEND.name: GmailStageSendAction,
+        }.get(data["method"], GmailStageAction)(**data)

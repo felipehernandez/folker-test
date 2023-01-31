@@ -1,5 +1,6 @@
 import json
 from enum import Enum, auto
+from typing import List
 
 import requests
 from mergedeep import merge
@@ -31,24 +32,26 @@ class RestStageAction(StageAction):
     body_json = str
     data = dict()
 
-    def __init__(self,
-                 method: str = None,
-                 host: str = None,
-                 uri: str = None,
-                 params: dict = None,
-                 headers: dict = None,
-                 authorization: dict = None,
-                 body=None,
-                 data=None,
-                 json=None,
-                 **kargs) -> None:
+    def __init__(
+        self,
+        method: str = None,
+        host: str = None,
+        uri: str = None,
+        params: dict = None,
+        headers: dict = None,
+        authorization: dict = None,
+        body=None,
+        data=None,
+        json=None,
+        **kargs
+    ) -> None:
         super().__init__()
 
         if method:
             try:
                 self.method = RestMethod[method]
             except Exception as ex:
-                raise InvalidSchemaDefinitionException(wrong_fields=['action.method'])
+                raise InvalidSchemaDefinitionException(wrong_fields=["action.method"])
 
         self.host = host
         self.uri = uri
@@ -59,7 +62,7 @@ class RestStageAction(StageAction):
         self.body_json = json
         self.data = data
 
-    def __add__(self, enrichment: 'RestStageAction'):
+    def __add__(self, enrichment: "RestStageAction"):
         result = self.__copy__()
         if isinstance(enrichment, VoidStageAction):
             return result
@@ -82,11 +85,8 @@ class RestStageAction(StageAction):
 
         return result
 
-    def mandatory_fields(self) -> [str]:
-        return [
-            'method',
-            'host'
-        ]
+    def mandatory_fields(self) -> List[str]:
+        return ["method", "host"]
 
     @loggable_action
     @resolvable_variables
@@ -101,56 +101,64 @@ class RestStageAction(StageAction):
                 RestMethod.POST: requests.post,
                 RestMethod.PUT: requests.put,
                 RestMethod.DELETE: requests.delete,
-                RestMethod.PATCH: requests.patch
+                RestMethod.PATCH: requests.patch,
             }[self.method](**call_parameters)
 
-            context.save_on_stage('status_code', response.status_code)
-            context.save_on_stage('headers', response.headers)
-            context.save_on_stage('response', response)
-            context.save_on_stage('response_text', response.text)
+            context.save_on_stage("status_code", response.status_code)
+            context.save_on_stage("headers", response.headers)
+            context.save_on_stage("response", response)
+            context.save_on_stage("response_text", response.text)
             try:
-                self._log_debug(logger=logger,
-                                status_code=response.status_code,
-                                response=response.text)
-                context.save_on_stage('response_json', response.json())
+                self._log_debug(
+                    logger=logger,
+                    status_code=response.status_code,
+                    response=response.text,
+                )
+                context.save_on_stage("response_json", response.json())
             except Exception as ex:
                 pass
 
         except Exception as e:
             logger.action_error(str(e))
-            context.save_on_stage('error', e)
+            context.save_on_stage("error", e)
 
         return context
 
     def build_request_parameters(self) -> dict:
-        call_parameters = {'url': self._build_url(), 'headers': self.headers}
+        call_parameters = {"url": self._build_url(), "headers": self.headers}
 
         if self.authorization:
-            call_parameters['auth'] = (self.authorization['user'], self.authorization['password'])
+            call_parameters["auth"] = (
+                self.authorization["user"],
+                self.authorization["password"],
+            )
 
         if self._is_form_data():
-            call_parameters['headers'].pop('Content-Type')
-            call_parameters['files'] = self.data
+            call_parameters["headers"].pop("Content-Type")
+            call_parameters["files"] = self.data
 
         elif self.body_json:
-            call_parameters['headers']['Content-Type'] = 'application/json'
-            call_parameters['json'] = self.body_json
+            call_parameters["headers"]["Content-Type"] = "application/json"
+            call_parameters["json"] = self.body_json
 
         elif self.body:
-            call_parameters['data'] = self.body
+            call_parameters["data"] = self.body
 
         elif self.data:
-            call_parameters['data'] = self.data
+            call_parameters["data"] = self.data
 
-        call_parameters['params'] = self.params
+        call_parameters["params"] = self.params
 
         return call_parameters
 
     def _is_form_data(self):
-        return 'Content-Type' in self.headers and self.headers['Content-Type'] == 'multipart/form-data'
+        return (
+            "Content-Type" in self.headers
+            and self.headers["Content-Type"] == "multipart/form-data"
+        )
 
     def _build_url(self):
-        return (self.host + '/' + self.uri) if self.uri else self.host
+        return (self.host + "/" + self.uri) if self.uri else self.host
 
     def _log_debug(self, logger: TestLogger, **parameters):
         logger.action_debug(json.dumps(parameters))
