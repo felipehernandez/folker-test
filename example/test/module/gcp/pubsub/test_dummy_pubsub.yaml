@@ -6,8 +6,6 @@ tags:
 
 stages:
   - name: setup
-    action:
-      type: VOID
     save:
 #      host: localhost:8681
       host: gcp-pubsub-emulator:8681

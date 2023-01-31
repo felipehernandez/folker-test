@@ -126,28 +126,28 @@ workflows:
           matrix:
             parameters:
               tests:
-                - profile
-                - template
-                - parallel
-                - conditional
-                - foreach
-                - save
-                - void
-                - print
-                - wait
-                - rest
-                - postgres
-                - file
                 - code
-                - gmail
-                - protobuf
-                - grpc
-                - graphql
-                - kafka
-                - zookeeper
-                - pubsub
+                - conditional
                 - datastore
+                - file
+                - foreach
+                - gmail
+                - graphql
+                - grpc
+                - kafka
+                - rest
+                - parallel
+                - postgres
+                - print
+                - profile
+                - protobuf
+                - pubsub
                 - rabbitmq
+                - save
+                - template
+                - void
+                - wait
+                - zookeeper
           requires:
             - build
       - validate-integration-tests:
@@ -162,28 +162,28 @@ workflows:
           matrix:
             parameters:
               tests:
-                - profile
-                - template
-                - parallel
-                - conditional
-                - foreach
-                - save
-                - void
-                - print
-                - wait
-                - rest
-                - postgres
-                - file
                 - code
-                - gmail
-                - protobuf
-                - grpc
-                - graphql
-                - kafka
-                - zookeeper
-                - pubsub
+                - conditional
                 - datastore
+                - file
+                - foreach
+                - gmail
+                - graphql
+                - grpc
+                - kafka
+                - rest
+                - parallel
+                - postgres
+                - print
+                - profile
+                - protobuf
+                - pubsub
                 - rabbitmq
+                - save
+                - template
+                - void
+                - wait
+                - zookeeper
           requires:
             - build
       - validate-integration-tests:
@@ -194,7 +194,7 @@ workflows:
             - build
             - validate-integration-tests
       - publish-docker-image:
-          name: publich-beta
+          name: publics-beta
           image-label: beta
           requires:
             - build-docker-image
@@ -208,28 +208,28 @@ workflows:
           matrix:
             parameters:
               tests:
-                - profile
-                - template
-                - parallel
-                - conditional
-                - foreach
-                - save
-                - void
-                - print
-                - wait
-                - rest
-                - postgres
-                - file
                 - code
-                - gmail
-                - protobuf
-                - grpc
-                - graphql
-                - kafka
-                - zookeeper
-                - pubsub
+                - conditional
                 - datastore
+                - file
+                - foreach
+                - gmail
+                - graphql
+                - grpc
+                - kafka
+                - rest
+                - parallel
+                - postgres
+                - print
+                - profile
+                - protobuf
+                - pubsub
                 - rabbitmq
+                - save
+                - template
+                - void
+                - wait
+                - zookeeper
           requires:
             - build
       - validate-integration-tests:
@@ -240,7 +240,7 @@ workflows:
             - build
             - validate-integration-tests
       - publish-docker-image:
-          name: publich-latest
+          name: publish-latest
           image-label: latest
           requires:
             - build-docker-image
