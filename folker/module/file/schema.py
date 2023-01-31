@@ -1,6 +1,12 @@
 from marshmallow import Schema, fields, post_load
 
-from folker.module.file.action import FileStageAction
+from folker.module.file.action import (
+    FileMethod,
+    FileStageAction,
+    FileStageReadAction,
+    FileStageWriteAction,
+    FileStageDeleteAction,
+)
 
 
 class FileActionSchema(Schema):
@@ -12,4 +18,9 @@ class FileActionSchema(Schema):
 
     @post_load
     def make_action(self, data, **kwargs):
-        return FileStageAction(**data)
+
+        return {
+            FileMethod.READ.name: FileStageReadAction,
+            FileMethod.WRITE.name: FileStageWriteAction,
+            FileMethod.DELETE.name: FileStageDeleteAction,
+        }.get(data["method"], FileStageAction)(**data)
