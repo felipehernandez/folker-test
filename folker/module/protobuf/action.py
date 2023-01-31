@@ -67,78 +67,13 @@ class ProtobufStageAction(StageAction):
         return ["method", "package"]
 
     def _validate_specific(self):
-        if not hasattr(self, "clazz") or not self.__getattribute__("clazz"):
-            self.validation_report.missing_fields.add("action.class")
-
-        if (
-            hasattr(self, "method")
-            and self.method == ProtobufMethod.CREATE
-            and (not hasattr(self, "data") or not self.data)
-        ):
-            self.validation_report.missing_fields.add("action.data")
-        if (
-            hasattr(self, "method")
-            and self.method == ProtobufMethod.LOAD
-            and (not hasattr(self, "message") or not self.message)
-        ):
-            self.validation_report.missing_fields.add("action.message")
+        pass
 
     @loggable_action
     @resolvable_variables
     @timed_action
     def execute(self, logger: TestLogger, context: Context) -> Context:
-        try:
-            {ProtobufMethod.LOAD: self._load, ProtobufMethod.CREATE: self._create}[
-                self.method
-            ](context)
-
-        except Exception as e:
-            logger.action_error(str(e))
-            context.save_on_stage("error", e)
-
-        return context
-
-    def _create(self, context: Context):
-        mod = __import__(self.package + "_pb2", fromlist=[self.clazz])
-        Proto = getattr(mod, self.clazz)
-        parsed_object = json_format.Parse(
-            json.dumps(self.data), Proto(), ignore_unknown_fields=False
-        )
-
-        context.save_on_stage("proto_object", parsed_object)
-        try:
-            context.save_on_stage(
-                "proto_serialize_str", parsed_object.SerializeToString()
-            )
-        except Exception as ex:
-            context.save_on_stage("proto_serialize_str", "")
-        try:
-            context.save_on_stage(
-                "proto_serialize_json",
-                str(MessageToJson(parsed_object)).encode("utf-8"),
-            )
-        except Exception as ex:
-            context.save_on_stage("proto_serialize_json", "")
-        try:
-            context.save_on_stage(
-                "proto_serialize_utf8", str(parsed_object.SerializeToString(), "utf-8")
-            )
-        except Exception as ex:
-            context.save_on_stage("proto_serialize_utf8", "")
-
-    def _load(self, context: Context):
-        proto_package = self.package + "_pb2"
-        proto_class = self.clazz
-        message = self.message
-
-        mod = __import__(proto_package, fromlist=[proto_class])
-        Proto = getattr(mod, proto_class)
-        loaded_object = Proto()
-        loaded_object.ParseFromString(message.encode())
-
-        context.save_on_stage("proto_object", loaded_object)
-        context.save_on_stage("proto_json", MessageToJson(loaded_object))
-        context.save_on_stage("proto_dict", MessageToDict(loaded_object))
+        pass
 
 
 class ProtobufStageLoadAction(ProtobufStageAction):
