@@ -164,3 +164,23 @@ class TestContextReplication:
                                                    'variable_index': 1},
                           expected_stage_variables=original_context.stage_variables,
                           expected_secrets=original_context.secrets)
+
+    def test_given_not_empty_context_when_replicate_stage_with_variable_reference_then_contexts(self):
+        original_context = Context(test_variables={'test_vble': 'test_value'},
+                                   stage_variables={'stage_vble': ['value1', 'value2']},
+                                   secrets={'secret_vble': 'secret_value'})
+
+        generated_contexts = original_context.replicate_on_stage({'variable': '${stage_vble}'})
+
+        assert 2 == len(generated_contexts)
+
+        _compare_contexts(generated_contexts[0],
+                          expected_test_variables=original_context.test_variables,
+                          expected_stage_variables={**original_context.stage_variables,
+                                                    'variable': 'value1', 'variable_index': 0},
+                          expected_secrets=original_context.secrets)
+        _compare_contexts(generated_contexts[1],
+                          expected_test_variables=original_context.test_variables,
+                          expected_stage_variables={**original_context.stage_variables,
+                                                    'variable': 'value2', 'variable_index': 1},
+                          expected_secrets=original_context.secrets)

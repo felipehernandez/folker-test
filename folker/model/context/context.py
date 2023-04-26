@@ -106,7 +106,7 @@ class Context:
 
         for key in reversed(list(variables.keys())):
             new_contexts = []
-            values = variables.get(key)
+            values = self._replace_variables(variables.get(key))
             for index, value in enumerate(values):
                 for base_context in [{**context} for context in replicated_contexts]:
                     new_contexts.append({
