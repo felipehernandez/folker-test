@@ -6,9 +6,9 @@ tags:
   - foreach
 
 stages:
-  - name: foreach stage
+  - name: foreach stage ${element}
     foreach:
-      element: [ 'alpha', 'beta', 'charlie']
+      element: [ 'zero', 'one', 'two' ]
     action:
       type: PRINT
       message: Hello ${element} (${element_index})!
@@ -17,7 +17,7 @@ stages:
         name: name_${element}
         value: ${element}
 
-  - name: assertions
+  - name: assertions ${element.name}
     foreach:
       element: ${elements}
     log:

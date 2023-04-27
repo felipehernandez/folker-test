@@ -14,17 +14,13 @@ class SequentialExecutor:
         fail_tests = []
         param_profile = list(config.profiles)[0] if config.profiles else None
         profile = profiles.get(param_profile, DEFAULT_PROFILE)
-        context = Context(
-            test_variables={
-                **(profile.context),
-                **(config.context)
-            },
-            secrets={
-                **(profile.secrets),
-                **(config.secrets)
-            })
 
         for test in tests:
+            context = Context(
+                test_variables={**profile.context, **config.context},
+                secrets={**profile.secrets, **config.secrets}
+            )
+
             if test.execute(logger_factory.build_test_logger(config, LoggerType.SEQUENTIAL),
                             context):
                 success_tests.append(test.name)

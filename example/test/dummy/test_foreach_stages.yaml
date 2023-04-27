@@ -6,7 +6,7 @@ tags:
   - foreach
 
 stages:
-  - name: foreach stage
+  - name: foreach stage ${element}
     foreach:
       element: [ 'alpha', 'beta', 'charlie']
     action:
@@ -15,7 +15,7 @@ stages:
     save:
       elements.${element_index}: ${element}
 
-  - name: assertions
+  - name: assertions ${value}
     foreach:
       value: ${elements}
     action:
@@ -25,7 +25,7 @@ stages:
       - ${elements.1} == 'beta'
       - ${elements.2} == 'charlie'
 
-  - name: multiple variables foreach
+  - name: multiple variables foreach ${element1}${element2}
     foreach:
       element1: [ 1, 2 ]
       element2: [ 3, 7 ]

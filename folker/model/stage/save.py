@@ -1,4 +1,5 @@
 from copy import copy
+from copy import deepcopy
 
 from folker.logger import TestLogger
 from folker.model.context import Context
@@ -26,7 +27,7 @@ class StageSave(StageStep):
         return result
 
     def execute(self, logger: TestLogger, context: Context) -> Context:
-        for (variable, saving) in self.save.items():
+        for (variable, saving) in deepcopy(self.save).items():
             variable = context.replace_variables(variable)
             try:
                 updated_saving, variables = context.map_variables(saving)
