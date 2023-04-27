@@ -1,0 +1,25 @@
+name: Foreach with vble reference Test
+description: Test for sampling foreach with variable reference
+tags:
+  - dummy
+  - print
+  - foreach
+
+stages:
+  - name: foreach stage
+    foreach:
+      element: [ 'alpha', 'beta', 'charlie']
+    action:
+      type: PRINT
+      message: Hello ${element} (${element_index})!
+    save:
+      elements.[]:
+        name: name_${element}
+        value: ${element}
+
+  - name: assertions
+    foreach:
+      element: ${elements}
+    log:
+      - ${element.name}
+      - ${element.value}

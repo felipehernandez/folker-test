@@ -1,4 +1,5 @@
 import collections
+import json
 import re
 from copy import deepcopy
 
@@ -180,6 +181,13 @@ class Context:
 
         variable_root = variable_children[0]
         variable_value = {variable_children[-1]: value}
+
+        if '[]' in variable_value.keys():
+            existing_array = context.get(variable_root, [])
+            existing_array.append(list(variable_value.values())[0])
+            context[variable_root] = existing_array
+            return context
+
         path = variable_children[1:-1]
         for element in reversed(path):
             variable_value = {element: variable_value}

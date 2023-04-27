@@ -1,5 +1,5 @@
-name: Print Test
-description: Dummy Test for Print Stage
+name: Foreach Test
+description: Dummy Test for Foreach Stage
 tags:
   - dummy
   - print
