@@ -111,7 +111,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-integration
-    command: -t foreach -n 1 --trace
+    command: -t foreach -n 2 --trace
   integration-tests-save:
     build:
       context: .
@@ -126,7 +126,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-integration
-    command: -t print -n 2 --trace
+    command: -t print -n 3 --trace
   integration-tests-wait:
     build:
       context: .

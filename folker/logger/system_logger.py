@@ -163,7 +163,7 @@ class SystemLogger(ABC):
 
         self.report.append(LogEntry(type=LogEntryType.REPORT_INFO, text=f'Total: {total}', end=''))
         if expected and int(expected) != total:
-            self.report.append(LogEntry(type=LogEntryType.REPORT_FAILURE, text=f' - Expected: {total}'))
+            self.report.append(LogEntry(type=LogEntryType.REPORT_FAILURE, text=f' - Expected: {expected}'))
         else:
             self.report.append(LogEntry.blank_line())
         self._log()
