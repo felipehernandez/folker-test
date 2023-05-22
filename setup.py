@@ -40,7 +40,7 @@ setup(
         'pylint==2.17.4',
         'pyOpenSSL==23.1.1',
         'PyYAML==6.0',
-        'requests==2.30.0',
+        'requests==2.31.0',
     ],
 
     entry_points={
