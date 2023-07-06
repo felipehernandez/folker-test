@@ -16,7 +16,7 @@ setup(
     install_requires=[
         'certifi==2022.12.7',
         'chardet==5.1.0',
-        'click==8.1.3',
+        'click==8.1.4',
         'coverage',
         'google==3.0.0',
         'google-api-python-client==2.92.0',
