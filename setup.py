@@ -36,7 +36,7 @@ setup(
         'mergedeep==1.3.4',
         'oauth2client==4.1.3',
         'pika==1.3.2',
-        'psycopg2-binary==2.9.6',
+        'psycopg2-binary==2.9.7',
         'pylint==2.17.5',
         'pyOpenSSL==23.2.0',
         'PyYAML==6.0.1',
