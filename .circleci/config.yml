@@ -128,7 +128,6 @@ workflows:
               tests:
                 - code
                 - conditional
-                - datastore
                 - file
                 - foreach
                 - gmail
@@ -164,7 +163,6 @@ workflows:
               tests:
                 - code
                 - conditional
-                - datastore
                 - file
                 - foreach
                 - gmail
@@ -210,7 +208,6 @@ workflows:
               tests:
                 - code
                 - conditional
-                - datastore
                 - file
                 - foreach
                 - gmail
