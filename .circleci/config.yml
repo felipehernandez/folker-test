@@ -192,7 +192,7 @@ workflows:
             - build
             - validate-integration-tests
       - publish-docker-image:
-          name: publics-beta
+          name: publish-beta
           image-label: beta
           requires:
             - build-docker-image
