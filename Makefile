@@ -19,7 +19,6 @@ lint:
 integration-all:
 	make integration-code
 	make integration-conditional
-	make integration-datastore
 	make integration-file
 	make integration-foreach
 	make integration-gmail
@@ -45,10 +44,6 @@ integration-code:
 	rm -R testcode
 integration-conditional:
 	python folker/cli.py -t conditional -n 1 # --trace
-integration-datastore:
-	cp -R example/credentials/ credentials
-	python folker/cli.py -t datastore -n 4 # --trace
-	rm -R credentials
 integration-file:
 	python folker/cli.py -t file -n 1 # --trace
 integration-foreach:

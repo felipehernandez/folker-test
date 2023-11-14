@@ -13,14 +13,6 @@ services:
     environment:
       PUBSUB_PROJECT1: "folker-test-gcp-test,a_topic:a_subscription"
 
-  gcp-datastore-emulator:
-    image: singularities/datastore-emulator
-    ports:
-      - 8684:8684
-    environment:
-      DATASTORE_PROJECT_ID: folker-test-gcp-test
-      DATASTORE_LISTEN_ADDRESS: 0.0.0.0:8684
-
   grpc-test-server:
     image: folkertest/grpc-test-server:latest
     ports:
@@ -189,13 +181,6 @@ services:
     command: -t pubsub -n 1 --trace
     depends_on:
       - gcp-pubsub-emulator
-  integration-tests-datastore:
-    build:
-      context: .
-      dockerfile: Dockerfile-integration
-    command: -t datastore -n 4 --trace
-    depends_on:
-      - gcp-datastore-emulator
   integration-tests-kafka:
     build:
       context: .
