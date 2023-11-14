@@ -14,7 +14,7 @@ services:
       PUBSUB_PROJECT1: "folker-test-gcp-test,a_topic:a_subscription"
 
   gcp-datastore-emulator:
-    image: egymgmbh/datastore-emulator
+    image: motemen/datastore-emulator
     ports:
       - 8684:8684
     environment:
