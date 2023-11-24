@@ -11,7 +11,7 @@ gql==2.0.0
 grpcio==1.59.3
 grpcio-tools==1.48.1
 httplib2==0.22.0
-idna==3.4
+idna==3.5
 marshmallow==3.20.1
 marshmallow-oneofschema==3.0.1
 oauth2client==4.1.3
