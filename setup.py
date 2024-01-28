@@ -29,7 +29,7 @@ setup(
         'httplib2==0.22.0',
         'idna==3.6',
         'kafka-python==2.0.2',
-        'kazoo==2.9.0',
+        'kazoo==2.10.0',
         'marshmallow==3.20.2',
         'marshmallow-oneofschema==3.1.0',
         'mergedeep==1.3.4',
