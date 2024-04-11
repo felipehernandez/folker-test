@@ -27,7 +27,7 @@ setup(
         'grpcio==1.62.1',
         'grpcio-tools==1.48.1',
         'httplib2==0.22.0',
-        'idna==3.6',
+        'idna==3.7',
         'kafka-python==2.0.2',
         'kazoo==2.10.0',
         'marshmallow==3.21.1',
