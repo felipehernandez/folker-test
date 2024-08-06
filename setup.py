@@ -38,7 +38,7 @@ setup(
         'psycopg2-binary==2.9.9',
         'pylint==3.2.6',
         'pyOpenSSL==23.3.0',
-        'PyYAML==6.0.1',
+        'PyYAML==6.0.2',
         'requests==2.32.3',
     ],
 
