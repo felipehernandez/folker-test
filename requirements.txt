@@ -20,7 +20,7 @@ psycopg2-binary==2.9.10
 pylint==3.2.7
 pyOpenSSL==23.3.0
 pytest==7.4.4
-pytest-cov==4.1.0
+pytest-cov==5.0.0
 pytest-html==4.1.1
 pytest-mock==3.14.0
 PyYAML==6.0.2
