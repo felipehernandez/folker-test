@@ -31,7 +31,7 @@ setup(
         'kafka-python==2.2.15',
         'kazoo==2.10.0',
         'marshmallow==3.22.0',
-        'marshmallow-oneofschema==3.1.1',
+        'marshmallow-oneofschema==3.2.0',
         'mergedeep==1.3.4',
         'oauth2client==4.1.3',
         'pika==1.3.2',
