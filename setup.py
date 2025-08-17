@@ -23,7 +23,7 @@ setup(
         'google-auth-httplib2',
         'google-auth-oauthlib',
         'google-cloud-pubsub==1.7.2',
-        'gql==2.0.0',
+        'gql==4.0.0',
         'grpcio==1.70.0',
         'grpcio-tools==1.48.1',
         'httplib2==0.22.0',
