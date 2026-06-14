@@ -25,6 +25,6 @@ pytest-html==4.1.1
 pytest-mock==3.14.1
 PyYAML==6.0.2
 requests==2.32.4
-kafka-python==2.2.15
+kafka-python==2.3.2
 kazoo==2.10.0
 mergedeep==1.3.4
