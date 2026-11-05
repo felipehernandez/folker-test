@@ -32,14 +32,14 @@ services:
       POSTGRES_PASSWORD: docker
 
   zookeeper:
-    image: docker.io/bitnami/zookeeper:3
+    image: docker.io/bitnamilegacy/zookeeper:3.9.3
     ports:
       - 2181:2181
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
 
   kafka:
-    image: docker.io/bitnami/kafka:3
+    image: docker.io/bitnamilegacy/kafka:3.9.0
     ports:
       - 9092:9092
       - 9093:9093
@@ -54,7 +54,7 @@ services:
     depends_on:
       - zookeeper
   kafka2:
-    image: docker.io/bitnami/kafka:3
+    image: docker.io/bitnamilegacy/kafka:3.9.0
     ports:
       - 9092:9092
     environment:
