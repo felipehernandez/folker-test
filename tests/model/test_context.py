@@ -46,10 +46,6 @@ class TestContextSave:
         assert context.stage_variables == {'k1': {'k2': {'k3': 'value', 'k4': 'new_value'}}}
 
     def test_nested_save_merges_without_deprecated_collections_api(self, monkeypatch):
-        # BUG-01: merging into an existing nested dict used collections.Mapping,
-        # removed in Python 3.10 (DeprecationWarning on 3.9, AttributeError on 3.10+).
-        # On 3.9 the alias is cached after first access, so drop it to make the
-        # check independent of test order and Python version.
         monkeypatch.delattr(collections, 'Mapping', raising=False)
         context = Context.empty_context()
 
