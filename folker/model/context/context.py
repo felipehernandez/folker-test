@@ -1,6 +1,6 @@
-import collections
 import json
 import re
+from collections.abc import Mapping
 from copy import deepcopy
 
 from folker.model.error.variables import VariableReferenceResolutionException
@@ -199,7 +199,7 @@ class Context:
     def _merge_dictionaries(self, stable: dict, new_values: dict):
         for k, v in new_values.items():
             if (k in stable and isinstance(stable[k], dict)
-                    and isinstance(new_values[k], collections.Mapping)):
+                    and isinstance(new_values[k], Mapping)):
                 self._merge_dictionaries(stable[k], new_values[k])
             else:
                 stable[k] = new_values[k]
