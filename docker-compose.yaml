@@ -31,42 +31,33 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: docker
 
+  # Only needed by the zookeeper module tests; Kafka runs in KRaft mode without it.
   zookeeper:
-    image: docker.io/bitnamilegacy/zookeeper:3.9.3
+    image: zookeeper:3.9.4
     ports:
       - 2181:2181
-    environment:
-      - ALLOW_ANONYMOUS_LOGIN=yes
 
   kafka:
-    image: docker.io/bitnamilegacy/kafka:3.9.0
+    image: apache/kafka:4.1.0
     ports:
       - 9092:9092
       - 9093:9093
     environment:
-      ALLOW_PLAINTEXT_LISTENER: 'yes'
-      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://localhost:9092,INTEGRATION://integration-tests-kafka:9094
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT,INTEGRATION:PLAINTEXT
-      KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092,INTEGRATION://0.0.0.0:9094
-      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "topic_test:1:1"
-    depends_on:
-      - zookeeper
-  kafka2:
-    image: docker.io/bitnamilegacy/kafka:3.9.0
-    ports:
-      - 9092:9092
-    environment:
-      ALLOW_PLAINTEXT_LISTENER: 'yes'
+      # Single-node KRaft (combined broker + controller)
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:29093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      # INSIDE: other containers (tests use kafka:9093) · OUTSIDE: host machine (localhost:9092)
+      KAFKA_LISTENERS: CONTROLLER://0.0.0.0:29093,INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
       KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
-      KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "topic_test:1:1"
-    depends_on:
-      - zookeeper
+      # Single broker: internal topics can't be replicated
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
 
   rabbitmq:
     image: rabbitmq:3-management
