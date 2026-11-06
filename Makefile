@@ -14,7 +14,10 @@ test-report:
 	coverage html -d reports/coverage --title=report --omit="*/lib/python*"
 
 lint:
-	pylint folker
+	ruff cehck .
+
+lint-fix:
+	ruff check --fix .
 
 integration-all:
 	make integration-code
