@@ -1,4 +1,3 @@
-import json
 import re
 from collections.abc import Mapping
 from copy import deepcopy
