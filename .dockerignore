@@ -1,0 +1,17 @@
+.git
+.github
+.circleci
+.devcontainer
+.vscode
+tests
+reports
+.pytest_cache
+__pycache__
+*.pyc
+.coverage
+venv
+*.egg-info
+build
+dist
+.DS_Store
+*.tar
