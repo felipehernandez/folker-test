@@ -34,7 +34,7 @@ setup(
         'marshmallow-oneofschema==3.1.1',
         'mergedeep==1.3.4',
         'oauth2client==4.1.3',
-        'pika==1.3.2',
+        'pika==1.4.4',
         'psycopg2-binary==2.9.10',
         'pylint==3.2.7',
         'pyOpenSSL==23.3.0',
