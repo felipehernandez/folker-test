@@ -2,7 +2,6 @@ import pytest
 
 from folker.module.file.action import (
     FileMethod,
-    FileStageAction,
     FileStageReadAction,
     FileStageWriteAction,
 )

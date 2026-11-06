@@ -4,7 +4,6 @@ import pytest
 
 from folker.model.context import Context
 from folker.module.kafka.action import (
-    KafkaStageAction,
     KafkaMethod,
     KafkaStagePublishAction,
     KafkaStageSubscribeAction,

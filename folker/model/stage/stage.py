@@ -106,7 +106,7 @@ class Stage(Validatable):
         updated_assertion, variables = context.map_variables(self.condition)
         try:
             return not eval(updated_assertion, {'variables': variables})
-        except Exception as e:
+        except Exception:
             return True
 
     def _execute(self, logger: TestLogger, context: Context):

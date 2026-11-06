@@ -17,7 +17,7 @@ class TestVoidActionNormalLog:
         action.execute(logger=logger, context=context)
 
         captured = capsys.readouterr()
-        expected_output = (f'')
+        expected_output = ('')
         assert captured.out == expected_output
 
 
@@ -33,7 +33,7 @@ class TestVoidActionDebugLog:
         action.execute(logger=logger, context=context)
 
         captured = capsys.readouterr()
-        expected_output = (f'')
+        expected_output = ('')
         assert captured.out == expected_output
 
 
@@ -50,21 +50,21 @@ class TestVoidActionTraceLog:
 
         captured = capsys.readouterr()
         expected_output = (
-            f'............................................. PRELUDE ..............................................\n'
-            f'{{\n'
-            f'    "ACTION": {{}},\n'
-            f'    "SECRETS": {{}},\n'
-            f'    "STAGE CONTEXT": {{}},\n'
-            f'    "TEST CONTEXT": {{}}\n'
-            f'}}\n'
-            f'............................................ CONCLUSION ............................................\n'
-            f'{{\n'
-            f'    "ACTION": {{}},\n'
-            f'    "SECRETS": {{}},\n'
-            f'    "STAGE CONTEXT": {{\n'
-            f'        "elapsed_time": 0\n'
-            f'    }},\n'
-            f'    "TEST CONTEXT": {{}}\n'
-            f'}}\n'
+            '............................................. PRELUDE ..............................................\n'
+            '{\n'
+            '    "ACTION": {},\n'
+            '    "SECRETS": {},\n'
+            '    "STAGE CONTEXT": {},\n'
+            '    "TEST CONTEXT": {}\n'
+            '}\n'
+            '............................................ CONCLUSION ............................................\n'
+            '{\n'
+            '    "ACTION": {},\n'
+            '    "SECRETS": {},\n'
+            '    "STAGE CONTEXT": {\n'
+            '        "elapsed_time": 0\n'
+            '    },\n'
+            '    "TEST CONTEXT": {}\n'
+            '}\n'
         )
         assert captured.out == expected_output

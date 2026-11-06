@@ -26,7 +26,7 @@ class FileStageAction(StageAction):
         super().__init__()
         try:
             self.method = FileMethod[method]
-        except Exception as ex:
+        except Exception:
             self.validation_report.wrong_fields.add("action.method")
 
         self.file = file
