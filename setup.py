@@ -1,5 +1,5 @@
 """Minimal setup file for tasks project."""
-from setuptools import setup
+from setuptools import find_packages, setup
 
 setup(
     name='folker-test',
@@ -11,7 +11,7 @@ setup(
     author_email='felherlla@gmail.com',
     url='https://github.com/felipehernandez/folker-test',
 
-    packages=['folker'],
+    packages=find_packages(),
 
     install_requires=[
         'certifi==2023.11.17',
