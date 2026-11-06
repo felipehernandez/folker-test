@@ -19,11 +19,28 @@ executors:
       - image: circleci/buildpack-deps:stretch
 jobs:
   build:
-    executor: python/default
+    executor: 
+      name: python/default
+      tag: "3.10"
     steps:
       - checkout
-      - python/install-packages:
-          pkg-manager: pip
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./
+
+  unit-tests:
+    parameters:
+      python-version:
+        type: string
+    executor:
+      name: python/default
+      tag: <<parameters.python-version>>
+    steps:
+      - checkout
+      - run:
+          name: Python version
+          command: python --version
       - python/install-packages:
           pkg-manager: pip
           pip-dependency-file: requirements.txt
@@ -38,10 +55,6 @@ jobs:
           path: codecoverage
       - store_artifacts:
           path: codecoverage
-      - persist_to_workspace:
-          root: .
-          paths:
-            - ./
 
   run-integration-tests:
     executor: integration-test-runner
@@ -122,6 +135,10 @@ workflows:
             equal: [ main, << pipeline.git.branch >> ]
     jobs:
       - build
+      - unit-tests:
+          matrix:
+            parameters:
+              python-version: ["3.10"]
       - run-integration-tests:
           matrix:
             parameters:
@@ -149,6 +166,7 @@ workflows:
                 - zookeeper
           requires:
             - build
+            - unit-tests
       - validate-integration-tests:
           requires:
             - run-integration-tests
@@ -157,6 +175,10 @@ workflows:
       equal: [ beta, << pipeline.git.branch >> ]
     jobs:
       - build
+      - unit-tests:
+          matrix:
+            parameters:
+              python-version: ["3.10"]
       - run-integration-tests:
           matrix:
             parameters:
@@ -184,6 +206,7 @@ workflows:
                 - zookeeper
           requires:
             - build
+            - unit-tests
       - validate-integration-tests:
           requires:
             - run-integration-tests
@@ -202,6 +225,10 @@ workflows:
       equal: [ main, << pipeline.git.branch >> ]
     jobs:
       - build
+      - unit-tests:
+          matrix:
+            parameters:
+              python-version: ["3.10"]
       - run-integration-tests:
           matrix:
             parameters:
@@ -229,6 +256,7 @@ workflows:
                 - zookeeper
           requires:
             - build
+            - unit-tests
       - validate-integration-tests:
           requires:
             - run-integration-tests
