@@ -1,7 +1,41 @@
+import sys
+
 import pytest
 from click.testing import CliRunner
 
 import folker.cli
+
+CWD_MODULE = 'folker_cwd_import_probe'
+
+
+@pytest.fixture
+def isolated_import_state(monkeypatch):
+    monkeypatch.setattr(sys, 'path', [p for p in sys.path if p not in ('', '.')])
+    yield
+    sys.modules.pop(CWD_MODULE, None)
+
+
+@pytest.mark.cli
+class TestWorkingDirectoryImports:
+    def test_modules_in_working_directory_are_importable(self, tmp_path, monkeypatch,
+                                                         isolated_import_state):
+        (tmp_path / f'{CWD_MODULE}.py').write_text('def answer():\n    return 42\n')
+        (tmp_path / 'test_cwd_import.yaml').write_text(
+            'name: Working directory import\n'
+            'stages:\n'
+            '  - name: call code from working directory\n'
+            '    action:\n'
+            '      type: CODE\n'
+            f'      module: {CWD_MODULE}\n'
+            '      method: answer\n'
+            '    assert:\n'
+            '      - ${result} == 42\n')
+        monkeypatch.chdir(tmp_path)
+
+        result = CliRunner().invoke(folker.cli.run, ['--logger-type', 'PLAIN', '-n', '1'])
+
+        assert result.exit_code == 0, result.output
+        assert f'No module named \'{CWD_MODULE}\'' not in result.output
 
 
 # @pytest.mark.cli

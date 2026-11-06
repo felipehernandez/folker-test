@@ -1,4 +1,7 @@
+import os
+import sys
 from typing import List
+
 from folker.executor import ParallelExecutor, SequentialExecutor
 from folker.load.files import load_profile_files, load_template_files, \
     load_test_files
@@ -14,6 +17,7 @@ from folker.parameters import Configuration, parameterised
 def run(config: Configuration):
     system_logger = logger_factory.system_logger(config)
 
+    make_working_directory_importable()
     run_system_setup(system_logger)
 
     tests = run_execution_setup(config=config, system_logger=system_logger)
@@ -43,6 +47,17 @@ def run(config: Configuration):
         raise TestSuiteResultException(failures)
     if expected_number_of_tests and int(expected_number_of_tests) != executed:
         raise TestSuiteNumberExecutionsException(expected_number_of_tests, executed)
+
+
+def make_working_directory_importable():
+    """
+    Generated protos (protos/*_pb2.py) and CODE action modules are imported relative to the
+    working directory. An installed `folker-test` console script only puts its own bin/
+    directory on sys.path, so add the working directory explicitly, as `python` itself does.
+    """
+    working_directory = os.getcwd()
+    if working_directory not in sys.path:
+        sys.path.insert(0, working_directory)
 
 
 def run_system_setup(system_logger: SystemLogger):

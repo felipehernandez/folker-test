@@ -1,3 +1,6 @@
+import collections
+import warnings
+
 from folker.model.context.context import contains_variable_reference, Context
 
 
@@ -41,6 +44,17 @@ class TestContextSave:
         context.save_on_stage('k1.k2.k4', 'new_value')
 
         assert context.stage_variables == {'k1': {'k2': {'k3': 'value', 'k4': 'new_value'}}}
+
+    def test_nested_save_merges_without_deprecated_collections_api(self, monkeypatch):
+        monkeypatch.delattr(collections, 'Mapping', raising=False)
+        context = Context.empty_context()
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('error', DeprecationWarning)
+            context.save_on_test('a.b.c', 1)
+            context.save_on_test('a.b.d', 2)
+
+        assert context.test_variables == {'a': {'b': {'c': 1, 'd': 2}}}
 
     def test_complex_save_override(self):
         context = Context(secrets={},
