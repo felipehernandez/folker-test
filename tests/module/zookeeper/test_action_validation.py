@@ -3,7 +3,6 @@ import pytest
 from folker.module.zookeeper.action import (
     ZookeeperStageAction,
     ZookeeperMethod,
-    ZookeeperStageExistsAction,
     ZookeeperStageCreateAction,
     ZookeeperStageDeleteAction,
     ZookeeperStageGetAction,

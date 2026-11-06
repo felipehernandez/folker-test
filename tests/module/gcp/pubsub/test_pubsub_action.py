@@ -4,7 +4,6 @@ import pytest
 
 from folker.model.context import Context
 from folker.module.gcp.pubsub.action import (
-    PubSubStageAction,
     PubSubMethod,
     PubSubStagePublishAction,
     PubSubStageSubscribeAction,

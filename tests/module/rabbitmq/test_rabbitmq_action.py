@@ -51,7 +51,7 @@ class TestRabbitMQPublishAction:
 
         assert context.test_variables == {}
         assert "elapsed_time" in context.stage_variables
-        assert context.stage_variables["published"] == True
+        assert context.stage_variables["published"] is True
 
 
 @pytest.mark.action_rabbitmq
@@ -101,7 +101,7 @@ class TestRabbitMQSubscribeAction:
 
         assert context.stage_variables["queue"] == "a-queue"
         assert context.stage_variables["message"] == "a-message"
-        assert context.stage_variables["ack-ed"] == True
+        assert context.stage_variables["ack-ed"] is True
 
 
 @pytest.mark.action_rabbitmq
@@ -199,5 +199,5 @@ class TestRabbitMQClearAction:
         assert "elapsed_time" in context.stage_variables
         assert "result" in context.stage_variables
 
-        assert context.stage_variables["result"] == True
+        assert context.stage_variables["result"] is True
         assert context.stage_variables["num_messages"] == 42

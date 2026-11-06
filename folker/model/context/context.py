@@ -9,7 +9,7 @@ from folker.model.error.variables import VariableReferenceResolutionException
 def contains_variable_reference(text):
     if not isinstance(text, str):
         return []
-    return re.findall('\${([^{}]+)}', text)
+    return re.findall(r'\${([^{}]+)}', text)
 
 
 def _resolve_variable_reference(context: dict, path: str) -> str:
@@ -22,9 +22,9 @@ def _resolve_variable_reference(context: dict, path: str) -> str:
                 step = int(step[1:-1])
             try:
                 context_navigation = context_navigation[step]
-            except Exception as ex:
+            except Exception:
                 context_navigation = getattr(context_navigation, step)
-    except Exception as ex:
+    except Exception:
         raise VariableReferenceResolutionException(variable_reference=path)
 
     return context_navigation

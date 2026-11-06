@@ -38,7 +38,7 @@ class TestRabbitMQActionEnrichment:
         assert enriched.method == RabbitMQMethod.SUBSCRIBE
         assert enriched.host == "a_host"
         assert enriched.queue == "a_queue"
-        assert enriched.ack == True
+        assert enriched.ack is True
 
     def test_enrich_void(self):
         original = RabbitMQStageAction(

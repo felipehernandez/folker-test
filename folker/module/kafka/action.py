@@ -42,7 +42,7 @@ class KafkaStageAction(StageAction):
         if method:
             try:
                 self.method = KafkaMethod[method]
-            except Exception as ex:
+            except Exception:
                 raise InvalidSchemaDefinitionException(wrong_fields=["action.method"])
 
         self.host = host

@@ -32,7 +32,7 @@ class StageSave(StageStep):
             try:
                 updated_saving, variables = context.map_variables(saving)
                 saving_value = eval(updated_saving, {'variables': variables})
-            except Exception as e:
+            except Exception:
                 saving_value = context.replace_variables(saving)
 
             context.save_on_test(variable, saving_value)
