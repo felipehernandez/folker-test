@@ -39,7 +39,7 @@ class ProtobufStageAction(StageAction):
         if method:
             try:
                 self.method = ProtobufMethod[method]
-            except Exception as ex:
+            except Exception:
                 raise InvalidSchemaDefinitionException(wrong_fields=["action.method"])
 
         self.package = package if package else None
@@ -161,18 +161,18 @@ class ProtobufStageCreateAction(ProtobufStageAction):
             context.save_on_stage(
                 "proto_serialize_str", parsed_object.SerializeToString()
             )
-        except Exception as ex:
+        except Exception:
             context.save_on_stage("proto_serialize_str", "")
         try:
             context.save_on_stage(
                 "proto_serialize_json",
                 str(MessageToJson(parsed_object)).encode("utf-8"),
             )
-        except Exception as ex:
+        except Exception:
             context.save_on_stage("proto_serialize_json", "")
         try:
             context.save_on_stage(
                 "proto_serialize_utf8", str(parsed_object.SerializeToString(), "utf-8")
             )
-        except Exception as ex:
+        except Exception:
             context.save_on_stage("proto_serialize_utf8", "")

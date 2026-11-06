@@ -51,7 +51,7 @@ class TestLoggerFactoryTest:
 
         assert type(logger) is PlainFileSequentialTestLogger
 
-    def test_given_file_sequential(self):
+    def test_given_file_parallel(self):
         config = Configuration(log_file='a_file.log')
 
         logger = logger_factory.build_test_logger(config=config, type=LoggerType.PARALLEL)

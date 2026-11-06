@@ -24,6 +24,7 @@ class TestStageAssertionsValidation:
 
         result = stage + template
 
+        assert result.assertions == ['an_assertion']
         assert template.assertions == []
         assert stage.assertions == ['an_assertion']
 

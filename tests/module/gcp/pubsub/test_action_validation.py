@@ -89,7 +89,7 @@ class TestPubSubStageSubscribeActionValidation:
         assert action
         assert action.validation_report
 
-    def test_validate_correct_subscribe(self):
+    def test_validate_correct_subscribe_without_ack(self):
         action = PubSubStageSubscribeAction(
             method=PubSubMethod.SUBSCRIBE.name,
             project="a-project",

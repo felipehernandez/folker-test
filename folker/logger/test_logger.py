@@ -25,7 +25,7 @@ def _to_serialized(dictionary: dict):
             try:
                 json.dumps(value)
                 serialized[key] = value
-            except Exception as ex:
+            except Exception:
                 serialized[key] = str(value)
     return serialized
 

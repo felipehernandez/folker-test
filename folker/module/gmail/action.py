@@ -49,7 +49,7 @@ class GmailStageAction(StageAction):
         if method:
             try:
                 self.method = GmailMethod[method]
-            except Exception as ex:
+            except Exception:
                 self.validation_report.wrong_fields.add("action.method")
 
         self.credentials_path = credentials_path

@@ -56,6 +56,19 @@ jobs:
       - store_artifacts:
           path: codecoverage
 
+  lint:
+    executor:
+      name: python/default
+      tag: "3.10"
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip
+          pip-dependency-file: requirements-lint.txt
+      - run:
+          name: Ruff
+          command: ruff check .
+
   run-integration-tests:
     executor: integration-test-runner
     parameters:
@@ -139,6 +152,7 @@ workflows:
           matrix:
             parameters:
               python-version: ["3.10"]
+      - lint
       - run-integration-tests:
           matrix:
             parameters:
@@ -167,6 +181,7 @@ workflows:
           requires:
             - build
             - unit-tests
+            - lint
       - validate-integration-tests:
           requires:
             - run-integration-tests
@@ -179,6 +194,7 @@ workflows:
           matrix:
             parameters:
               python-version: ["3.10"]
+      - lint
       - run-integration-tests:
           matrix:
             parameters:
@@ -207,6 +223,7 @@ workflows:
           requires:
             - build
             - unit-tests
+            - lint
       - validate-integration-tests:
           requires:
             - run-integration-tests
@@ -229,6 +246,7 @@ workflows:
           matrix:
             parameters:
               python-version: ["3.10"]
+      - lint
       - run-integration-tests:
           matrix:
             parameters:
@@ -257,6 +275,7 @@ workflows:
           requires:
             - build
             - unit-tests
+            - lint
       - validate-integration-tests:
           requires:
             - run-integration-tests

@@ -12,7 +12,7 @@ class PrintStageAction(StageAction):
         super().__init__()
         self.message = message
 
-    def __add__(self, enrichment: 'WaitStageAction'):
+    def __add__(self, enrichment: 'PrintStageAction'):
         result = self.__copy__()
 
         if isinstance(enrichment, VoidStageAction):

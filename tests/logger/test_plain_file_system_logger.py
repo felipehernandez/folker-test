@@ -16,7 +16,7 @@ class TestNormalSystemStartupPlainFileSystemLogger:
 
         system_logger.system_setup_start()
 
-        assert not log_file.exists()
+        assert log_file.read() == ''
 
 
 @pytest.mark.logger
@@ -40,7 +40,7 @@ class TestDebugSystemStartupPlainFileSystemLogger:
 
 
 @pytest.mark.logger
-class TestNormalSystemStartupPlainFileSystemLogger:
+class TestTraceSystemStartupPlainFileSystemLogger:
     """
     Test all logging for system setup stage on trace mode
     """
