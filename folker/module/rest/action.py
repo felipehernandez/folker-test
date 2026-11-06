@@ -115,8 +115,13 @@ class RestStageAction(StageAction):
                     response=response.text,
                 )
                 context.save_on_stage("response_json", response.json())
-            except Exception:
-                pass
+            except requests.exceptions.JSONDecodeError as e:
+                self._log_debug(
+                    logger=logger,
+                    status_code=response.status_code,
+                    response_json_error=str(e),
+                )
+                context.save_on_stage("response_json_error", str(e))
 
         except Exception as e:
             logger.action_error(str(e))
