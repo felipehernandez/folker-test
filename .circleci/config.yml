@@ -57,14 +57,14 @@ jobs:
           path: codecoverage
 
   lint:
-    executor: 
+    executor:
       name: python/default
       tag: "3.10"
     steps:
       - checkout
       - python/install-packages:
           pkg-manager: pip
-          pip-dependency-file: requirements.txt
+          pip-dependency-file: requirements-lint.txt
       - run:
           name: Ruff
           command: ruff check .
