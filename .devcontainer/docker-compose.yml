@@ -6,8 +6,8 @@ services:
       context: ..
       dockerfile: .devcontainer/Dockerfile
       args:
-        # [Choice] Python version: 3, 3.8, 3.7, 3.6
-        VARIANT: 3.9
+        # Keep in sync with .python-version (CI-12). Quoted: YAML reads 3.10 as 3.1
+        VARIANT: "3.10"
         # [Choice] Install Node.js
         INSTALL_NODE: "true"
         NODE_VERSION: "lts/*"

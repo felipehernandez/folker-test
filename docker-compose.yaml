@@ -1,4 +1,15 @@
-version: '3.1'
+version: '3.4'
+
+# Integration test runners share one image: the `integration` target of Dockerfile, i.e. the
+# published runtime plus example fixtures (CI-04). CI loads the image it built and tested, so
+# compose finds it locally and skips the build; locally, `docker compose run` builds it.
+x-integration-test: &integration-test
+  image: folkertest/folkertest-integration:ci
+  build:
+    context: .
+    target: integration
+    args:
+      PYTHON_VERSION: ${PYTHON_VERSION:-3.10}
 
 services:
   mockserver:
@@ -67,127 +78,85 @@ services:
       - ./.circleci/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
 
   integration-tests-template:
-    build:
-      context: .
-      dockerfile: Dockerfile-integration
+    <<: *integration-test
     command: -t template -n 3 --trace
     depends_on:
       - mockserver
   integration-tests-profile:
-    build:
-      context: .
-      dockerfile: Dockerfile-integration
+    <<: *integration-test
     command: -p test-profile -t profile -n 1 --trace
   integration-tests-parallel:
-    build:
-      context: .
-      dockerfile: Dockerfile-integration
+    <<: *integration-test
     command: -t parallel -n 3 --trace
   integration-tests-conditional:
-    build:
-      context: .
-      dockerfile: Dockerfile-integration
+    <<: *integration-test
     command: -t conditional -n 1 --trace
   integration-tests-foreach:
-    build:
-      context: .
-      dockerfile: Dockerfile-integration
+    <<: *integration-test
     command: -t foreach -n 2 --trace
   integration-tests-save:
-    build:
-      context: .
-      dockerfile: Dockerfile-integration
+    <<: *integration-test
     command: -t save -n 2 --trace
   integration-tests-void:
-    build:
-      context: .
-      dockerfile: Dockerfile-integration
+    <<: *integration-test
     command: -t void -n 3 --trace
   integration-tests-print:
-    build:
-      context: .
-      dockerfile: Dockerfile-integration
+    <<: *integration-test
     command: -t print -n 3 --trace
   integration-tests-wait:
-    build:
-      context: .
-      dockerfile: Dockerfile-integration
+    <<: *integration-test
     command: -t wait -n 1 --trace
   integration-tests-rest:
-    build:
-      context: .
-      dockerfile: Dockerfile-integration
+    <<: *integration-test
     command: -t rest -n 3 --trace
     depends_on:
       - mockserver
   integration-tests-postgres:
-    build:
-      context: .
-      dockerfile: Dockerfile-integration
+    <<: *integration-test
     command: -t postgres -n 1 --trace
     depends_on:
       - postgres-server
   integration-tests-file:
-    build:
-      context: .
-      dockerfile: Dockerfile-integration
+    <<: *integration-test
     command: -t file -n 1 --trace
   integration-tests-code:
-    build:
-      context: .
-      dockerfile: Dockerfile-integration
+    <<: *integration-test
     command: -t code -n 1 --trace
   integration-tests-gmail:
-    build:
-      context: .
-      dockerfile: Dockerfile-integration
+    <<: *integration-test
     command: -t gmail -n 1 --trace
   integration-tests-protobuf:
-    build:
-      context: .
-      dockerfile: Dockerfile-integration
+    <<: *integration-test
     command: -t protobuf -n 2 --trace
     depends_on:
       - mockserver
   integration-tests-grpc:
-    build:
-      context: .
-      dockerfile: Dockerfile-integration
+    <<: *integration-test
     command: -t grpc -n 1 --trace
     depends_on:
       - grpc-test-server
   integration-tests-graphql:
-    build:
-      context: .
-      dockerfile: Dockerfile-integration
+    <<: *integration-test
     command: -t graphql -n 1 --trace
     depends_on:
       - graphql-test-server
   integration-tests-pubsub:
-    build:
-      context: .
-      dockerfile: Dockerfile-integration
+    <<: *integration-test
     command: -t pubsub -n 1 --trace
     depends_on:
       - gcp-pubsub-emulator
   integration-tests-kafka:
-    build:
-      context: .
-      dockerfile: Dockerfile-integration
+    <<: *integration-test
     command: -t kafka -n 1 --trace
     depends_on:
       - kafka
   integration-tests-zookeeper:
-    build:
-      context: .
-      dockerfile: Dockerfile-integration
+    <<: *integration-test
     command: -t zookeeper -n 4 --trace
     depends_on:
       - zookeeper
   integration-tests-rabbitmq:
-    build:
-      context: .
-      dockerfile: Dockerfile-integration
+    <<: *integration-test
     command: -t rabbitmq -n 4 --trace
     depends_on:
       - rabbitmq

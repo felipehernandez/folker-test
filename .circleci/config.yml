@@ -4,6 +4,10 @@ parameters:
   image-version:
     type: string
     default: "3.0"
+  python-version:
+    # Runtime Python version. Must equal .python-version (CI-12, checked by the lint job).
+    type: string
+    default: "3.10"
 
 orbs:
   python: circleci/python@4.0.0
@@ -19,9 +23,9 @@ executors:
       - image: circleci/buildpack-deps:stretch
 jobs:
   build:
-    executor: 
+    executor:
       name: python/default
-      tag: "3.10"
+      tag: << pipeline.parameters.python-version >>
     steps:
       - checkout
       - persist_to_workspace:
@@ -35,7 +39,7 @@ jobs:
         type: string
     executor:
       name: python/default
-      tag: <<parameters.python-version>>
+      tag: << parameters.python-version >>
     steps:
       - checkout
       - run:
@@ -59,7 +63,7 @@ jobs:
   lint:
     executor:
       name: python/default
-      tag: "3.10"
+      tag: << pipeline.parameters.python-version >>
     steps:
       - checkout
       - python/install-packages:
@@ -68,6 +72,31 @@ jobs:
       - run:
           name: Ruff
           command: ruff check .
+      - run:
+          name: Python version is declared consistently
+          command: python scripts/check_python_version.py
+
+  build-docker-image:
+    executor: docker-builder
+    steps:
+      - attach_workspace:
+          at: .
+      - setup_remote_docker
+      - run:
+          name: Build runtime and integration images
+          command: |
+            PYTHON_VERSION="$(cat .python-version)"
+            docker build --build-arg PYTHON_VERSION="$PYTHON_VERSION" \
+              --target runtime -t folkertest/folkertest:ci .
+            docker build --build-arg PYTHON_VERSION="$PYTHON_VERSION" \
+              --target integration -t folkertest/folkertest-integration:ci .
+      - run:
+          name: Archive images
+          command: docker save -o folkertest.tar folkertest/folkertest:ci folkertest/folkertest-integration:ci
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./folkertest.tar
 
   run-integration-tests:
     executor: integration-test-runner
@@ -77,52 +106,42 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      - run: |
-          for i in $(seq 1 3); do
-            eval docker-compose run integration-tests-<<parameters.tests>> && s=0 && break || s=$? && sleep 10;
-          done;
-          (exit $s)
+      - run:
+          name: Load the image under test
+          command: |
+            docker load -i folkertest.tar
+            # compose must run the loaded image, never rebuild one
+            docker image inspect folkertest/folkertest-integration:ci > /dev/null
+      - run:
+          name: Run integration tests
+          command: |
+            for i in $(seq 1 3); do
+              eval docker-compose run integration-tests-<<parameters.tests>> && s=0 && break || s=$? && sleep 10;
+            done;
+            (exit $s)
 
   validate-integration-tests:
     executor: integration-test-runner
     steps:
       - run: echo "Integration tests validated"
 
-  build-docker-image:
-    executor: docker-builder
-    steps:
-      - attach_workspace:
-          at: .
-      - setup_remote_docker
-      - run:
-          name: Build Docker image
-          command: |
-            docker build \
-              -t folkertest/folkertest:<<pipeline.parameters.image-version>>.<<pipeline.number>> \
-              -t folkertest/folkertest:beta \
-              -t folkertest/folkertest:latest \
-              .
-      - run:
-          name: Archive Docker image
-          command: docker save -o folkertest.tar folkertest/folkertest
-      - persist_to_workspace:
-          root: .
-          paths:
-            - ./folkertest.tar
-
   publish-docker-image:
-    executor: docker-builder
+    executor: docker-publisher
     parameters:
       image-label:
         type: string
-        default: beta
     steps:
       - attach_workspace:
           at: .
       - setup_remote_docker
       - run:
-          name: Load Docker image
+          name: Load the tested image
           command: docker load -i ./folkertest.tar
+      - run:
+          name: Tag the tested image
+          command: |
+            docker tag folkertest/folkertest:ci folkertest/folkertest:<<pipeline.parameters.image-version>>.<<pipeline.number>>
+            docker tag folkertest/folkertest:ci folkertest/folkertest:<<parameters.image-label>>
       - run:
           name: Login Dockerhub
           command: |
@@ -137,154 +156,64 @@ jobs:
             docker push folkertest/folkertest:<<parameters.image-label>>
 
 workflows:
-  version: 2.1
-
-  development:
-    when:
-      and:
-        - not:
-            equal: [ beta, << pipeline.git.branch >> ]
-        - not:
-            equal: [ main, << pipeline.git.branch >> ]
+  # One workflow for every branch (CI-06). Only publishing depends on the branch.
+  build-test-publish:
     jobs:
       - build
+      - lint
       - unit-tests:
           matrix:
             parameters:
-              python-version: ["3.10"]
-      - lint
-      - run-integration-tests:
-          matrix:
-            parameters:
-              tests:
-                - code
-                - conditional
-                - file
-                - foreach
-                - gmail
-                - graphql
-                - grpc
-                - kafka
-                - rest
-                - parallel
-                - postgres
-                - print
-                - profile
-                - protobuf
-                - pubsub
-                - rabbitmq
-                - save
-                - template
-                - void
-                - wait
-                - zookeeper
-          requires:
-            - build
-            - unit-tests
-            - lint
-      - validate-integration-tests:
-          requires:
-            - run-integration-tests
-  beta:
-    when:
-      equal: [ beta, << pipeline.git.branch >> ]
-    jobs:
-      - build
-      - unit-tests:
-          matrix:
-            parameters:
-              python-version: ["3.10"]
-      - lint
-      - run-integration-tests:
-          matrix:
-            parameters:
-              tests:
-                - code
-                - conditional
-                - file
-                - foreach
-                - gmail
-                - graphql
-                - grpc
-                - kafka
-                - rest
-                - parallel
-                - postgres
-                - print
-                - profile
-                - protobuf
-                - pubsub
-                - rabbitmq
-                - save
-                - template
-                - void
-                - wait
-                - zookeeper
-          requires:
-            - build
-            - unit-tests
-            - lint
-      - validate-integration-tests:
-          requires:
-            - run-integration-tests
+              # Runtime version first; DEP-04 adds the next target version here
+              python-version: [<< pipeline.parameters.python-version >>]
       - build-docker-image:
           requires:
             - build
-            - validate-integration-tests
+      - run-integration-tests:
+          matrix:
+            parameters:
+              tests:
+                - code
+                - conditional
+                - file
+                - foreach
+                - gmail
+                - graphql
+                - grpc
+                - kafka
+                - rest
+                - parallel
+                - postgres
+                - print
+                - profile
+                - protobuf
+                - pubsub
+                - rabbitmq
+                - save
+                - template
+                - void
+                - wait
+                - zookeeper
+          requires:
+            - build-docker-image
+            - unit-tests
+            - lint
+      - validate-integration-tests:
+          requires:
+            - run-integration-tests
       - publish-docker-image:
           name: publish-beta
           image-label: beta
           requires:
-            - build-docker-image
-
-  main:
-    when:
-      equal: [ main, << pipeline.git.branch >> ]
-    jobs:
-      - build
-      - unit-tests:
-          matrix:
-            parameters:
-              python-version: ["3.10"]
-      - lint
-      - run-integration-tests:
-          matrix:
-            parameters:
-              tests:
-                - code
-                - conditional
-                - file
-                - foreach
-                - gmail
-                - graphql
-                - grpc
-                - kafka
-                - rest
-                - parallel
-                - postgres
-                - print
-                - profile
-                - protobuf
-                - pubsub
-                - rabbitmq
-                - save
-                - template
-                - void
-                - wait
-                - zookeeper
-          requires:
-            - build
-            - unit-tests
-            - lint
-      - validate-integration-tests:
-          requires:
-            - run-integration-tests
-      - build-docker-image:
-          requires:
-            - build
             - validate-integration-tests
+          filters:
+            branches:
+              only: beta
       - publish-docker-image:
           name: publish-latest
           image-label: latest
           requires:
-            - build-docker-image
+            - validate-integration-tests
+          filters:
+            branches:
+              only: main
