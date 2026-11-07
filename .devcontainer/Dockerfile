@@ -1,5 +1,5 @@
-# [Choice] Python version: 3, 3.8, 3.7, 3.6
-ARG VARIANT=3
+# Set from .devcontainer/docker-compose.yml; keep in sync with .python-version (CI-12)
+ARG VARIANT=3.10
 FROM mcr.microsoft.com/vscode/devcontainers/python:0-${VARIANT}
 
 ENV PYTHONUNBUFFERED 1
