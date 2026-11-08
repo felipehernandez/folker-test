@@ -42,7 +42,7 @@ Pick tasks by ID ("work on BUG-03"). Each task is meant to be one small PR.
 | CI-11 | Renovate guardrails and grouping | Med | XS | ☐ |
 | CI-12 | Single source of truth for the Python version | Med | S | ☑ |
 | **2 · Testability** |||||
-| TST-01 | Fix pytest configuration (markers, warnings as errors) | Med | XS | ☐ |
+| TST-01 | Fix pytest configuration (markers, warnings as errors) | Med | XS | ☑ |
 | TST-02 | Regression-test policy for bug fixes | High | — | ☐ |
 | TST-03 | Executor tests (sequential/parallel, start methods) | High | S | ☐ |
 | TST-04 | Loader tests (`folker/load/files.py`) | Med | S | ☐ |
@@ -59,7 +59,7 @@ Pick tasks by ID ("work on BUG-03"). Each task is meant to be one small PR.
 | DEP-06 | Align `grpcio` / `grpcio-tools` / `protobuf` | High | S | ☐ |
 | DEP-07 | Gmail: `oauth2client` → `google-auth` | Med | S | ☐ |
 | DEP-08 | `gql` 2.0 → 3.x | Med | S | ☐ |
-| DEP-09 | marshmallow deprecations (prepare for 4.x) | Low | XS | ☐ |
+| DEP-09 | marshmallow deprecations (prepare for 4.x) | Low | XS | ☑ |
 | DEP-10 | Optional extras per module 📐 | Med | S | ☐ |
 | **4 · Bugs** |||||
 | BUG-01 | `collections.Mapping` crash on Python ≥ 3.10 ✅ | High | XS | ☑ |
@@ -210,6 +210,7 @@ Pick tasks by ID ("work on BUG-03"). Each task is meant to be one small PR.
 - **Benefit:** Typos in marks fail. Deprecations surface early.
 - **Depends on:** DEP-01 (or do it in a root `pytest.ini` now).
 - **Lesson:** [Test on the runtime Python version](../lessons/20261105-test-on-runtime-python-version.md)
+- **Done:** `tests/pytest.ini` removed (pytest never loaded it from the repo root, and the marker list mixed tabs and spaces). `[tool.pytest.ini_options]` in `pyproject.toml` registers the same markers, sets `--strict-markers`, and treats `DeprecationWarning` as an error. Two ignores remain, both outside our code: `pkg_resources` (pulled in by `google-cloud-pubsub` 1.7.2; goes away with DEP-05) and `pyparsing` (called by the pinned `httplib2`). The file has no `[project]` table; dependency consolidation stays with DEP-01. Turning the filter on required the two marshmallow fixes tracked as DEP-09, otherwise collection dies at import.
 
 ### TST-02 — Regression-test policy for bug fixes
 - **What / why:** Every BUG-xx gets a test that fails before the fix and passes after. The probe scripts from the analysis are the starting point.
@@ -319,6 +320,7 @@ Pick tasks by ID ("work on BUG-03"). Each task is meant to be one small PR.
 - **Impact:** Low (Renovate will propose 4.x eventually).
 - **Cost:** XS.
 - **Benefit:** Smooth major upgrade.
+- **Done:** `default=False` is now `dump_default=False`. That is the 3.13 rename of `default` (dump-only); `load_default` would have changed loading, and omitted `parallel` already falls through to `Test.__init__`'s `False`. The only other marshmallow 4 warning was `fields.String(strict=False)` on the wait schema, which was unused metadata (the `pre_load` hook already stringifies `time`), so the argument was removed. No `RemovedInMarshmallow4Warning` left in the unit suite.
 
 ### DEP-10 — Optional extras per module 📐
 - **What / why:** Every install pulls Kafka, Postgres, Google, grpc, ZooKeeper and RabbitMQ clients. Offer `folker-test[rest,kafka,gcp,...]` plus `[all]`, and keep `[all]` for the Docker image.

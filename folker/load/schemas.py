@@ -44,7 +44,7 @@ class TestSchema(Schema):
     id = fields.String()
     name = fields.String()
     description = fields.String()
-    parallel = fields.Boolean(default=False)
+    parallel = fields.Boolean(dump_default=False)
 
     foreach = fields.Mapping()
     tags = fields.List(fields.String())
