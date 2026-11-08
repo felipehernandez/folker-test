@@ -1,0 +1,34 @@
+# Pytest config only. Dependencies stay in setup.py / requirements.txt until DEP-01.
+
+[tool.pytest.ini_options]
+addopts = ["--strict-markers"]
+markers = [
+    "cli: tests that validate possible execution configurations",
+    "logger: tests that validate application logging",
+    "action_correctness: tests that validate an action schema",
+    "action_code: code action",
+    "action_file: file action",
+    "action_gcp_pubsub: Google Cloud Pub/Sub action",
+    "action_gmail: Gmail action",
+    "action_graphql: GraphQL action",
+    "action_grpc: gRPC action",
+    "action_kafka: Kafka action",
+    "action_postgres: Postgres action",
+    "action_print: print action",
+    "action_protobuf: Protobuf action",
+    "action_rest: REST action",
+    "action_void: void action",
+    "action_wait: wait action",
+    "action_zookeeper: ZooKeeper action",
+    "action_rabbitmq: RabbitMQ action",
+]
+# Later entries are checked first. Ignore only third-party warnings we cannot
+# fix without a dependency upgrade. pkg_resources warns on import (stacklevel
+# points at google-cloud-pubsub 1.7.2, DEP-05) and on declare_namespace.
+# httplib2 still calls deprecated pyparsing APIs. Warnings from our code stay errors.
+filterwarnings = [
+    "error::DeprecationWarning",
+    "ignore:pkg_resources is deprecated:DeprecationWarning",
+    "ignore:pkg_resources.declare_namespace:DeprecationWarning",
+    "ignore::DeprecationWarning:httplib2",
+]

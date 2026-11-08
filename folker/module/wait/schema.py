@@ -6,7 +6,7 @@ from folker.module.wait.action import WaitStageAction
 class WaitActionSchema(Schema):
     type = fields.String()
 
-    time = fields.String(strict=False)
+    time = fields.String()
 
     @pre_load
     def pre_process_spec(self, in_data, **kwargs):
