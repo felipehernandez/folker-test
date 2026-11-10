@@ -130,6 +130,7 @@ Tasks only partly done (◐) stay in the plan.
 | BUG-03 | `foreach` stops after first failing iteration | High | XS | 2026-11-10 |
 | BUG-04 | VOID template + real action → `action = None` | High | XS | 2026-11-10 |
 | BUG-05 | Stage's own `foreach` lost when using a template | Med | XS | 2026-11-10 |
+| BUG-06 | Validation ignores `wrong_fields` | Med | XS | 2026-11-10 |
 | BUG-07 | Test files in paths with spaces fail to load | Med | XS | 2026-11-10 |
 | BUG-08 | Shared mutable default `foreach={}` in `Test` | Low | XS | 2026-11-10 |
 | BUG-09 | Integer identity comparison in assertions | Low | XS | 2026-11-10 |
@@ -174,6 +175,14 @@ Tasks only partly done (◐) stay in the plan.
 - **Cost:** XS. 1 line.
 - **Benefit:** `foreach` works with templates.
 - **Done:** `Stage.__add__` now assigns the merged dict to `result.foreach` (it wrote `result.params`, which nothing reads), so a stage's own `foreach` survives being merged onto a template stage: template and stage keys are combined and the stage wins on conflicts. Tests in `tests/model/stage/test_stage_enrichment.py` (stage `foreach` kept, template `foreach` kept, merge and override, template not modified); the first and third failed before the fix.
+
+### BUG-06 — Validation ignores `wrong_fields`
+- **Completed:** 2026-11-10
+- **What / why:** `folker/model/validation.py:16`: `len(self.missing_fields) == len(self.missing_fields) == 0` checks `missing_fields` twice, so an invalid Postgres `method` passes validation and fails at runtime.
+- **Impact:** Med. May surface previously hidden errors in user suites, so call it out in the changelog.
+- **Cost:** XS.
+- **Benefit:** Errors at load time instead of mid-run.
+- **Done:** `ValidationReport.__bool__` now checks both `missing_fields` and `wrong_fields`. Correction to the description above: on Python 3.10 an invalid `method` on Postgres or File was *already* rejected at load time, because the action's mandatory-field check also adds `action.method` to `missing_fields`, which masked the defect. The bug was real but latent: a report with only `wrong_fields` counted as valid, so any validator whose only finding is a wrong field passed silently. Because the current actions already failed through `missing_fields`, the fix changes no behaviour for existing suites: all 35 example suites load with 0 errors before and after, so no changelog warning is needed. Tests in `tests/model/test_validation_report.py` (report, `merge_with_prefix`, `generate_error`, and an action whose only problem is a wrong field); four of them failed before the fix.
 
 ### BUG-07 — Test files in paths with spaces fail to load
 - **Completed:** 2026-11-10
