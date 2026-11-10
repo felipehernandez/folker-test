@@ -37,7 +37,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 | CI-13 | Branch rules as code, in sync with the pipeline | Med | S | ☐ |
 | **2 · Testability** |||||
 | TST-02 | Regression-test policy for bug fixes | High | — | ☐ |
-| TST-03 | Executor tests (sequential/parallel, start methods) | High | S | ☐ |
 | TST-04 | Loader tests (`folker/load/files.py`) | Med | S | ☐ |
 | TST-05 | In-process CLI end-to-end tests (no Docker) | High | M | ☐ |
 | TST-06 | Execution tests for untested actions | Med | M | ☐ |
@@ -139,14 +138,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 - **Impact:** High. Bugs stay fixed.
 - **Cost:** Built into each BUG task.
 - **Benefit:** The suite grows where bugs actually happen.
-
-### TST-03 — Executor tests
-- **What / why:** `ParallelExecutor` and `SequentialExecutor` have no tests. BUG-02 shipped because of that. Test both executors, including the parallel one under the `spawn` and `forkserver` start methods (macOS default; Linux default from 3.14).
-- **Impact:** High.
-- **Cost:** S. ~100 lines of tests.
-- **Benefit:** Safe refactoring of execution (IMP-03, IMP-07).
-- **Depends on:** none.
-- **Progress:** `ParallelExecutor` already has tests in `tests/executor/test_parallel_executor.py` (context, profile and failure reporting under `fork`, `spawn` and `forkserver`), added with BUG-02. Still open: `SequentialExecutor` tests and the remaining parallel cases (empty list, result ordering, foreach tests).
 
 ### TST-04 — Loader tests
 - **What / why:** `folker/load/files.py` (globbing, template enrichment, profile loading, error handling) is mostly untested. Cover paths with spaces (BUG-07), broken YAML, missing template ids and `-tf` filtering, using `tmp_path`.
@@ -525,7 +516,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 
 ## Suggested order (waves)
 
-1. **Safety net (≈1–2 days):** TST-03
+1. **Safety net:** done (TST-03, BUG-10)
 1b. **Security advisories (≈½ day, do first):** DEP-11, DEP-21, DEP-13, DEP-14, DEP-12, DEP-15, DEP-22, DEP-16, DEP-17, DEP-20, DEP-19, DEP-18 (DEP-03 and DEP-02 close several of them for free)
 2. **Remaining bugs (≈2 days):** BUG-19, BUG-20, BUG-21, IMP-01, IMP-12
 3. **Pipeline hardening (≈2–3 days):** CI-08, CI-13, TST-04, TST-05

@@ -99,6 +99,7 @@ Tasks only partly done (◐) stay in the plan.
 | ID | Title | Impact | Cost | Completed |
 |---|---|---|---|---|
 | TST-01 | Fix pytest configuration (markers, warnings as errors) | Med | XS | 2026-11-09 |
+| TST-03 | Executor tests (sequential/parallel, start methods) | High | S | 2026-11-10 |
 | TST-07 | Deterministic integration environment (healthchecks) | Med | S | 2026-11-10 |
 | TST-08 | Template/enrichment merge test matrix | Med | S | 2026-11-10 |
 
@@ -111,6 +112,16 @@ Tasks only partly done (◐) stay in the plan.
 - **Depends on:** DEP-01 (or do it in a root `pytest.ini` now).
 - **Lesson:** [Test on the runtime Python version](../lessons/20261105-test-on-runtime-python-version.md)
 - **Done:** `tests/pytest.ini` removed (pytest never loaded it from the repo root, and the marker list mixed tabs and spaces). `[tool.pytest.ini_options]` in `pyproject.toml` registers the same markers, sets `--strict-markers`, and treats `DeprecationWarning` as an error. Two ignores remain, both outside our code: `pkg_resources` (pulled in by `google-cloud-pubsub` 1.7.2; goes away with DEP-05) and `pyparsing` (called by the pinned `httplib2`). The file has no `[project]` table; dependency consolidation stays with DEP-01. Turning the filter on required the two marshmallow fixes tracked as DEP-09, otherwise collection dies at import.
+
+### TST-03 — Executor tests
+- **What / why:** `ParallelExecutor` and `SequentialExecutor` have no tests. BUG-02 shipped because of that. Test both executors, including the parallel one under the `spawn` and `forkserver` start methods (macOS default; Linux default from 3.14).
+- **Impact:** High.
+- **Cost:** S. ~100 lines of tests.
+- **Benefit:** Safe refactoring of execution (IMP-03, IMP-07).
+- **Depends on:** none.
+- **Completed:** 2026-11-10
+- **Done:** `ParallelExecutor` was covered by BUG-02 (context, profile and failure reporting under `fork`, `spawn` and `forkserver`). This adds `tests/executor/test_sequential_executor.py` and extends `tests/executor/test_parallel_executor.py`. Both executors: no tests, results split into passed and failed in the order of the input, a failing or crashing test does not stop the others, `foreach` tests are reported once and fail when any iteration fails. Sequential only: each test gets its own context (variables saved or changed by one never reach the next), the profile and command-line values reach the tests with the command line winning, merged profiles, an unknown profile fails before anything runs, and each test gets its own `SEQUENTIAL` logger. Parallel, under all three start methods: empty list, results follow the input order even when tests finish in another order, more tests than workers. The shared picklable stages live in `tests/executor/stages.py`. Checked by mutation: sharing one context across tests, swapping the profile/command-line precedence, and returning results in completion order are each caught. Left for IMP-07: the pool is closed but never joined, and the worker count is not configurable.
+
 
 ### TST-07 — Deterministic integration environment
 - **Completed:** 2026-11-10

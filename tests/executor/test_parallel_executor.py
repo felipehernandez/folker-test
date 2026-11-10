@@ -7,6 +7,7 @@ from folker.executor import ParallelExecutor
 from folker.model import Profile, Stage
 from folker.model import Test as FolkerTest  # not `Test`: pytest would try to collect it
 from folker.parameters import Configuration
+from tests.executor.stages import FailOnValueStage, FailStage, PassStage, SleepStage
 
 START_METHODS = ['fork', 'spawn', 'forkserver']
 
@@ -78,3 +79,56 @@ class TestParallelExecutorProfile:
         success, failures = ParallelExecutor().execute(Configuration(), _tests())
 
         assert (success, failures) == ([], ['test_0', 'test_1'])
+
+
+def a_test(name, *stages, **fields):
+    return FolkerTest(name=name, stages=list(stages) or [PassStage(name='stage')], **fields)
+
+
+@pytest.mark.parametrize('start_method', START_METHODS, indirect=True)
+class TestParallelExecutorResults:
+    def test_no_tests(self, start_method):
+        assert ParallelExecutor().execute(Configuration(), []) == ([], [])
+
+    def test_results_follow_the_order_of_the_tests_not_the_order_they_finish(self, start_method):
+        # The first test finishes last, so completion order and input order differ
+        tests = [a_test('slow', SleepStage(name='s', seconds=1)),
+                 a_test('fast_1'),
+                 a_test('slow_failing', SleepStage(name='s', seconds=0.5), FailStage(name='f')),
+                 a_test('fast_failing', FailStage(name='f')),
+                 a_test('fast_2')]
+
+        success, failures = ParallelExecutor().execute(Configuration(), tests)
+
+        assert success == ['slow', 'fast_1', 'fast_2']
+        assert failures == ['slow_failing', 'fast_failing']
+
+    def test_a_failing_test_does_not_affect_the_others(self, start_method):
+        tests = [a_test('failing', FailStage(name='f'))] + [a_test(f'ok_{i}') for i in range(3)]
+
+        assert ParallelExecutor().execute(Configuration(), tests) == (['ok_0', 'ok_1', 'ok_2'],
+                                                                      ['failing'])
+
+    def test_more_tests_than_workers(self, start_method, monkeypatch):
+        monkeypatch.setattr('folker.executor.parallel_executor.cpu_count', lambda: 2)
+        tests = [a_test(f'test_{i}') for i in range(8)]
+
+        success, failures = ParallelExecutor().execute(Configuration(), tests)
+
+        assert success == [f'test_{i}' for i in range(8)]
+        assert failures == []
+
+
+@pytest.mark.parametrize('start_method', START_METHODS, indirect=True)
+class TestParallelExecutorForeach:
+    def test_a_test_with_foreach_is_reported_once_when_every_iteration_passes(self, start_method):
+        test = a_test('loop', FailOnValueStage(name='s', variable='item', value='never'),
+                      foreach={'item': ['a', 'b', 'c']})
+
+        assert ParallelExecutor().execute(Configuration(), [test]) == (['loop'], [])
+
+    def test_a_test_with_foreach_fails_when_one_iteration_fails(self, start_method):
+        test = a_test('loop', FailOnValueStage(name='s', variable='item', value='b'),
+                      foreach={'item': ['a', 'b', 'c']})
+
+        assert ParallelExecutor().execute(Configuration(), [test]) == ([], ['loop'])
