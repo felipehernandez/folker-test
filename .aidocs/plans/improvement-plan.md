@@ -66,7 +66,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 | DEP-21 | Vuln: certifi: GLOBALTRUST root certificate removed | Low | XS | ☐ |
 | DEP-22 | Vuln: pyOpenSSL: TLS connection bypass through an unhandled SNI callback exception | Low | XS | ☐ |
 | **4 · Bugs** |||||
-| BUG-10 | Non-raw regex string (warning in 3.12+) | Low | XS | ☐ |
 | BUG-11 | Multiple profiles: random one picked, rest ignored | Med | XS | ☐ |
 | BUG-12 | Proto generation failures reported as success | Med | XS | ☐ |
 | BUG-18 | `Configuration()` without `test_files` crashes the loader ✅ | Low | XS | ☐ |
@@ -216,7 +215,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 - **Impact:** High. Security patches, plus 10–25% faster execution.
 - **Cost:** S.
 - **Benefit:** Supported runtime.
-- **Depends on:** BUG-01, BUG-10, CI-01, DEP-06.
+- **Depends on:** BUG-01, CI-01, DEP-06.
 - **Note:** the `unit-tests-<python>` check name changes with the version. Update the required checks in the same change (CI-13), or merges block on a check that never reports.
 
 ### DEP-05 — `google-cloud-pubsub` 1.7.2 → 2.x 📐
@@ -344,12 +343,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 ---
 
 ## 4 · Bugs
-
-### BUG-10 — Non-raw regex string
-- **What / why:** `folker/model/context/context.py:12`: `'\${...}'` raises a `SyntaxWarning` on 3.12+ and will eventually be an error.
-- **Impact:** Low.
-- **Cost:** XS.
-- **Benefit:** Clean on modern Python (prerequisite for DEP-04).
 
 ### BUG-11 — Multiple profiles: random one picked, rest ignored
 - **What / why:** `config.profiles` is a `set`, and both executors use `list(config.profiles)[0]`. With `-p a -p b` the chosen profile is arbitrary and the others are ignored without a warning. Short-term fix: error out or warn when more than one is given, and fail on an unknown profile name (it currently falls back to DEFAULT silently). Merging is FEAT-05.
@@ -553,7 +546,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 
 ## Suggested order (waves)
 
-1. **Safety net (≈1–2 days):** TST-03, BUG-10
+1. **Safety net (≈1–2 days):** TST-03
 1b. **Security advisories (≈½ day, do first):** DEP-11, DEP-21, DEP-13, DEP-14, DEP-12, DEP-15, DEP-22, DEP-16, DEP-17, DEP-20, DEP-19, DEP-18 (DEP-03 and DEP-02 close several of them for free)
 2. **Remaining bugs (≈2 days):** BUG-11, BUG-12, BUG-18, IMP-01, IMP-12
 3. **Pipeline hardening (≈2–3 days):** CI-07, CI-08, CI-13, TST-04, TST-05

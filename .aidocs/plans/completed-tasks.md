@@ -134,6 +134,7 @@ Tasks only partly done (◐) stay in the plan.
 | BUG-07 | Test files in paths with spaces fail to load | Med | XS | 2026-11-10 |
 | BUG-08 | Shared mutable default `foreach={}` in `Test` | Low | XS | 2026-11-10 |
 | BUG-09 | Integer identity comparison in assertions | Low | XS | 2026-11-10 |
+| BUG-10 | Non-raw regex string (warning in 3.12+) | Low | XS | 2026-11-10 |
 | BUG-13 | Secrets leaked in REST debug logs | Med | S | 2026-11-10 |
 | BUG-14 | Network calls without timeouts can hang forever | High | S | 2026-11-10 |
 | BUG-15 | Failing `if:` condition silently skips the stage | Med | XS | 2026-11-10 |
@@ -211,6 +212,14 @@ Tasks only partly done (◐) stay in the plan.
 - **Cost:** XS.
 - **Benefit:** Correct for any count. Removes a `SyntaxWarning`.
 - **Done:** both counts are now compared with `!=`, in `StageAssertions._wrap_up_test` (the one the task names) and in `TestLogger.assert_test_result` (`folker/logger/test_logger.py`, same pattern, not listed in the task). Beyond CPython's small-int cache (-5..256), a stage with more than 256 passing assertions raised a failure with an empty failure list, and the logger reported a passing run as failed. Tests: 300 passing assertions no longer raise, one failure among 300 is still the only reported failure, and the logger prints a failure line only when the counts differ (the logger test builds its ints at runtime, since two equal literals in one function are the same object). The task's remark about removing a `SyntaxWarning` was not verified: no such warning was seen on Python 3.10.
+
+### BUG-10 — Non-raw regex string
+- **What / why:** `folker/model/context/context.py:12`: `'\${...}'` raises a `SyntaxWarning` on 3.12+ and will eventually be an error.
+- **Impact:** Low.
+- **Cost:** XS.
+- **Benefit:** Clean on modern Python (prerequisite for DEP-04).
+- **Completed:** 2026-11-10
+- **Done:** already fixed when picked up: `contains_variable_reference` uses `r'\${([^{}]+)}'` (raw string, since `8620ad8`), and compiling every `.py` file under `folker/`, `tests/` and `example/` on Python 3.12 with warnings as errors reports nothing. What was missing was a guard, so `tests/test_source_warnings.py` compiles each source file with warnings as errors (an invalid escape is a `DeprecationWarning` on 3.10/3.11 and a `SyntaxWarning` on 3.12+, and pytest misses it whenever a cached `.pyc` exists) and checks that it detects a bad escape. It fails on the pre-fix `context.py` on 3.10 and 3.12 and passes now. The guard has no third-party imports, so it also runs on 3.12 with only pytest (`--noconftest`), which is useful for DEP-04 while `grpcio-tools==1.48.1` still won't install there (DEP-06).
 
 ### BUG-13 — Secrets leaked in REST debug logs
 - **What / why:** `RestStageAction._log_debug` dumps headers, auth and body after variable resolution, so secrets referenced via `${...}` print in clear text with `--debug`. Apply the same obfuscation the test logger uses for secrets.
