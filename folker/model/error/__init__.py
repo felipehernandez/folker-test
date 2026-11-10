@@ -1,6 +1,7 @@
 from .assertions import TestFailException, \
     MalformedAssertionException, \
-    UnresolvableAssertionException
+    UnresolvableAssertionException, \
+    UnresolvableConditionException
 from .error import SourceException
 from .folker import TestSuiteNumberExecutionsException, TestSuiteResultException
 from .load import FileException, \

@@ -2,6 +2,7 @@ from copy import deepcopy
 
 from folker.logger import TestLogger
 from folker.model.context import Context
+from folker.model.error import UnresolvableConditionException
 from folker.model.error.error import SourceException
 from folker.model.stage.assertions import StageAssertions
 from folker.model.stage.log import StageLog
@@ -87,7 +88,15 @@ class Stage(Validatable):
         return bool(self.validation_report)
 
     def execute(self, logger: TestLogger, context: Context) -> Context:
-        if self.skip_stage_execution(context):
+        try:
+            skip = self.skip_stage_execution(context)
+        except SourceException as e:
+            if not e.details:
+                e.details = {}
+            e.details['stage'] = self
+            raise e
+
+        if skip:
             logger.stage_skip(context.replace_variables(self.name))
             return context
 
@@ -106,8 +115,9 @@ class Stage(Validatable):
         updated_assertion, variables = context.map_variables(self.condition)
         try:
             return not eval(updated_assertion, {'variables': variables})
-        except Exception:
-            return True
+        except Exception as e:
+            raise UnresolvableConditionException(condition=self.condition,
+                                                 error=f'{type(e).__name__}: {e}') from e
 
     def _execute(self, logger: TestLogger, context: Context):
         name = context.replace_variables(self.name)

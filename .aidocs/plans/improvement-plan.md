@@ -59,7 +59,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 | BUG-12 | Proto generation failures reported as success | Med | XS | ☐ |
 | BUG-13 | Secrets leaked in REST debug logs | Med | S | ☐ |
 | BUG-14 | Network calls without timeouts can hang forever | High | S | ☐ |
-| BUG-15 | Failing `if:` condition silently skips the stage | Med | XS | ☐ |
 | BUG-16 | REST debug logging can turn a request into an error 🔍 | Low | XS | ☐ |
 | BUG-18 | `Configuration()` without `test_files` crashes the loader ✅ | Low | XS | ☐ |
 | **5 · Improvements** |||||
@@ -280,12 +279,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 - **Benefit:** Fails fast with a clear error.
 - **Related:** FEAT-04.
 
-### BUG-15 — Failing `if:` condition silently skips the stage
-- **What / why:** `Stage.skip_stage_execution` catches every `eval` exception and returns "skip". A typo or type error in a condition looks like "condition false". It should fail the test with the condition and the error.
-- **Impact:** Med. Behaviour change, so note it in the changelog.
-- **Cost:** XS.
-- **Benefit:** Condition mistakes become visible.
-
 ### BUG-16 — REST debug logging can turn a request into an error 🔍
 - **What / why:** `_log_debug` calls `json.dumps(parameters)` inside the request `try`. Non-JSON-serialisable values (for example file handles in `data`) would raise before the request is sent and be reported as an action error. Verify, then serialise with `default=str`.
 - **Impact:** Low.
@@ -483,7 +476,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 ## Suggested order (waves)
 
 1. **Safety net (≈1–2 days):** TST-03, BUG-10
-2. **Remaining bugs (≈2 days):** BUG-11, BUG-12, BUG-18, BUG-13, BUG-14, BUG-15, BUG-16, IMP-01, IMP-12
+2. **Remaining bugs (≈2 days):** BUG-11, BUG-12, BUG-18, BUG-13, BUG-14, BUG-16, IMP-01, IMP-12
 3. **Pipeline hardening (≈2–3 days):** CI-07, CI-08, CI-13, TST-04, TST-05
 4. **Dependency overhaul (≈1 week, ADRs first):** DEP-02, DEP-03, DEP-01, DEP-05, DEP-06, DEP-04, DEP-07, DEP-08, CI-11
 5. **Structural (incremental):** IMP-07, IMP-10, IMP-03, IMP-04, DEP-10, TST-08, IMP-05, IMP-02, IMP-06, IMP-09, IMP-11

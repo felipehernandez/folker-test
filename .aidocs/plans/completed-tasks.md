@@ -134,6 +134,7 @@ Tasks only partly done (◐) stay in the plan.
 | BUG-07 | Test files in paths with spaces fail to load | Med | XS | 2026-11-10 |
 | BUG-08 | Shared mutable default `foreach={}` in `Test` | Low | XS | 2026-11-10 |
 | BUG-09 | Integer identity comparison in assertions | Low | XS | 2026-11-10 |
+| BUG-15 | Failing `if:` condition silently skips the stage | Med | XS | 2026-11-10 |
 | BUG-17 | Working-directory modules not importable from an installed CLI ✅ | High | XS | 2026-11-07 |
 
 ### BUG-01 — `collections.Mapping` crash on Python ≥ 3.10 ✅
@@ -207,6 +208,14 @@ Tasks only partly done (◐) stay in the plan.
 - **Cost:** XS.
 - **Benefit:** Correct for any count. Removes a `SyntaxWarning`.
 - **Done:** both counts are now compared with `!=`, in `StageAssertions._wrap_up_test` (the one the task names) and in `TestLogger.assert_test_result` (`folker/logger/test_logger.py`, same pattern, not listed in the task). Beyond CPython's small-int cache (-5..256), a stage with more than 256 passing assertions raised a failure with an empty failure list, and the logger reported a passing run as failed. Tests: 300 passing assertions no longer raise, one failure among 300 is still the only reported failure, and the logger prints a failure line only when the counts differ (the logger test builds its ints at runtime, since two equal literals in one function are the same object). The task's remark about removing a `SyntaxWarning` was not verified: no such warning was seen on Python 3.10.
+
+### BUG-15 — Failing `if:` condition silently skips the stage
+- **Completed:** 2026-11-10
+- **What / why:** `Stage.skip_stage_execution` catches every `eval` exception and returns "skip". A typo or type error in a condition looks like "condition false". It should fail the test with the condition and the error.
+- **Impact:** Med. Behaviour change, so note it in the changelog.
+- **Cost:** XS.
+- **Benefit:** Condition mistakes become visible.
+- **Done:** a condition that cannot be evaluated (undefined name, syntax error, division by zero, non-string condition) now raises the new `UnresolvableConditionException` with the `condition`, the underlying `error` and the `stage` in its details, so the test fails instead of the stage being skipped. A condition that evaluates to false still skips. `Stage.execute` attaches the stage to any `SourceException` raised while resolving the condition, including `VariableReferenceResolutionException`, which already failed the test before. The existing `test_stage_conditional_execution_error` asserted the old skip behaviour; it is now parametrised over four bad conditions and expects the exception (failed before the fix). The only example using `if:` (`example/test/dummy/test_dummy_conditional.yaml`) is a valid condition. Changelog (CI-10): conditions that previously errored and were skipped will now fail the run.
 
 ### BUG-17 — Working-directory modules not importable from an installed CLI ✅
 - **Completed:** 2026-11-07
