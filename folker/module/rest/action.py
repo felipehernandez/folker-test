@@ -172,4 +172,6 @@ class RestStageAction(StageAction):
         return (self.host + "/" + self.uri) if self.uri else self.host
 
     def _log_debug(self, logger: TestLogger, **parameters):
-        logger.action_debug(json.dumps(parameters))
+        # Logging must never change what is sent: values YAML can produce (dates, bytes)
+        # or that a template carries are not JSON-serialisable, so fall back to `str`
+        logger.action_debug(json.dumps(parameters, default=str))

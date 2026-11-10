@@ -53,11 +53,22 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 | DEP-07 | Gmail: `oauth2client` → `google-auth` | Med | S | ☐ |
 | DEP-08 | `gql` 2.0 → 3.x | Med | S | ☐ |
 | DEP-10 | Optional extras per module 📐 | Med | S | ☐ |
+| DEP-11 | Vuln: certifi: compromised emSign root CAs | High | XS | ☐ |
+| DEP-12 | Vuln: httplib2: decompression bomb DoS | High | S | ☐ |
+| DEP-13 | Vuln: kafka-python: unbounded SCRAM iteration count DoS | High | XS | ☐ |
+| DEP-14 | Vuln: kafka-python: unvalidated protocol frame length DoS | High | XS | ☐ |
+| DEP-15 | Vuln: pyOpenSSL: DTLS cookie callback buffer overflow | High | XS | ☐ |
+| DEP-16 | Vuln: idna: `idna.encode()` bypasses the CVE-2024-3651 fix | Med | XS | ☐ |
+| DEP-17 | Vuln: marshmallow: DoS in `Schema.load(many=...)` | Med | XS | ☐ |
+| DEP-18 | Vuln: pylint: code execution through the pickled stats cache | Med | S | ☐ |
+| DEP-19 | Vuln: pytest: insecure `tmpdir` handling | Med | S | ☐ |
+| DEP-20 | Vuln: requests: insecure temp file reuse in `extract_zipped_paths()` | Med | XS | ☐ |
+| DEP-21 | Vuln: certifi: GLOBALTRUST root certificate removed | Low | XS | ☐ |
+| DEP-22 | Vuln: pyOpenSSL: TLS connection bypass through an unhandled SNI callback exception | Low | XS | ☐ |
 | **4 · Bugs** |||||
 | BUG-10 | Non-raw regex string (warning in 3.12+) | Low | XS | ☐ |
 | BUG-11 | Multiple profiles: random one picked, rest ignored | Med | XS | ☐ |
 | BUG-12 | Proto generation failures reported as success | Med | XS | ☐ |
-| BUG-16 | REST debug logging can turn a request into an error 🔍 | Low | XS | ☐ |
 | BUG-18 | `Configuration()` without `test_files` crashes the loader ✅ | Low | XS | ☐ |
 | **5 · Improvements** |||||
 | IMP-01 | Strict loading: broken YAML fails the run | High | S | ☐ |
@@ -190,6 +201,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 - **Impact:** Med. Smaller image, smaller attack surface.
 - **Cost:** XS.
 - **Benefit:** Leaner runtime.
+- **Security:** DEP-18 (pylint advisory) builds on this.
 - **Depends on:** can be done now, or as part of DEP-01.
 
 ### DEP-03 — Remove unused / stale transitive pins
@@ -197,6 +209,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 - **Impact:** Med. Security (CA bundle, OpenSSL).
 - **Cost:** XS. Verify with `grep` and a test run, then delete.
 - **Benefit:** Less to maintain. Fewer resolver conflicts.
+- **Security:** also resolves the `certifi`, `idna` and `pyOpenSSL` advisories (DEP-11, DEP-15, DEP-16, DEP-21, DEP-22). Whichever lands first, confirm the Dependabot alerts close.
 
 ### DEP-04 — Python 3.10 → 3.12/3.13
 - **What / why:** Python 3.10 reached end of life in October 2026. Update the Dockerfiles, devcontainer and CI.
@@ -242,6 +255,92 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 - **Depends on:** DEP-01, IMP-04.
 - **ADR:** yes (distribution contract).
 
+### DEP-11 — Vuln: certifi: compromised emSign root CAs
+- **What / why:** Dependabot (critical, [GHSA-6q48-6c7w-9gw2](https://github.com/advisories/GHSA-6q48-6c7w-9gw2)), alerts #30, #31 on `beta` (one per manifest: `requirements.txt` and `setup.py`). Pin: `certifi==2023.11.17` → `>= 2026.10.18`. The bundle trusts emSign root CAs whose intermediate CA keys are compromised, so a certificate issued with them would be accepted by every `requests`, `google-*` and `gql` call. Folker never imports `certifi`; it arrives through `requests` and the Google clients, and the pin freezes it.
+- **Impact:** High.
+- **Cost:** XS. Delete the pin (preferred, see DEP-03) or raise it to `2026.10.18` or later in `requirements.txt` and `setup.py`. Run the suite and one REST/GraphQL example against HTTPS.
+- **Benefit:** The alerts close.
+- **Supersedes:** DEP-21 is closed by the same bump.
+- **Related:** DEP-03.
+
+### DEP-12 — Vuln: httplib2: decompression bomb DoS
+- **What / why:** Dependabot (high, [GHSA-j5g9-f88f-gfj3](https://github.com/advisories/GHSA-j5g9-f88f-gfj3), CVE-2026-59939), alerts #22, #23 on `beta` (one per manifest: `requirements.txt` and `setup.py`). Pin: `httplib2==0.22.0` → `>= 0.32.0`. A gzip/deflate response is decompressed without a size limit, so a hostile server can exhaust memory. Only the Gmail module uses `httplib2` directly (`folker/module/gmail/action.py`), together with `oauth2client` and `google-api-python-client`.
+- **Impact:** High.
+- **Cost:** S. Bump the pin in both files. `pyproject.toml` ignores a `DeprecationWarning` from `httplib2` (pyparsing); re-check it and drop the ignore if the new release no longer triggers it. Check `google-api-python-client==2.179.0` and `oauth2client==4.1.3` still resolve.
+- **Benefit:** The alerts close.
+- **Related:** DEP-07 (drops the `httplib2` coupling and would remove the need for the pin).
+
+### DEP-13 — Vuln: kafka-python: unbounded SCRAM iteration count DoS
+- **What / why:** Dependabot (high, [GHSA-2jcm-hq8r-84wx](https://github.com/advisories/GHSA-2jcm-hq8r-84wx), CVE-2026-10143), alerts #24, #25 on `beta` (one per manifest: `requirements.txt` and `setup.py`). Pin: `kafka-python==2.2.15` → `>= 2.3.2`. A broker (or a man in the middle) can send an enormous SCRAM iteration count and make the client spend its CPU on it. The Kafka module connects to whatever `host` a test names, so a hostile or compromised broker is the exposure.
+- **Impact:** High.
+- **Cost:** XS. Bump the pin in both files together with DEP-14 (same fix version). Run the Kafka unit tests and the Kafka integration job.
+- **Benefit:** The alerts close.
+- **Related:** DEP-14.
+
+### DEP-14 — Vuln: kafka-python: unvalidated protocol frame length DoS
+- **What / why:** Dependabot (high, [GHSA-m3px-q5gj-j9x7](https://github.com/advisories/GHSA-m3px-q5gj-j9x7), CVE-2026-10142), alerts #26, #27 on `beta` (one per manifest: `requirements.txt` and `setup.py`). Pin: `kafka-python==2.2.15` → `>= 2.3.2`. The client trusts the length announced in a protocol frame, so a hostile broker can make it allocate or wait for an arbitrary amount of data.
+- **Impact:** High.
+- **Cost:** XS. Same bump as DEP-13; do both in one PR and confirm both alerts close.
+- **Benefit:** The alerts close.
+- **Related:** DEP-13.
+
+### DEP-15 — Vuln: pyOpenSSL: DTLS cookie callback buffer overflow
+- **What / why:** Dependabot (high, [GHSA-5pwr-322w-8jr4](https://github.com/advisories/GHSA-5pwr-322w-8jr4), CVE-2026-27459), alerts #15, #16 on `beta` (one per manifest: `requirements.txt` and `setup.py`). Pin: `pyOpenSSL==23.3.0` → `>= 26.0.0`. Only affects code that sets a DTLS cookie callback. Folker does not import `OpenSSL` and does not use DTLS, so it is not reachable today, but the pin keeps the alert open and holds `cryptography` back.
+- **Impact:** High.
+- **Cost:** XS. Delete the pin (preferred, see DEP-03) or raise it to `26.0.0` or later. Check which package, if any, still needs it with `pipdeptree -r -p pyOpenSSL`.
+- **Benefit:** The alerts close.
+- **Related:** DEP-03, DEP-22 (same fix version).
+
+### DEP-16 — Vuln: idna: `idna.encode()` bypasses the CVE-2024-3651 fix
+- **What / why:** Dependabot (moderate, [GHSA-65pc-fj4g-8rjx](https://github.com/advisories/GHSA-65pc-fj4g-8rjx), CVE-2026-45409), alerts #20, #21 on `beta` (one per manifest: `requirements.txt` and `setup.py`). Pin: `idna==3.10` → `>= 3.15`. Specially crafted input makes `idna.encode()` slow again. `requests` encodes the host of every request, and REST and GraphQL hosts come from test definitions, so the exposure is a hostile test file or a variable fed from a response.
+- **Impact:** Med.
+- **Cost:** XS. Delete the pin (preferred, see DEP-03) or raise it to `3.15` or later.
+- **Benefit:** The alerts close.
+- **Related:** DEP-03.
+
+### DEP-17 — Vuln: marshmallow: DoS in `Schema.load(many=...)`
+- **What / why:** Dependabot (moderate, [GHSA-428g-f7cq-pgp5](https://github.com/advisories/GHSA-428g-f7cq-pgp5), CVE-2025-68480), alerts #11, #12 on `beta` (one per manifest: `requirements.txt` and `setup.py`). Pin: `marshmallow==3.22.0` → `>= 3.26.2` (stay on 3.x). Loading a very large collection with `many=True` can exhaust memory or CPU. Folker loads test files with marshmallow (`folker/load/schemas.py` and every module schema), so a hostile YAML file is the exposure.
+- **Impact:** Med.
+- **Cost:** XS. Bump within 3.x in both files. DEP-09 already removed the 4.x deprecations, so the suite should stay green; confirm `marshmallow-oneofschema==3.1.1` still resolves.
+- **Benefit:** The alerts close.
+- **Related:** DEP-09 (done).
+
+### DEP-18 — Vuln: pylint: code execution through the pickled stats cache
+- **What / why:** Dependabot (moderate, [GHSA-22qq-2fwx-7p67](https://github.com/advisories/GHSA-22qq-2fwx-7p67), CVE-2026-114608), alerts #32, #33 on `beta` (one per manifest: `requirements.txt` and `setup.py`). Pin: `pylint==3.2.7` → `>= 4.0.9`. Pylint unpickles its stats cache from `PYLINT_HOME`, so a poisoned cache runs code on a developer or CI machine. Pylint is a development tool, yet `setup.py` lists it in `install_requires`, so it also ships to users and into the image. It is a major bump (3.x → 4.x), so new checks may fire.
+- **Impact:** Med.
+- **Cost:** S. First move it out of the runtime dependencies (DEP-02), then pin `>= 4.0.9` in the lint requirements (`requirements-lint.txt`) and fix or disable the new messages.
+- **Benefit:** The alerts close.
+- **Depends on:** DEP-02 recommended first.
+- **Related:** DEP-01.
+
+### DEP-19 — Vuln: pytest: insecure `tmpdir` handling
+- **What / why:** Dependabot (moderate, [GHSA-6w46-j5rx-g56g](https://github.com/advisories/GHSA-6w46-j5rx-g56g), CVE-2025-71176), alert #19 on `beta` (`requirements.txt` only; `setup.py` does not list pytest). Pin: `pytest==7.4.4` → `>= 9.0.3`. Predictable temporary directories allow another local user to interfere with a test run. Only `requirements.txt` has it (it is missing from `setup.py`). It is two major versions ahead, so check `pytest-mock`, `pytest-cov` and `pytest-html` support it and that the `DeprecationWarning`-as-error filter in `pyproject.toml` does not trip on new pytest warnings.
+- **Impact:** Med.
+- **Cost:** S. Raise the pin, run the suite on the runtime Python (see the lesson on testing on the runtime version) and fix what breaks. Move it to a dev-only group when DEP-01/DEP-02 land.
+- **Benefit:** The alerts close.
+- **Related:** DEP-02, DEP-01.
+
+### DEP-20 — Vuln: requests: insecure temp file reuse in `extract_zipped_paths()`
+- **What / why:** Dependabot (moderate, [GHSA-gc5v-m9x4-r6x2](https://github.com/advisories/GHSA-gc5v-m9x4-r6x2), CVE-2026-25645), alerts #17, #18 on `beta` (one per manifest: `requirements.txt` and `setup.py`). Pin: `requests==2.32.4` → `>= 2.33.0`. A helper that extracts files from a zipped path reuses a predictable temp file. Folker does not call it, but `requests` is used by the REST module and (through `gql`) the GraphQL module, and the pin keeps the alert open.
+- **Impact:** Med.
+- **Cost:** XS. Bump in both files and re-run `tests/module/rest`, `tests/module/test_timeouts.py` and one REST example: the timeout work (BUG-14) relies on the `timeout=` argument.
+- **Benefit:** The alerts close.
+- **Related:** BUG-14 (done).
+
+### DEP-21 — Vuln: certifi: GLOBALTRUST root certificate removed
+- **What / why:** Dependabot (low, [GHSA-248v-346w-9cwc](https://github.com/advisories/GHSA-248v-346w-9cwc), CVE-2024-39689), alerts #9, #10 on `beta` (one per manifest: `requirements.txt` and `setup.py`). Pin: `certifi==2023.11.17` → `>= 2024.7.4`. The old bundle still trusts the GLOBALTRUST root, which Mozilla removed. Any bump that fixes DEP-11 (`>= 2026.10.18`) also fixes this, so there is nothing to do beyond confirming the alerts close.
+- **Impact:** Low.
+- **Cost:** XS. Do it together with DEP-11; close this task when alerts #9 and #10 disappear.
+- **Benefit:** The alerts close.
+- **Depends on:** DEP-11.
+
+### DEP-22 — Vuln: pyOpenSSL: TLS connection bypass through an unhandled SNI callback exception
+- **What / why:** Dependabot (low, [GHSA-vp96-hxj8-p424](https://github.com/advisories/GHSA-vp96-hxj8-p424), CVE-2026-27448), alerts #13, #14 on `beta` (one per manifest: `requirements.txt` and `setup.py`). Pin: `pyOpenSSL==23.3.0` → `>= 26.0.0`. Only affects servers that set `set_tlsext_servername_callback`. Folker is a client and does not import `OpenSSL`, so it is not reachable today.
+- **Impact:** Low.
+- **Cost:** XS. Same change as DEP-15; confirm alerts #13 and #14 close.
+- **Benefit:** The alerts close.
+- **Depends on:** DEP-15.
+
 ---
 
 ## 4 · Bugs
@@ -263,12 +362,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 - **Impact:** Med. Confusing downstream import errors.
 - **Cost:** XS.
 - **Benefit:** Failures reported where they happen.
-
-### BUG-16 — REST debug logging can turn a request into an error 🔍
-- **What / why:** `_log_debug` calls `json.dumps(parameters)` inside the request `try`. Non-JSON-serialisable values (for example file handles in `data`) would raise before the request is sent and be reported as an action error. Verify, then serialise with `default=str`.
-- **Impact:** Low.
-- **Cost:** XS.
-- **Benefit:** Debug mode never changes behaviour.
 
 ### BUG-18 — `Configuration()` without `test_files` crashes the loader ✅
 - **What / why:** `Configuration.test_files` defaults to `None`, and `_should_load_file` calls `len(selected_test_files)` (`folker/load/files.py`), so loading with a hand-built `Configuration()` raises `TypeError: object of type 'NoneType' has no len()`. The CLI always passes a list, so it only affects code (and tests) that build a `Configuration` directly. Found while writing the BUG-07 tests, which had to pass `test_files=[]`.
@@ -461,7 +554,8 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 ## Suggested order (waves)
 
 1. **Safety net (≈1–2 days):** TST-03, BUG-10
-2. **Remaining bugs (≈2 days):** BUG-11, BUG-12, BUG-18, BUG-16, IMP-01, IMP-12
+1b. **Security advisories (≈½ day, do first):** DEP-11, DEP-21, DEP-13, DEP-14, DEP-12, DEP-15, DEP-22, DEP-16, DEP-17, DEP-20, DEP-19, DEP-18 (DEP-03 and DEP-02 close several of them for free)
+2. **Remaining bugs (≈2 days):** BUG-11, BUG-12, BUG-18, IMP-01, IMP-12
 3. **Pipeline hardening (≈2–3 days):** CI-07, CI-08, CI-13, TST-04, TST-05
 4. **Dependency overhaul (≈1 week, ADRs first):** DEP-02, DEP-03, DEP-01, DEP-05, DEP-06, DEP-04, DEP-07, DEP-08, CI-11
 5. **Structural (incremental):** IMP-07, IMP-10, IMP-03, IMP-04, DEP-10, TST-08, IMP-05, IMP-02, IMP-06, IMP-09, IMP-11

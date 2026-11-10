@@ -137,6 +137,7 @@ Tasks only partly done (◐) stay in the plan.
 | BUG-13 | Secrets leaked in REST debug logs | Med | S | 2026-11-10 |
 | BUG-14 | Network calls without timeouts can hang forever | High | S | 2026-11-10 |
 | BUG-15 | Failing `if:` condition silently skips the stage | Med | XS | 2026-11-10 |
+| BUG-16 | REST debug logging can turn a request into an error | Low | XS | 2026-11-10 |
 | BUG-17 | Working-directory modules not importable from an installed CLI ✅ | High | XS | 2026-11-07 |
 
 ### BUG-01 — `collections.Mapping` crash on Python ≥ 3.10 ✅
@@ -244,6 +245,14 @@ Tasks only partly done (◐) stay in the plan.
 - **Cost:** XS.
 - **Benefit:** Condition mistakes become visible.
 - **Done:** a condition that cannot be evaluated (undefined name, syntax error, division by zero, non-string condition) now raises the new `UnresolvableConditionException` with the `condition`, the underlying `error` and the `stage` in its details, so the test fails instead of the stage being skipped. A condition that evaluates to false still skips. `Stage.execute` attaches the stage to any `SourceException` raised while resolving the condition, including `VariableReferenceResolutionException`, which already failed the test before. The existing `test_stage_conditional_execution_error` asserted the old skip behaviour; it is now parametrised over four bad conditions and expects the exception (failed before the fix). The only example using `if:` (`example/test/dummy/test_dummy_conditional.yaml`) is a valid condition. Changelog (CI-10): conditions that previously errored and were skipped will now fail the run.
+
+### BUG-16 — REST debug logging can turn a request into an error
+- **What / why:** `_log_debug` calls `json.dumps(parameters)` inside the request `try`. Non-JSON-serialisable values (for example file handles in `data`) would raise before the request is sent and be reported as an action error. Verify, then serialise with `default=str`.
+- **Impact:** Low.
+- **Cost:** XS.
+- **Benefit:** Debug mode never changes behaviour.
+- **Completed:** 2026-11-10
+- **Done:** verified, and worse than described: `_log_debug` serialises before `action_debug` checks the debug flag, so a non-serialisable value in the request broke the action even without `--debug`. `data` is a free-form dict, so YAML values such as a date (`2026-11-10`) or `!!binary` bytes reach it. The action then reported `Object of type ... is not JSON serializable` and never sent the request. `_log_debug` now uses `json.dumps(parameters, default=str)`. Tests in `tests/module/rest/test_rest_action_debug_logging.py` (date, bytes and an arbitrary object, with debug on and off; the request is sent with the original values and the value is still logged); all seven failed before the fix. Not changed: the identical `_log_debug` in RabbitMQ and Pub/Sub only receives strings today, and `assertion_fail` also `json.dumps` its variables.
 
 ### BUG-17 — Working-directory modules not importable from an installed CLI ✅
 - **Completed:** 2026-11-07
