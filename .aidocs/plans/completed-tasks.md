@@ -101,6 +101,7 @@ Tasks only partly done (◐) stay in the plan.
 | TST-01 | Fix pytest configuration (markers, warnings as errors) | Med | XS | 2026-11-09 |
 | TST-03 | Executor tests (sequential/parallel, start methods) | High | S | 2026-11-10 |
 | TST-04 | Loader tests | Med | S | 2026-11-10 |
+| TST-05 | In-process CLI end-to-end tests | High | M | 2026-11-10 |
 | TST-07 | Deterministic integration environment (healthchecks) | Med | S | 2026-11-10 |
 | TST-08 | Template/enrichment merge test matrix | Med | S | 2026-11-10 |
 
@@ -137,6 +138,16 @@ Tasks only partly done (◐) stay in the plan.
   - Enrichment: an id-only stage becomes the template stage, a stage overrides and extends it (host kept, uri replaced, headers merged, assertions added), order and untemplated stages are kept, two tests using one template do not share state, and templates are not enriched by other templates.
   - Profiles: registration with context and secrets, nested values, nested directories, patterns, not affected by `-tf`, broken profile skipped.
   Checked by mutation (stages never enriched, `-tf` also filtering templates, load errors unhandled): each is caught. It found BUG-22 (an id with no template is a silent no-op stage), kept as a strict `xfail`. The broken-file tests describe today's behaviour and will change with IMP-01.
+
+
+### TST-05 — In-process CLI end-to-end tests
+- **What / why:** Docker-free modules (print, void, wait, save, foreach, conditional, template, profile, code, file) only get end-to-end coverage in the Docker integration jobs. Run them in-process via `click.testing.CliRunner` against `example/test/...` copied into `tmp_path`.
+- **Impact:** High. Seconds instead of minutes, and runs locally.
+- **Cost:** M.
+- **Benefit:** Fast end-to-end feedback. Reduces reliance on the flaky Docker matrix.
+- **Depends on:** TST-01.
+- **Completed:** 2026-11-10
+- **Done:** `tests/test_cli_end_to_end.py` (26 tests, about 10 s) copies `example/test` and `example/code` into `tmp_path` with the layout of the integration image (`test/`, `testcode/`) and invokes `folker.cli.run` through `CliRunner`. One test per Docker-free job of `docker-compose.yaml`, with the same selection and `-n`: template (as `-t template -st rest -n 2`, the REST one needs mockserver), profile (`-p test-profile`), parallel, conditional, foreach, save, void, print, wait, file, code. On top of those: tag selection (`-st`, several `-t` combined with AND), `-tf` and `-TF`, the exit status (a failing assertion raises `TestSuiteResultException` naming the test, the other selected tests still run, a wrong `-n` raises `TestSuiteNumberExecutionsException`, an unknown profile fails before any stage runs), and `-c` / `-s` values, their precedence over profiles, merged profiles, and that `--trace` does not print a secret. The run mutates process-wide state, so each test gets its own `templates`, `stage_templates` and `profiles` registries and `sys.path`, and the imported `testcode` modules are dropped afterwards; the file passes in any position among the other suites. Checked by mutation: conditions never skipping, every test reporting success, and the working directory not being importable are each caught. Modules that need a service (REST, Postgres, Kafka, RabbitMQ, ZooKeeper, Pub/Sub, gRPC, GraphQL, protobuf, Gmail) stay in the Docker jobs. The Docker-free jobs there now duplicate these tests; dropping them from CI is a separate decision.
 
 
 ### TST-07 — Deterministic integration environment

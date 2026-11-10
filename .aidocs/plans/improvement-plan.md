@@ -37,7 +37,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 | CI-13 | Branch rules as code, in sync with the pipeline | Med | S | ☐ |
 | **2 · Testability** |||||
 | TST-02 | Regression-test policy for bug fixes | High | — | ☐ |
-| TST-05 | In-process CLI end-to-end tests (no Docker) | High | M | ☐ |
 | TST-06 | Execution tests for untested actions | Med | M | ☐ |
 | **3 · Dependencies** |||||
 | DEP-01 | Single dependency source: `pyproject.toml` + lock 📐 | High | M | ☐ |
@@ -138,13 +137,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 - **Impact:** High. Bugs stay fixed.
 - **Cost:** Built into each BUG task.
 - **Benefit:** The suite grows where bugs actually happen.
-
-### TST-05 — In-process CLI end-to-end tests
-- **What / why:** Docker-free modules (print, void, wait, save, foreach, conditional, template, profile, code, file) only get end-to-end coverage in the Docker integration jobs. Run them in-process via `click.testing.CliRunner` against `example/test/...` copied into `tmp_path`.
-- **Impact:** High. Seconds instead of minutes, and runs locally.
-- **Cost:** M.
-- **Benefit:** Fast end-to-end feedback. Reduces reliance on the flaky Docker matrix.
-- **Depends on:** TST-01.
 
 ### TST-06 — Execution tests for untested actions
 - **What / why:** `code`, `file`, `gmail`, `graphql`, `postgres`, `protobuf` and `zookeeper` only have enrichment/validation tests, so their `execute()` is untested. Add tests with mocked clients (`pytest-mock`, `responses`/`requests-mock`).
@@ -520,7 +512,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 1. **Safety net:** done (TST-03, BUG-10)
 1b. **Security advisories (≈½ day, do first):** DEP-11, DEP-21, DEP-13, DEP-14, DEP-12, DEP-15, DEP-22, DEP-16, DEP-17, DEP-20, DEP-19, DEP-18 (DEP-03 and DEP-02 close several of them for free)
 2. **Remaining bugs (≈2 days):** BUG-19, BUG-20, BUG-21, BUG-22, IMP-01, IMP-12
-3. **Pipeline hardening (≈2–3 days):** CI-08, CI-13, TST-05
+3. **Pipeline hardening (≈2–3 days):** CI-08, CI-13
 4. **Dependency overhaul (≈1 week, ADRs first):** DEP-02, DEP-03, DEP-01, DEP-05, DEP-06, DEP-04, DEP-07, DEP-08, CI-11
 5. **Structural (incremental):** IMP-07, IMP-10, IMP-03, IMP-04, DEP-10, IMP-05, IMP-02, IMP-06, IMP-09, IMP-11
 6. **Release and features:** CI-09, CI-10, FEAT-01, FEAT-02, FEAT-03, FEAT-04, FEAT-06, FEAT-07, FEAT-08, FEAT-09, IMP-08
