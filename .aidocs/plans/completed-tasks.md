@@ -100,6 +100,7 @@ Tasks only partly done (◐) stay in the plan.
 |---|---|---|---|---|
 | TST-01 | Fix pytest configuration (markers, warnings as errors) | Med | XS | 2026-11-09 |
 | TST-03 | Executor tests (sequential/parallel, start methods) | High | S | 2026-11-10 |
+| TST-04 | Loader tests | Med | S | 2026-11-10 |
 | TST-07 | Deterministic integration environment (healthchecks) | Med | S | 2026-11-10 |
 | TST-08 | Template/enrichment merge test matrix | Med | S | 2026-11-10 |
 
@@ -121,6 +122,21 @@ Tasks only partly done (◐) stay in the plan.
 - **Depends on:** none.
 - **Completed:** 2026-11-10
 - **Done:** `ParallelExecutor` was covered by BUG-02 (context, profile and failure reporting under `fork`, `spawn` and `forkserver`). This adds `tests/executor/test_sequential_executor.py` and extends `tests/executor/test_parallel_executor.py`. Both executors: no tests, results split into passed and failed in the order of the input, a failing or crashing test does not stop the others, `foreach` tests are reported once and fail when any iteration fails. Sequential only: each test gets its own context (variables saved or changed by one never reach the next), the profile and command-line values reach the tests with the command line winning, merged profiles, an unknown profile fails before anything runs, and each test gets its own `SEQUENTIAL` logger. Parallel, under all three start methods: empty list, results follow the input order even when tests finish in another order, more tests than workers. The shared picklable stages live in `tests/executor/stages.py`. Checked by mutation: sharing one context across tests, swapping the profile/command-line precedence, and returning results in completion order are each caught. Left for IMP-07: the pool is closed but never joined, and the worker count is not configurable.
+
+
+### TST-04 — Loader tests
+- **What / why:** `folker/load/files.py` (globbing, template enrichment, profile loading, error handling) is mostly untested. Cover paths with spaces (BUG-07), broken YAML, missing template ids and `-tf` filtering, using `tmp_path`.
+- **Impact:** Med.
+- **Cost:** S.
+- **Benefit:** Enables IMP-01 and IMP-03.
+- **Completed:** 2026-11-10
+- **Done:** `tests/load/test_files_loading.py` (33 tests, in `tmp_path` with the three global registries replaced for each test) adds, next to the BUG-07 and `-tf` tests of `test_load_files.py`:
+  - Discovery: nested directories, the default `test*.yaml` / `template*.yaml` / `profile*.yaml` patterns (and that other names and `.yml` are ignored), a custom `-TF` pattern, no files, only the working directory is searched, and which files are reported as loaded.
+  - Broken files: malformed YAML, a schema error and an empty file are logged and skipped without affecting the others (and are not in the list of valid files), for tests, templates and profiles; a test whose merged definition is invalid raises `InvalidSchemaDefinitionException` out of the loader instead.
+  - Templates: registration by id and by stage id, nested directories, not affected by `-tf`, and the duplicated-id case.
+  - Enrichment: an id-only stage becomes the template stage, a stage overrides and extends it (host kept, uri replaced, headers merged, assertions added), order and untemplated stages are kept, two tests using one template do not share state, and templates are not enriched by other templates.
+  - Profiles: registration with context and secrets, nested values, nested directories, patterns, not affected by `-tf`, broken profile skipped.
+  Checked by mutation (stages never enriched, `-tf` also filtering templates, load errors unhandled): each is caught. It found BUG-22 (an id with no template is a silent no-op stage), kept as a strict `xfail`. The broken-file tests describe today's behaviour and will change with IMP-01.
 
 
 ### TST-07 — Deterministic integration environment

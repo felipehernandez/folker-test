@@ -37,7 +37,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 | CI-13 | Branch rules as code, in sync with the pipeline | Med | S | ☐ |
 | **2 · Testability** |||||
 | TST-02 | Regression-test policy for bug fixes | High | — | ☐ |
-| TST-04 | Loader tests (`folker/load/files.py`) | Med | S | ☐ |
 | TST-05 | In-process CLI end-to-end tests (no Docker) | High | M | ☐ |
 | TST-06 | Execution tests for untested actions | Med | M | ☐ |
 | **3 · Dependencies** |||||
@@ -66,6 +65,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 | BUG-19 | A stage cannot switch a template flag off (`ack`, `ephemeral`) | Med | XS | ☐ |
 | BUG-20 | `ZookeeperStageAction`: a stage without `version` overrides the template version | Med | XS | ☐ |
 | BUG-21 | `method` of a template is silently kept when the stage names another | Low | S | ☐ |
+| BUG-22 | A stage that references a template id that does not exist is a silent no-op 🔍 | Med | XS | ☐ |
 | **5 · Improvements** |||||
 | IMP-01 | Strict loading: broken YAML fails the run | High | S | ☐ |
 | IMP-02 | Narrow broad `except Exception` handling | Med | M | ☐ |
@@ -138,12 +138,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 - **Impact:** High. Bugs stay fixed.
 - **Cost:** Built into each BUG task.
 - **Benefit:** The suite grows where bugs actually happen.
-
-### TST-04 — Loader tests
-- **What / why:** `folker/load/files.py` (globbing, template enrichment, profile loading, error handling) is mostly untested. Cover paths with spaces (BUG-07), broken YAML, missing template ids and `-tf` filtering, using `tmp_path`.
-- **Impact:** Med.
-- **Cost:** S.
-- **Benefit:** Enables IMP-01 and IMP-03.
 
 ### TST-05 — In-process CLI end-to-end tests
 - **What / why:** Docker-free modules (print, void, wait, save, foreach, conditional, template, profile, code, file) only get end-to-end coverage in the Docker integration jobs. Run them in-process via `click.testing.CliRunner` against `example/test/...` copied into `tmp_path`.
@@ -339,6 +333,13 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 - **Benefit:** One documented rule for every action.
 - **Found by:** TST-08. `TestMethod` in `tests/model/stage/test_action_merge_matrix.py` pins today's behaviour; update it with the decision. IMP-05 should settle it for all modules at once. 🔍 Decide the intended behaviour first.
 
+### BUG-22 — A stage that references a template id that does not exist is a silent no-op 🔍
+- **What / why:** `_enrich_stages` (`folker/load/files.py`) only enriches a stage whose id is in `stage_templates`. A stage with just an `id` and no `action` gets a `VOID` action by default, so a typo (`id: get_usr`) or a template file that failed to load (see IMP-01) produces a stage that does nothing, and a test that passes without checking anything. A stage that has an id and its own definition is fine; the problem is the id-only stage with no template.
+- **Impact:** Med. False greens.
+- **Cost:** XS. Report it as a load error when a stage has an id, no `action` of its own and no matching template (verify first that no existing example relies on it).
+- **Benefit:** Typos in template references fail at load time.
+- **Found by:** TST-04. `TestStageEnrichment::test_a_reference_to_a_template_that_does_not_exist_is_reported` is a strict `xfail` today; remove the mark with the fix.
+
 ---
 
 ## 5 · Improvements
@@ -348,7 +349,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 - **Impact:** High. Prevents false greens.
 - **Cost:** S.
 - **Benefit:** CI fails on broken test definitions.
-- **Depends on:** TST-04.
+- **Depends on:** TST-04 (done). `TestBrokenFiles` in `tests/load/test_files_loading.py` pins today's behaviour (log and skip, the run goes on) for tests, templates and profiles, and a validation error after enrichment already raises out of the loader instead: update them with this change, and decide whether the two paths should behave the same.
 
 ### IMP-02 — Narrow broad exception handling
 - **What / why:** There are 34 `except Exception` blocks (25 in modules). Many hide the real cause (REST stores errors in `context.error`; JSON parse errors are ignored). Catch specific exceptions and keep tracebacks in `--trace`.
@@ -518,8 +519,8 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 
 1. **Safety net:** done (TST-03, BUG-10)
 1b. **Security advisories (≈½ day, do first):** DEP-11, DEP-21, DEP-13, DEP-14, DEP-12, DEP-15, DEP-22, DEP-16, DEP-17, DEP-20, DEP-19, DEP-18 (DEP-03 and DEP-02 close several of them for free)
-2. **Remaining bugs (≈2 days):** BUG-19, BUG-20, BUG-21, IMP-01, IMP-12
-3. **Pipeline hardening (≈2–3 days):** CI-08, CI-13, TST-04, TST-05
+2. **Remaining bugs (≈2 days):** BUG-19, BUG-20, BUG-21, BUG-22, IMP-01, IMP-12
+3. **Pipeline hardening (≈2–3 days):** CI-08, CI-13, TST-05
 4. **Dependency overhaul (≈1 week, ADRs first):** DEP-02, DEP-03, DEP-01, DEP-05, DEP-06, DEP-04, DEP-07, DEP-08, CI-11
 5. **Structural (incremental):** IMP-07, IMP-10, IMP-03, IMP-04, DEP-10, IMP-05, IMP-02, IMP-06, IMP-09, IMP-11
 6. **Release and features:** CI-09, CI-10, FEAT-01, FEAT-02, FEAT-03, FEAT-04, FEAT-06, FEAT-07, FEAT-08, FEAT-09, IMP-08
