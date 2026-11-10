@@ -52,7 +52,9 @@ class Test(Validatable):
         executions_result = True
 
         for execution_context in execution_contexts:
-            executions_result = executions_result and self._execute(logger, execution_context)
+            # Run first, combine after: `and` would skip the remaining iterations once one failed
+            iteration_result = self._execute(logger, execution_context)
+            executions_result = executions_result and iteration_result
 
         return executions_result
 

@@ -126,6 +126,7 @@ Tasks only partly done (◐) stay in the plan.
 |---|---|---|---|---|
 | BUG-01 | `collections.Mapping` crash on Python ≥ 3.10 ✅ | High | XS | 2026-11-06 |
 | BUG-02 | Parallel tests lose the selected profile | High | S | 2026-11-10 |
+| BUG-03 | `foreach` stops after first failing iteration | High | XS | 2026-11-10 |
 | BUG-04 | VOID template + real action → `action = None` | High | XS | 2026-11-10 |
 | BUG-05 | Stage's own `foreach` lost when using a template | Med | XS | 2026-11-10 |
 | BUG-17 | Working-directory modules not importable from an installed CLI ✅ | High | XS | 2026-11-07 |
@@ -145,6 +146,14 @@ Tasks only partly done (◐) stay in the plan.
 - **Benefit:** Parallel runs behave like sequential ones.
 - **Depends on:** TST-03 recommended. Root cause addressed in IMP-03.
 - **Done:** `ParallelExecutor.execute` now resolves the selected profile in the parent process and passes it to each worker, instead of the worker reading the global `folker.profiles` (empty under `spawn`/`forkserver`). Reproduced first on Python 3.10: sequential and `fork` passed, `spawn` and `forkserver` failed every test with "Missing reference". Regression tests in `tests/executor/test_parallel_executor.py` run the executor under all three start methods; the profile test failed under `spawn`/`forkserver` before the fix. Root cause (global registries) is still addressed by IMP-03.
+
+### BUG-03 — `foreach` stops after first failing iteration
+- **Completed:** 2026-11-10
+- **What / why:** `folker/model/test.py:55`: `executions_result and self._execute(...)` short-circuits, so iterations after a failure never run or report.
+- **Impact:** High. Data-driven tests hide failures.
+- **Cost:** XS. Evaluate first, then combine.
+- **Benefit:** Complete results for data-driven tests.
+- **Done:** `Test.execute` runs each `foreach` iteration first and combines the results afterwards, so a failing iteration no longer skips the ones after it. Tests in `tests/model/test_test_execution.py`: a failure in the first of three iterations still runs all three, and every iteration is reported (3 starts, 2 errors, 1 finish); both failed before the fix. An all-pass guard test was added. The existing failure test only failed on the last iteration, so it never exercised the bug.
 
 ### BUG-04 — VOID template + real action → `action = None`
 - **Completed:** 2026-11-10
