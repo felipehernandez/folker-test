@@ -129,6 +129,7 @@ Tasks only partly done (◐) stay in the plan.
 | BUG-03 | `foreach` stops after first failing iteration | High | XS | 2026-11-10 |
 | BUG-04 | VOID template + real action → `action = None` | High | XS | 2026-11-10 |
 | BUG-05 | Stage's own `foreach` lost when using a template | Med | XS | 2026-11-10 |
+| BUG-07 | Test files in paths with spaces fail to load | Med | XS | 2026-11-10 |
 | BUG-17 | Working-directory modules not importable from an installed CLI ✅ | High | XS | 2026-11-07 |
 
 ### BUG-01 — `collections.Mapping` crash on Python ≥ 3.10 ✅
@@ -170,6 +171,14 @@ Tasks only partly done (◐) stay in the plan.
 - **Cost:** XS. 1 line.
 - **Benefit:** `foreach` works with templates.
 - **Done:** `Stage.__add__` now assigns the merged dict to `result.foreach` (it wrote `result.params`, which nothing reads), so a stage's own `foreach` survives being merged onto a template stage: template and stage keys are combined and the stage wins on conflicts. Tests in `tests/model/stage/test_stage_enrichment.py` (stage `foreach` kept, template `foreach` kept, merge and override, template not modified); the first and third failed before the fix.
+
+### BUG-07 — Test files in paths with spaces fail to load
+- **Completed:** 2026-11-10
+- **What / why:** `folker/load/files.py:82`: `filename.resolve().as_uri()[7:]` yields `%20`-encoded paths.
+- **Impact:** Med. Common on macOS/Windows.
+- **Cost:** XS. Use `str(filename.resolve())`.
+- **Benefit:** Works in any directory.
+- **Done:** `load_schema` uses `str(filename.resolve())` instead of `filename.resolve().as_uri()[7:]`. The URI form is percent-encoded, so it broke on spaces and also on `%`, `#`, `?` and non-ASCII characters in any directory of the path, not only spaces. Tests in `tests/load/test_load_files.py` load a test file from directories named with each of those characters, and from a nested directory under a parent with spaces; all six failed before the fix.
 
 ### BUG-17 — Working-directory modules not importable from an installed CLI ✅
 - **Completed:** 2026-11-07
