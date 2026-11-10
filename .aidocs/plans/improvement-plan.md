@@ -42,7 +42,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 | TST-04 | Loader tests (`folker/load/files.py`) | Med | S | ☐ |
 | TST-05 | In-process CLI end-to-end tests (no Docker) | High | M | ☐ |
 | TST-06 | Execution tests for untested actions | Med | M | ☐ |
-| TST-08 | Template/enrichment merge test matrix | Med | S | ☐ |
 | **3 · Dependencies** |||||
 | DEP-01 | Single dependency source: `pyproject.toml` + lock 📐 | High | M | ☐ |
 | DEP-02 | Move dev tools out of runtime dependencies | Med | XS | ☐ |
@@ -66,6 +65,9 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 | DEP-21 | Vuln: certifi: GLOBALTRUST root certificate removed | Low | XS | ☐ |
 | DEP-22 | Vuln: pyOpenSSL: TLS connection bypass through an unhandled SNI callback exception | Low | XS | ☐ |
 | **4 · Bugs** |||||
+| BUG-19 | A stage cannot switch a template flag off (`ack`, `ephemeral`) | Med | XS | ☐ |
+| BUG-20 | `ZookeeperStageAction`: a stage without `version` overrides the template version | Med | XS | ☐ |
+| BUG-21 | `method` of a template is silently kept when the stage names another | Low | S | ☐ |
 | **5 · Improvements** |||||
 | IMP-01 | Strict loading: broken YAML fails the run | High | S | ☐ |
 | IMP-02 | Narrow broad `except Exception` handling | Med | M | ☐ |
@@ -173,12 +175,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 - **Impact:** Med.
 - **Cost:** M. One file per module.
 - **Benefit:** Dependency upgrades (DEP-05..08) become verifiable without Docker.
-
-### TST-08 — Template/enrichment merge test matrix
-- **What / why:** `__add__` merges caused BUG-04 and BUG-05. Add a parametrised matrix: for each action type × (template has field / stage has field / both / neither), assert the merged result.
-- **Impact:** Med.
-- **Cost:** S.
-- **Benefit:** Safety net for IMP-05.
 
 ---
 
@@ -340,6 +336,27 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 
 ## 4 · Bugs
 
+### BUG-19 — A stage cannot switch a template flag off (`ack`, `ephemeral`)
+- **What / why:** `__add__` uses `if enrichment.ack:` / `if enrichment.ephemeral:`, so `ack: false` in a stage cannot override `ack: true` from the template. Affects `RabbitMQStageAction.ack`, `PubSubStageAction.ack` and `ZookeeperStageAction.ephemeral`. Compare with `is not None`, as the `timeout` fields already do (BUG-14); `ephemeral` defaults to `False`, so it needs a `None` default too.
+- **Impact:** Med.
+- **Cost:** XS.
+- **Benefit:** A stage can disable what its template enables.
+- **Found by:** TST-08. Regression tests: the three `TestFlags::test_the_stage_can_switch_it_off` cases in `tests/model/stage/test_action_merge_matrix.py` (strict `xfail` today; remove them from `KNOWN_DEFECTS` with the fix). IMP-05 would fix this generically.
+
+### BUG-20 — `ZookeeperStageAction`: a stage without `version` overrides the template version
+- **What / why:** `version` defaults to `-1`, which is truthy, so in `template + stage` an unset stage `version` replaces the template's (`version: 3` becomes `-1`, i.e. "any version"). Default it to `None` and apply `-1` when executing, and merge with `is not None`.
+- **Impact:** Med.
+- **Cost:** XS.
+- **Benefit:** A template's optimistic-locking version is honoured.
+- **Found by:** TST-08. Regression test: `TestScalarFields::test_only_the_template_defines_it[zookeeper.version]` (strict `xfail` today).
+
+### BUG-21 — `method` of a template is silently kept when the stage names another
+- **What / why:** `code` and `grpc` take the stage's `method` when merging; REST, Kafka, Postgres, RabbitMQ, ZooKeeper, Pub/Sub, File and Protobuf keep the template's, so a stage overriding it runs the template's operation with no warning. For the actions whose class depends on `method` (Postgres, RabbitMQ, ZooKeeper, Pub/Sub, Kafka) the merged object is also the template's subclass, so honouring the override needs a decision: merge `method` and re-pick the class, or reject the override with a clear error at load time.
+- **Impact:** Low.
+- **Cost:** S.
+- **Benefit:** One documented rule for every action.
+- **Found by:** TST-08. `TestMethod` in `tests/model/stage/test_action_merge_matrix.py` pins today's behaviour; update it with the decision. IMP-05 should settle it for all modules at once. 🔍 Decide the intended behaviour first.
+
 ---
 
 ## 5 · Improvements
@@ -378,7 +395,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 - **Impact:** Med. Large maintainability gain.
 - **Cost:** L. Do it incrementally, one module per PR.
 - **Benefit:** Adding a module means declaring fields, not writing merge code.
-- **Depends on:** TST-08.
+- **Depends on:** TST-08 (done: `tests/model/stage/test_action_merge_matrix.py`; its `KNOWN_DEFECTS` table and the `TestMethod` cases show what the generic merge must decide: BUG-19, BUG-20, BUG-21).
 
 ### IMP-06 — Logger composition
 - **What / why:** Seven logger classes cover plain/colour × console/file × sequential/parallel. Split into a formatter (plain, colour) and a sink (console, file, buffered for parallel runs).
@@ -519,8 +536,8 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 
 1. **Safety net (≈1–2 days):** TST-03
 1b. **Security advisories (≈½ day, do first):** DEP-11, DEP-21, DEP-13, DEP-14, DEP-12, DEP-15, DEP-22, DEP-16, DEP-17, DEP-20, DEP-19, DEP-18 (DEP-03 and DEP-02 close several of them for free)
-2. **Remaining bugs (≈2 days):** IMP-01, IMP-12
+2. **Remaining bugs (≈2 days):** BUG-19, BUG-20, BUG-21, IMP-01, IMP-12
 3. **Pipeline hardening (≈2–3 days):** CI-07, CI-08, CI-13, TST-04, TST-05
 4. **Dependency overhaul (≈1 week, ADRs first):** DEP-02, DEP-03, DEP-01, DEP-05, DEP-06, DEP-04, DEP-07, DEP-08, CI-11
-5. **Structural (incremental):** IMP-07, IMP-10, IMP-03, IMP-04, DEP-10, TST-08, IMP-05, IMP-02, IMP-06, IMP-09, IMP-11
+5. **Structural (incremental):** IMP-07, IMP-10, IMP-03, IMP-04, DEP-10, IMP-05, IMP-02, IMP-06, IMP-09, IMP-11
 6. **Release and features:** CI-09, CI-10, FEAT-01, FEAT-02, FEAT-03, FEAT-04, FEAT-06, FEAT-07, FEAT-08, FEAT-09, IMP-08

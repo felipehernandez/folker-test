@@ -88,6 +88,7 @@ Tasks only partly done (◐) stay in the plan.
 |---|---|---|---|---|
 | TST-01 | Fix pytest configuration (markers, warnings as errors) | Med | XS | 2026-11-09 |
 | TST-07 | Deterministic integration environment (healthchecks) | Med | S | 2026-11-10 |
+| TST-08 | Template/enrichment merge test matrix | Med | S | 2026-11-10 |
 
 ### TST-01 — Fix pytest configuration
 - **Completed:** 2026-11-09
@@ -106,6 +107,14 @@ Tasks only partly done (◐) stay in the plan.
 - **Cost:** S.
 - **Benefit:** Unlocks CI-05. Fewer flaky reruns.
 - **Done:** every service a test depends on has a `healthcheck`, and every `depends_on` uses `condition: service_healthy`; the obsolete `version:` line is removed. What each probe proves (tool in brackets): postgres accepts TCP connections, `-h 127.0.0.1` so it can't pass on the init-time temporary server (`pg_isready`); RabbitMQ is running *and* the imported queues exist (`rabbitmq-diagnostics`, `rabbitmqctl`); Kafka answers an API request, `interval/timeout 10s` because each probe starts a JVM (`kafka-broker-api-versions.sh`); ZooKeeper answers `srvr` (`nc`); gRPC, GraphQL and the Pub/Sub emulator accept connections on their port (bash `/dev/tcp`; the emulator image opens 8682 only after it has created its topics); MockServer uses the image's own healthcheck. Probes in `latest` images depend on their tools staying present until CI-07 pins them. If CI's `docker-compose` is too old for `condition: service_healthy`, fall back to `docker-compose up -d` plus a bounded `docker inspect` health poll in the job.
+
+### TST-08 — Template/enrichment merge test matrix
+- **What / why:** `__add__` merges caused BUG-04 and BUG-05. Add a parametrised matrix: for each action type × (template has field / stage has field / both / neither), assert the merged result.
+- **Impact:** Med.
+- **Cost:** S.
+- **Benefit:** Safety net for IMP-05.
+- **Completed:** 2026-11-10
+- **Done:** `tests/model/stage/test_action_merge_matrix.py` covers the 14 action types (code, file, gmail, graphql, grpc, kafka, postgres, print, protobuf, pub/sub, rabbitmq, rest, wait, zookeeper). For every scalar, mapping and sequence field it checks neither / only the template / only the stage / both (the stage wins; mappings merge key by key, the REST JSON body recursively, sequences concatenate template first), plus the contract for each action: neither operand is modified, the result does not alias the template, and a Void stage or template gives the other one unchanged. Checked by temporarily breaking two `__add__` methods (a forgotten field, a replace instead of a merge): both were caught. It found four defects, kept as strict `xfail` cases in a `KNOWN_DEFECTS` table so fixing one forces the mark to be removed: BUG-19 (`ack` and `ephemeral` cannot be switched off), BUG-20 (ZooKeeper `version`) and BUG-21 (`method` is merged inconsistently, pinned by `TestMethod`). Not covered: `foreach`, `save`, `log` and `assert` merging at stage level (`tests/model/stage/test_stage_enrichment.py`), and the actions' validation.
 
 ## 3 · Dependencies
 
