@@ -31,9 +31,9 @@ Pick tasks by ID ("work on BUG-03"). Each task is meant to be one small PR.
 | **1 · CI/CD** |||||
 | CI-01 | Run unit tests on the runtime Python version (matrix) | High | S | ☑ |
 | CI-02 | Lint / static-analysis quality gate | Med | S | ☑ |
-| CI-03 | Coverage gate (scoped to `folker/`, ratchet) | Med | XS | ☐ |
+| CI-03 | Coverage gate (scoped to `folker/`, ratchet) | Med | XS | ☑ |
 | CI-04 | Test the exact image you publish | High | M | ☑ |
-| CI-05 | Remove retry loop and no-op validation job | Med | S | ☐ |
+| CI-05 | Remove retry loop and no-op validation job | Med | S | ☑ |
 | CI-06 | De-duplicate the three CircleCI workflows | Med | S | ☑ |
 | CI-07 | Pin integration service images (Kafka/ZooKeeper done) | High | S | ◐ |
 | CI-08 | Update EOL executors and actions | Med | XS | ☐ |
@@ -48,7 +48,7 @@ Pick tasks by ID ("work on BUG-03"). Each task is meant to be one small PR.
 | TST-04 | Loader tests (`folker/load/files.py`) | Med | S | ☐ |
 | TST-05 | In-process CLI end-to-end tests (no Docker) | High | M | ☐ |
 | TST-06 | Execution tests for untested actions | Med | M | ☐ |
-| TST-07 | Deterministic integration environment (healthchecks) | Med | S | ☐ |
+| TST-07 | Deterministic integration environment (healthchecks) | Med | S | ☑ |
 | TST-08 | Template/enrichment merge test matrix | Med | S | ☐ |
 | **3 · Dependencies** |||||
 | DEP-01 | Single dependency source: `pyproject.toml` + lock 📐 | High | M | ☐ |
@@ -130,6 +130,7 @@ Pick tasks by ID ("work on BUG-03"). Each task is meant to be one small PR.
 - **Cost:** XS. A few config lines.
 - **Benefit:** Stops coverage erosion, especially for the BUG work.
 - **Depends on:** TST-01.
+- **Done:** the printed total was 94% because it counted `tests/`, and the xml/html reports also picked up pytest temp files. Coverage is now `source_pkgs = ["folker"]` with branch coverage, configured in `pyproject.toml` (`coverage[toml]==7.16.2`, so `tomli` is explicit on 3.10). Baseline is 86.42% (2902 statements, 530 branches) on Python 3.10, and `fail_under = 86.4`. The threshold is raised by hand when coverage rises and never lowered. A Renovate bump of `coverage` may shift the number; the gate catching that is intended. When a Python version is added to the matrix (DEP-04), re-measure on it, because `fail_under` must hold on every version. The xml/html steps run with `--fail-under=0`, so `coverage report` (the `Coverage gate` step) is the only gate, and artifacts upload with `when: always`.
 
 ### CI-04 — Test the exact image you publish
 - **What / why:** Integration tests run images built from `Dockerfile-integration` by docker-compose, while `build-docker-image` separately builds `Dockerfile`. The published artifact is never tested. Build once with a multi-stage `runtime` target, layer the integration fixtures on top of it, and publish the tested digest.
@@ -145,6 +146,7 @@ Pick tasks by ID ("work on BUG-03"). Each task is meant to be one small PR.
 - **Cost:** S.
 - **Benefit:** Faster, honest pipelines.
 - **Depends on:** TST-07.
+- **Done:** `run-integration-tests` runs `docker-compose run` once (no retry, no `sleep`), after a step that prints the compose version. `validate-integration-tests` is deleted and `publish-beta`/`publish-latest` require `run-integration-tests` directly (CircleCI waits for every matrix variant). Done together with TST-07 in one change.
 
 ### CI-06 — De-duplicate the three CircleCI workflows
 - **What / why:** `development`, `beta` and `main` each copy the same 21-entry integration matrix. Use YAML anchors or pipeline parameters for the shared part.
@@ -249,6 +251,7 @@ Pick tasks by ID ("work on BUG-03"). Each task is meant to be one small PR.
 - **Impact:** Med.
 - **Cost:** S.
 - **Benefit:** Unlocks CI-05. Fewer flaky reruns.
+- **Done:** every service a test depends on has a `healthcheck`, and every `depends_on` uses `condition: service_healthy`; the obsolete `version:` line is removed. What each probe proves (tool in brackets): postgres accepts TCP connections, `-h 127.0.0.1` so it can't pass on the init-time temporary server (`pg_isready`); RabbitMQ is running *and* the imported queues exist (`rabbitmq-diagnostics`, `rabbitmqctl`); Kafka answers an API request, `interval/timeout 10s` because each probe starts a JVM (`kafka-broker-api-versions.sh`); ZooKeeper answers `srvr` (`nc`); gRPC, GraphQL and the Pub/Sub emulator accept connections on their port (bash `/dev/tcp`; the emulator image opens 8682 only after it has created its topics); MockServer uses the image's own healthcheck. Probes in `latest` images depend on their tools staying present until CI-07 pins them. If CI's `docker-compose` is too old for `condition: service_healthy`, fall back to `docker-compose up -d` plus a bounded `docker inspect` health poll in the job.
 
 ### TST-08 — Template/enrichment merge test matrix
 - **What / why:** `__add__` merges caused BUG-04 and BUG-05. Add a parametrised matrix: for each action type × (template has field / stage has field / both / neither), assert the merged result.

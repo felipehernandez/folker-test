@@ -7,11 +7,11 @@ install:
 
 test:
 	coverage run -m pytest -vv
-	coverage report -m
+	coverage report
 
 test-report:
 	coverage run -m pytest -vv
-	coverage html -d reports/coverage --title=report --omit="*/lib/python*"
+	coverage html -d reports/coverage --title=report
 
 lint:
 	ruff cehck .
