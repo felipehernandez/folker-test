@@ -60,7 +60,7 @@ class Stage(Validatable):
             result.description = enrichment.description
         if enrichment.condition:
             result.condition = enrichment.condition
-        result.params = {**self.foreach, **enrichment.foreach}
+        result.foreach = {**self.foreach, **enrichment.foreach}
 
         result.action = result.action + enrichment.action
         result.save = self.save + enrichment.save

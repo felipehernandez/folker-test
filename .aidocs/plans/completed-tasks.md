@@ -127,6 +127,7 @@ Tasks only partly done (◐) stay in the plan.
 | BUG-01 | `collections.Mapping` crash on Python ≥ 3.10 ✅ | High | XS | 2026-11-06 |
 | BUG-02 | Parallel tests lose the selected profile | High | S | 2026-11-10 |
 | BUG-04 | VOID template + real action → `action = None` | High | XS | 2026-11-10 |
+| BUG-05 | Stage's own `foreach` lost when using a template | Med | XS | 2026-11-10 |
 | BUG-17 | Working-directory modules not importable from an installed CLI ✅ | High | XS | 2026-11-07 |
 
 ### BUG-01 — `collections.Mapping` crash on Python ≥ 3.10 ✅
@@ -152,6 +153,14 @@ Tasks only partly done (◐) stay in the plan.
 - **Cost:** XS.
 - **Benefit:** Templates usable for shared save/log/assert blocks.
 - **Done:** `VoidStageAction.__add__` returns a copy of the enrichment (so VOID + real action gives the real action, and VOID + VOID stays VOID) instead of `None`. Reproduced first on Python 3.10: a VOID template stage extended by a `WaitStageAction` stage ended with `action = None`. Regression tests: `tests/module/void/test_action_enrichment.py` and `test_enrich_action_of_void_template` in `tests/model/stage/test_stage_enrichment.py`; they failed before the fix. The reverse order (real template + VOID stage) already worked.
+
+### BUG-05 — Stage's own `foreach` lost when using a template
+- **Completed:** 2026-11-10
+- **What / why:** `folker/model/stage/stage.py:62` writes the merged dict to `result.params` instead of `result.foreach`.
+- **Impact:** Med.
+- **Cost:** XS. 1 line.
+- **Benefit:** `foreach` works with templates.
+- **Done:** `Stage.__add__` now assigns the merged dict to `result.foreach` (it wrote `result.params`, which nothing reads), so a stage's own `foreach` survives being merged onto a template stage: template and stage keys are combined and the stage wins on conflicts. Tests in `tests/model/stage/test_stage_enrichment.py` (stage `foreach` kept, template `foreach` kept, merge and override, template not modified); the first and third failed before the fix.
 
 ### BUG-17 — Working-directory modules not importable from an installed CLI ✅
 - **Completed:** 2026-11-07
