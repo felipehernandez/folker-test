@@ -57,7 +57,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 | BUG-10 | Non-raw regex string (warning in 3.12+) | Low | XS | ☐ |
 | BUG-11 | Multiple profiles: random one picked, rest ignored | Med | XS | ☐ |
 | BUG-12 | Proto generation failures reported as success | Med | XS | ☐ |
-| BUG-13 | Secrets leaked in REST debug logs | Med | S | ☐ |
 | BUG-14 | Network calls without timeouts can hang forever | High | S | ☐ |
 | BUG-16 | REST debug logging can turn a request into an error 🔍 | Low | XS | ☐ |
 | BUG-18 | `Configuration()` without `test_files` crashes the loader ✅ | Low | XS | ☐ |
@@ -266,12 +265,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 - **Cost:** XS.
 - **Benefit:** Failures reported where they happen.
 
-### BUG-13 — Secrets leaked in REST debug logs
-- **What / why:** `RestStageAction._log_debug` dumps headers, auth and body after variable resolution, so secrets referenced via `${...}` print in clear text with `--debug`. Apply the same obfuscation the test logger uses for secrets.
-- **Impact:** Med. Credentials end up in CI logs.
-- **Cost:** S. Probably a shared redaction helper used by all modules.
-- **Benefit:** Safe to enable debug in CI.
-
 ### BUG-14 — Network calls without timeouts can hang forever
 - **What / why:** `requests.*` (REST), postgres, rabbitmq, zookeeper and graphql calls have no timeouts (only Kafka has any). A dead endpoint hangs the CI job until the global timeout. Add sensible defaults, overridable per action.
 - **Impact:** High.
@@ -476,7 +469,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 ## Suggested order (waves)
 
 1. **Safety net (≈1–2 days):** TST-03, BUG-10
-2. **Remaining bugs (≈2 days):** BUG-11, BUG-12, BUG-18, BUG-13, BUG-14, BUG-16, IMP-01, IMP-12
+2. **Remaining bugs (≈2 days):** BUG-11, BUG-12, BUG-18, BUG-14, BUG-16, IMP-01, IMP-12
 3. **Pipeline hardening (≈2–3 days):** CI-07, CI-08, CI-13, TST-04, TST-05
 4. **Dependency overhaul (≈1 week, ADRs first):** DEP-02, DEP-03, DEP-01, DEP-05, DEP-06, DEP-04, DEP-07, DEP-08, CI-11
 5. **Structural (incremental):** IMP-07, IMP-10, IMP-03, IMP-04, DEP-10, TST-08, IMP-05, IMP-02, IMP-06, IMP-09, IMP-11

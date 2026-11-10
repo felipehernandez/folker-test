@@ -134,6 +134,7 @@ Tasks only partly done (◐) stay in the plan.
 | BUG-07 | Test files in paths with spaces fail to load | Med | XS | 2026-11-10 |
 | BUG-08 | Shared mutable default `foreach={}` in `Test` | Low | XS | 2026-11-10 |
 | BUG-09 | Integer identity comparison in assertions | Low | XS | 2026-11-10 |
+| BUG-13 | Secrets leaked in REST debug logs | Med | S | 2026-11-10 |
 | BUG-15 | Failing `if:` condition silently skips the stage | Med | XS | 2026-11-10 |
 | BUG-17 | Working-directory modules not importable from an installed CLI ✅ | High | XS | 2026-11-07 |
 
@@ -208,6 +209,14 @@ Tasks only partly done (◐) stay in the plan.
 - **Cost:** XS.
 - **Benefit:** Correct for any count. Removes a `SyntaxWarning`.
 - **Done:** both counts are now compared with `!=`, in `StageAssertions._wrap_up_test` (the one the task names) and in `TestLogger.assert_test_result` (`folker/logger/test_logger.py`, same pattern, not listed in the task). Beyond CPython's small-int cache (-5..256), a stage with more than 256 passing assertions raised a failure with an empty failure list, and the logger reported a passing run as failed. Tests: 300 passing assertions no longer raise, one failure among 300 is still the only reported failure, and the logger prints a failure line only when the counts differ (the logger test builds its ints at runtime, since two equal literals in one function are the same object). The task's remark about removing a `SyntaxWarning` was not verified: no such warning was seen on Python 3.10.
+
+### BUG-13 — Secrets leaked in REST debug logs
+- **What / why:** `RestStageAction._log_debug` dumps headers, auth and body after variable resolution, so secrets referenced via `${...}` print in clear text with `--debug`. Apply the same obfuscation the test logger uses for secrets.
+- **Impact:** Med. Credentials end up in CI logs.
+- **Cost:** S. Probably a shared redaction helper used by all modules.
+- **Benefit:** Safe to enable debug in CI.
+- **Completed:** 2026-11-10
+- **Done:** the fix is in the logger, not in each module, so REST, RabbitMQ and Pub/Sub are covered at once and new modules are safe by default. `TestLogger.action_prelude` (called by every action) records the values of `context.secrets` (nested values included, empty ones ignored), and `action_debug`, `action_error` and `action_warn` mask them with `*` of the same length, as the SECRETS trace dump already did. Masking also matches the JSON-escaped form of a secret, because debug messages are `json.dumps` output where quotes, backslashes and non-ASCII characters are escaped. Longest secrets are masked first. Tests in `tests/logger/test_secret_redaction.py`, including a REST action run with secrets in headers and authorization; all but two failed before the fix. Limits: only values in `context.secrets` are masked (not secrets copied into test variables with `save`), and `message` (the print action), assertion debug dumps and trace `TEST CONTEXT` are not redacted.
 
 ### BUG-15 — Failing `if:` condition silently skips the stage
 - **Completed:** 2026-11-10

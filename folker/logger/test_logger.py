@@ -13,6 +13,21 @@ def _obfuscate_secrets(secrets: dict):
     return {key: '*' * len(value) for key, value in secrets.items()}
 
 
+def _flatten_secrets(secrets) -> set:
+    """Every non-empty leaf value of a (possibly nested) secrets structure, as text"""
+    if isinstance(secrets, dict):
+        values = secrets.values()
+    elif isinstance(secrets, (list, tuple, set)):
+        values = secrets
+    else:
+        return set() if secrets is None or str(secrets) == '' else {str(secrets)}
+
+    result = set()
+    for value in values:
+        result |= _flatten_secrets(value)
+    return result
+
+
 def _to_serialized(dictionary: dict):
     SKIP_ATTRIBUTES = {'validation_report'}
     serialized = {}
@@ -40,12 +55,35 @@ class TestLogger(ABC):
     log_file: str
 
     report: List[LogEntry]
+    _secret_values: List[str]
 
     def __init__(self, config: Configuration) -> None:
         self.debug = config.debug_mode
         self.trace = config.trace_mode
         self.log_file = config.log_file
         self.report = []
+        self._secret_values = []
+
+    def _watch_secrets(self, secrets: dict):
+        # Longest first, so a secret that contains another one is masked as a whole
+        self._secret_values = sorted(_flatten_secrets(secrets), key=len, reverse=True)
+
+    def _redact(self, message):
+        """Masks the value of every secret of the running action in a log message"""
+        if not isinstance(message, str):
+            return message
+        for secret in self._secret_values:
+            mask = '*' * len(secret)
+            message = message.replace(secret, mask)
+            # Messages are often JSON dumps, where quotes, backslashes and non-ASCII
+            # characters of the secret appear escaped
+            escaped = json.dumps(secret)[1:-1]
+            if escaped != secret:
+                message = message.replace(escaped, mask)
+            escaped = json.dumps(secret, ensure_ascii=False)[1:-1]
+            if escaped != secret:
+                message = message.replace(escaped, mask)
+        return message
 
     def _log(self):
         pass
@@ -92,6 +130,7 @@ class TestLogger(ABC):
 
     # Action
     def action_prelude(self, action: dict, context: Context):
+        self._watch_secrets(context.secrets)
         if self.trace:
             self.report.append(LogEntry(type=LogEntryType.ACTION_TRACE,
                                         text=' PRELUDE '.center(100, '.')))
@@ -130,15 +169,18 @@ class TestLogger(ABC):
 
     def action_debug(self, message: str):
         if self.debug:
-            self.report.append(LogEntry(type=LogEntryType.ACTION_DEBUG, text=message))
+            self.report.append(LogEntry(type=LogEntryType.ACTION_DEBUG,
+                                        text=self._redact(message)))
         self._log()
 
     def action_error(self, message: str):
-        self.report.append(LogEntry(type=LogEntryType.ACTION_ERROR, text=message))
+        self.report.append(LogEntry(type=LogEntryType.ACTION_ERROR,
+                                    text=self._redact(message)))
         self._log()
 
     def action_warn(self, message):
-        self.report.append(LogEntry(type=LogEntryType.ACTION_WARN, text=message))
+        self.report.append(LogEntry(type=LogEntryType.ACTION_WARN,
+                                    text=self._redact(message)))
         self._log()
 
     # Log
