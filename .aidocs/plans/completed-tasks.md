@@ -130,6 +130,7 @@ Tasks only partly done (◐) stay in the plan.
 | BUG-04 | VOID template + real action → `action = None` | High | XS | 2026-11-10 |
 | BUG-05 | Stage's own `foreach` lost when using a template | Med | XS | 2026-11-10 |
 | BUG-07 | Test files in paths with spaces fail to load | Med | XS | 2026-11-10 |
+| BUG-08 | Shared mutable default `foreach={}` in `Test` | Low | XS | 2026-11-10 |
 | BUG-17 | Working-directory modules not importable from an installed CLI ✅ | High | XS | 2026-11-07 |
 
 ### BUG-01 — `collections.Mapping` crash on Python ≥ 3.10 ✅
@@ -179,6 +180,14 @@ Tasks only partly done (◐) stay in the plan.
 - **Cost:** XS. Use `str(filename.resolve())`.
 - **Benefit:** Works in any directory.
 - **Done:** `load_schema` uses `str(filename.resolve())` instead of `filename.resolve().as_uri()[7:]`. The URI form is percent-encoded, so it broke on spaces and also on `%`, `#`, `?` and non-ASCII characters in any directory of the path, not only spaces. Tests in `tests/load/test_load_files.py` load a test file from directories named with each of those characters, and from a nested directory under a parent with spaces; all six failed before the fix.
+
+### BUG-08 — Shared mutable default `foreach={}`
+- **Completed:** 2026-11-10
+- **What / why:** `folker/model/test.py:24`: all `Test` instances share the same default dict.
+- **Impact:** Low (latent).
+- **Cost:** XS.
+- **Benefit:** Removes a source of cross-test contamination.
+- **Done:** `Test.__init__` takes `foreach: dict = None` and stores `foreach if foreach else {}`, the same pattern it already used for `tags` and `stages`, so each `Test` gets its own dict. It was the only mutable default argument in `folker/`. Test in `tests/model/test_test_defaults.py`: mutating the `foreach` of one default-constructed `Test` no longer shows up in another (failed before the fix); guard tests cover an explicit `{}`, a given `foreach`, and `tags`/`stages`.
 
 ### BUG-17 — Working-directory modules not importable from an installed CLI ✅
 - **Completed:** 2026-11-07

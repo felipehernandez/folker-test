@@ -21,7 +21,7 @@ class Test(Validatable):
                  name: str = None,
                  description: str = None,
                  parallel: bool = False,
-                 foreach: dict = {},
+                 foreach: dict = None,
                  tags: [str] = None,
                  stages: [Stage] = None
                  ) -> None:
@@ -30,7 +30,7 @@ class Test(Validatable):
         self.name = name
         self.description = description
         self.parallel = parallel
-        self.foreach = foreach
+        self.foreach = foreach if foreach else {}
         self.tags = tags if tags else []
         self.stages = stages if stages else []
 

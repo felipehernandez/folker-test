@@ -91,7 +91,7 @@ class TestStageEnrichment:
                            action=VoidStageAction(),
                            foreach={'stage_key': ['b']})
 
-        reult = original + enrichment
+        _ = original + enrichment
 
         assert original.foreach == {'template_key': ['a']}
 
