@@ -102,6 +102,7 @@ Tasks only partly done (◐) stay in the plan.
 | TST-03 | Executor tests (sequential/parallel, start methods) | High | S | 2026-11-10 |
 | TST-04 | Loader tests | Med | S | 2026-11-10 |
 | TST-05 | In-process CLI end-to-end tests | High | M | 2026-11-10 |
+| TST-06 | Execution tests for untested actions | Med | M | 2026-11-10 |
 | TST-07 | Deterministic integration environment (healthchecks) | Med | S | 2026-11-10 |
 | TST-08 | Template/enrichment merge test matrix | Med | S | 2026-11-10 |
 
@@ -148,6 +149,15 @@ Tasks only partly done (◐) stay in the plan.
 - **Depends on:** TST-01.
 - **Completed:** 2026-11-10
 - **Done:** `tests/test_cli_end_to_end.py` (26 tests, about 10 s) copies `example/test` and `example/code` into `tmp_path` with the layout of the integration image (`test/`, `testcode/`) and invokes `folker.cli.run` through `CliRunner`. One test per Docker-free job of `docker-compose.yaml`, with the same selection and `-n`: template (as `-t template -st rest -n 2`, the REST one needs mockserver), profile (`-p test-profile`), parallel, conditional, foreach, save, void, print, wait, file, code. On top of those: tag selection (`-st`, several `-t` combined with AND), `-tf` and `-TF`, the exit status (a failing assertion raises `TestSuiteResultException` naming the test, the other selected tests still run, a wrong `-n` raises `TestSuiteNumberExecutionsException`, an unknown profile fails before any stage runs), and `-c` / `-s` values, their precedence over profiles, merged profiles, and that `--trace` does not print a secret. The run mutates process-wide state, so each test gets its own `templates`, `stage_templates` and `profiles` registries and `sys.path`, and the imported `testcode` modules are dropped afterwards; the file passes in any position among the other suites. Checked by mutation: conditions never skipping, every test reporting success, and the working directory not being importable are each caught. Modules that need a service (REST, Postgres, Kafka, RabbitMQ, ZooKeeper, Pub/Sub, gRPC, GraphQL, protobuf, Gmail) stay in the Docker jobs. The Docker-free jobs there now duplicate these tests; dropping them from CI is a separate decision.
+
+
+### TST-06 — Execution tests for untested actions
+- **What / why:** `code`, `file`, `gmail`, `graphql`, `postgres`, `protobuf` and `zookeeper` only have enrichment/validation tests, so their `execute()` is untested. Add tests with mocked clients (`pytest-mock`, `responses`/`requests-mock`).
+- **Impact:** Med.
+- **Cost:** M. One file per module.
+- **Benefit:** Dependency upgrades (DEP-05..08) become verifiable without Docker.
+- **Completed:** 2026-11-10
+- **Done:** one execution test file per module, 99 tests (95 passing, 4 strict xfail): `tests/module/code/test_code_action.py`, `file/test_file_action.py`, `gmail/test_gmail_action.py`, `graphql/test_graphql_action.py`, `postgres/test_postgres_action.py`, `protobuf/test_protobuf_action.py`, `zookeeper/test_zookeeper_action.py`. Where a client can be exercised for real it is, so the tests stay valid when the dependency changes: `graphql` runs the real `gql` client against a local HTTP server (the schema is the fixed introspection result `tests/module/graphql/introspection.json`, independent of the `graphql-core` version), `protobuf` compiles a small `.proto` with `grpc_tools` and uses the real generated messages, `file` and `code` use the real file system and a real module. `gmail` (the MIME message is decoded back from the API payload; credentials lookup), `postgres` (all six statement types, commit rules, row mapping, cleanup on every failure path) and `zookeeper` (every operation, versions, ephemeral and data options) use mocked clients. They pin the error handling as it is: `file`, `postgres`, `protobuf`, `gmail` and `zookeeper create` save the failure as `error` and let the action succeed, while `code`, `graphql` and the other ZooKeeper operations raise and fail the test (consistency is IMP-02). Checked by mutation, one per module (result saved under another name, file appended instead of replaced, Cc header changed, query/mutation selection, commit removed, unknown protobuf fields ignored, ZooKeeper version ignored): each is caught. It found BUG-23 (ZooKeeper clients left open when an operation fails), kept as strict `xfail`. DEP-07 (oauth2client) is only partly covered: the credentials store is mocked, so the authorisation flow still needs its own tests when it is replaced.
 
 
 ### TST-07 — Deterministic integration environment
