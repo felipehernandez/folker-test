@@ -26,6 +26,7 @@ class RabbitMQActionSchema(Schema):
 
     queue = fields.String()
     ack = fields.Boolean()
+    timeout = fields.Float()
 
     @post_load
     def make_action(self, data, **kwargs):

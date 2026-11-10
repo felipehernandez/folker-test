@@ -135,6 +135,7 @@ Tasks only partly done (◐) stay in the plan.
 | BUG-08 | Shared mutable default `foreach={}` in `Test` | Low | XS | 2026-11-10 |
 | BUG-09 | Integer identity comparison in assertions | Low | XS | 2026-11-10 |
 | BUG-13 | Secrets leaked in REST debug logs | Med | S | 2026-11-10 |
+| BUG-14 | Network calls without timeouts can hang forever | High | S | 2026-11-10 |
 | BUG-15 | Failing `if:` condition silently skips the stage | Med | XS | 2026-11-10 |
 | BUG-17 | Working-directory modules not importable from an installed CLI ✅ | High | XS | 2026-11-07 |
 
@@ -217,6 +218,24 @@ Tasks only partly done (◐) stay in the plan.
 - **Benefit:** Safe to enable debug in CI.
 - **Completed:** 2026-11-10
 - **Done:** the fix is in the logger, not in each module, so REST, RabbitMQ and Pub/Sub are covered at once and new modules are safe by default. `TestLogger.action_prelude` (called by every action) records the values of `context.secrets` (nested values included, empty ones ignored), and `action_debug`, `action_error` and `action_warn` mask them with `*` of the same length, as the SECRETS trace dump already did. Masking also matches the JSON-escaped form of a secret, because debug messages are `json.dumps` output where quotes, backslashes and non-ASCII characters are escaped. Longest secrets are masked first. Tests in `tests/logger/test_secret_redaction.py`, including a REST action run with secrets in headers and authorization; all but two failed before the fix. Limits: only values in `context.secrets` are masked (not secrets copied into test variables with `save`), and `message` (the print action), assertion debug dumps and trace `TEST CONTEXT` are not redacted.
+
+### BUG-14 — Network calls without timeouts can hang forever
+- **What / why:** `requests.*` (REST), postgres, rabbitmq, zookeeper and graphql calls have no timeouts (only Kafka has any). A dead endpoint hangs the CI job until the global timeout. Add sensible defaults, overridable per action.
+- **Impact:** High.
+- **Cost:** S.
+- **Benefit:** Fails fast with a clear error.
+- **Related:** FEAT-04.
+- **Completed:** 2026-11-10
+- **Decision:** [ADR 20261110](../adrs/20261110-network-timeouts-default-and-per-action.md).
+- **Done:** REST, Postgres, RabbitMQ, ZooKeeper, GraphQL, gRPC and Pub/Sub now time out after `DEFAULT_TIMEOUT` (30 s, `folker/module/timeout.py`), and each action accepts an optional `timeout` in seconds (schema field, merged by templates, validated centrally in `StageAction`: zero, negative and non-numeric values are `action.timeout` wrong fields). What it bounds, per module:
+  - REST and GraphQL: `requests` timeout (connect and each read, not the total transfer time). A timeout is reported as the action `error`, as any other request failure.
+  - Postgres: `connect_timeout` (rounded up to whole seconds) and `statement_timeout`, so a query slower than the timeout fails too. `execute` also crashed with `UnboundLocalError` in `finally` when the connection failed, hiding the real error; `connection` and `cursor` are now initialised first.
+  - RabbitMQ: `socket_timeout`, `stack_timeout` and `blocked_connection_timeout` of the connection.
+  - ZooKeeper: `KazooClient.start(timeout=...)` (it was already 15 s); a failed start now stops the client, which otherwise keeps its thread alive. The failure still propagates and fails the test.
+  - gRPC: the call deadline (`timeout=` on the stub method), which for a server-streaming call covers the whole stream.
+  - Pub/Sub: `future.result(timeout=...)` for publish, and the `timeout` of `pull`, `acknowledge`, `list_topics` and `list_subscriptions`. gRPC and Pub/Sub were not in the original list.
+  - Tests in `tests/module/test_timeouts.py`; 71 of them failed before the fix.
+- **Not covered:** Kafka already had its own 10 s timeouts and takes no `timeout` field. RabbitMQ and ZooKeeper operations after connecting are not individually bounded. Changelog (CI-10): a request or query slower than 30 s now fails unless the action sets a larger `timeout`.
 
 ### BUG-15 — Failing `if:` condition silently skips the stage
 - **Completed:** 2026-11-10

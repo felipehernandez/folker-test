@@ -4,6 +4,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from folker.model.context import Context
+from folker.module.timeout import DEFAULT_TIMEOUT
 from folker.module.grpc.action import GrpcStageAction
 
 
@@ -32,7 +33,7 @@ class TestGrpcAction:
 
         mocked_grpc.assert_called_with('a_host')
         mocked_stub.assert_called_with(mocked_channel)
-        mocked_method.assert_called_with('data_value')
+        mocked_method.assert_called_with('data_value', timeout=DEFAULT_TIMEOUT)
         assert mocked_response == context.stage_variables['response']
 
     @patch('grpc.insecure_channel')
@@ -59,5 +60,5 @@ class TestGrpcAction:
 
         mocked_grpc.assert_called_with('a_host')
         mocked_stub.assert_called_with(mocked_channel)
-        mocked_method.assert_called_with('data_value')
+        mocked_method.assert_called_with('data_value', timeout=DEFAULT_TIMEOUT)
         assert ['item1', 'item2'] == context.stage_variables['response']

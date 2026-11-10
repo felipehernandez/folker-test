@@ -3,6 +3,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from folker.model.context import Context
+from folker.module.timeout import DEFAULT_TIMEOUT
 from folker.module.rabbitmq.action import (RabbitMQMethod,
                                            RabbitMQStageClearAction,
                                            RabbitMQStageCountAction,
@@ -41,7 +42,11 @@ class TestRabbitMQPublishAction:
         context = self.action.execute(logger=logger, context=Context())
 
         ConnectionParameters.assert_called_once_with(
-            host="a-host", virtual_host="a-virtual-host"
+            host="a-host",
+            virtual_host="a-virtual-host",
+            socket_timeout=DEFAULT_TIMEOUT,
+            stack_timeout=DEFAULT_TIMEOUT,
+            blocked_connection_timeout=DEFAULT_TIMEOUT,
         )
         BlockingConnection.assert_called_once_with(mocked_conn_params)
 

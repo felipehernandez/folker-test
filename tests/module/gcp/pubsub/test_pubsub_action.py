@@ -3,6 +3,7 @@ from unittest.mock import patch, Mock
 import pytest
 
 from folker.model.context import Context
+from folker.module.timeout import DEFAULT_TIMEOUT
 from folker.module.gcp.pubsub.action import (
     PubSubMethod,
     PubSubStagePublishAction,
@@ -77,7 +78,9 @@ class TestPubSubStageSubscribeAction:
         assert "message-id" == context.stage_variables["message_id"]
         assert "a-message" == context.stage_variables["message_content"]
         MockSubscriber.return_value.acknowledge.assert_called_with(
-            subscription="subscription-path", ack_ids=["ack-id"]
+            subscription="subscription-path",
+            ack_ids=["ack-id"],
+            timeout=DEFAULT_TIMEOUT,
         )
 
     @patch("os.path.exists")

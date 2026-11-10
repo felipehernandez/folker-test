@@ -6,6 +6,7 @@ from folker.decorator import timed_action, resolvable_variables, loggable_action
 from folker.logger import TestLogger
 from folker.model import Context
 from folker.model import StageAction
+from folker.module.timeout import effective_timeout
 from folker.module.void.action import VoidStageAction
 
 
@@ -17,6 +18,7 @@ class GrpcStageAction(StageAction):
     stub: str
     method: str
     data: object
+    timeout: float = None
 
     def __init__(self,
                  host: str = None,
@@ -25,6 +27,7 @@ class GrpcStageAction(StageAction):
                  stub: str = None,
                  method: str = None,
                  data: str = None,
+                 timeout: float = None,
                  **kargs) -> None:
         super().__init__()
 
@@ -36,6 +39,7 @@ class GrpcStageAction(StageAction):
         self.method = method
 
         self.data = data
+        self.timeout = timeout
 
     def __add__(self, enrichment: 'GrpcStageAction'):
         result = self.__copy__()
@@ -54,6 +58,8 @@ class GrpcStageAction(StageAction):
             result.method = enrichment.method
         if enrichment.data:
             result.data = enrichment.data
+        if enrichment.timeout is not None:
+            result.timeout = enrichment.timeout
 
         return result
 
@@ -77,7 +83,7 @@ class GrpcStageAction(StageAction):
         stub = StubDefinition(channel)
 
         method_to_call = getattr(stub, self.method)
-        response = method_to_call(self.data)
+        response = method_to_call(self.data, timeout=effective_timeout(self.timeout))
 
         if isinstance(response, Iterable):
             responses = []
