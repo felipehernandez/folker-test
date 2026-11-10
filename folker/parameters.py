@@ -19,7 +19,7 @@ class Configuration:
     logger_type: LoggerType
     execute_tags: set
     skip_tags: set
-    profiles: set
+    profiles: List[str]  # in command-line order: later profiles take precedence
     context: dict
     secrets: dict
     expected_test_count: int
@@ -35,7 +35,7 @@ class Configuration:
                  logger_type: str = None,
                  tags: {str} = None,
                  skip_tags: {str} = None,
-                 profiles: {str} = None,
+                 profiles: List[str] = None,
                  context: dict = None,
                  secrets: dict = None,
                  expected_test_count: int = None,
@@ -56,7 +56,9 @@ class Configuration:
         self.profile_files_re = f'**/{DEFAULT_PROFILE_FILES_RE}'
         self.execute_tags = set(tags) if tags else set()
         self.skip_tags = set(skip_tags) if skip_tags else set()
-        self.profiles = profiles if profiles else set()
+        # A set has no order, and the order decides which profile wins a conflict
+        self.profiles = (sorted(profiles) if isinstance(profiles, (set, frozenset))
+                         else list(profiles)) if profiles else []
         self.context = context if context else dict()
         self.secrets = secrets if secrets else dict()
         self.expected_test_count = int(expected_test_count) if expected_test_count else None
@@ -98,7 +100,8 @@ def parameterised(func):
     @click.option('-p', '--profile',
                   'profiles',
                   multiple=True,
-                  help='Use a profile to initialise context and secrets')
+                  help='Use a profile to initialise context and secrets. Repeat the option, '
+                       'or separate names with commas, to merge several: later ones win')
     @click.option('-c', '--context',
                   'context',
                   type=(str, str),
@@ -147,10 +150,10 @@ def parameterised(func):
                                           for tag_group in skip_tags
                                           for skip_tag in tag_group.split(',')
                                           },
-                               profiles={profile
+                               profiles=[profile
                                          for profile_group in profiles
                                          for profile in profile_group.split(',')
-                                         },
+                                         if profile],
                                context={key: value for key, value in context},
                                secrets={key: value for key, value in secrets},
                                expected_test_count=expected_test_count,

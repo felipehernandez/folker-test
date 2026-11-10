@@ -66,7 +66,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 | DEP-21 | Vuln: certifi: GLOBALTRUST root certificate removed | Low | XS | ☐ |
 | DEP-22 | Vuln: pyOpenSSL: TLS connection bypass through an unhandled SNI callback exception | Low | XS | ☐ |
 | **4 · Bugs** |||||
-| BUG-11 | Multiple profiles: random one picked, rest ignored | Med | XS | ☐ |
 | BUG-12 | Proto generation failures reported as success | Med | XS | ☐ |
 | BUG-18 | `Configuration()` without `test_files` crashes the loader ✅ | Low | XS | ☐ |
 | **5 · Improvements** |||||
@@ -87,7 +86,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 | FEAT-02 | `--validate` dry-run mode | Med | S | ☐ |
 | FEAT-03 | Environment-variable references (`${env.X}`) | Med | S | ☐ |
 | FEAT-04 | Stage-level `retry` / `timeout` | High | M | ☐ |
-| FEAT-05 | Ordered merging of multiple profiles | Med | S | ☐ |
 | FEAT-06 | `--list` tests matching the filters | Low | XS | ☐ |
 | FEAT-07 | Filter tests by name pattern (`-k`) | Low | S | ☐ |
 | FEAT-08 | Configurable parallelism (`--workers N`) | Low | XS | ☐ |
@@ -344,12 +342,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 
 ## 4 · Bugs
 
-### BUG-11 — Multiple profiles: random one picked, rest ignored
-- **What / why:** `config.profiles` is a `set`, and both executors use `list(config.profiles)[0]`. With `-p a -p b` the chosen profile is arbitrary and the others are ignored without a warning. Short-term fix: error out or warn when more than one is given, and fail on an unknown profile name (it currently falls back to DEFAULT silently). Merging is FEAT-05.
-- **Impact:** Med.
-- **Cost:** XS.
-- **Benefit:** Deterministic configuration.
-
 ### BUG-12 — Proto generation failures reported as success
 - **What / why:** `folker/load/protos.py`: `subprocess.run` without `check=True` means protoc errors are logged "OK". It also calls `python3` instead of `sys.executable`, so it can pick the wrong interpreter or venv.
 - **Impact:** Med. Confusing downstream import errors.
@@ -443,7 +435,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 - **Depends on:** BUG-12.
 
 ### IMP-12 — Housekeeping
-- **What / why:** Delete the empty `main.py`. Remove the stray class attributes in `RestStageAction`. Fix the `enrichment.body_json or enrichment.body_json` typo (`folker/module/rest/action.py:81`). Update `docs/Documentation.md` for the behaviour changes from BUG-06, BUG-15 and IMP-01.
+- **What / why:** Delete the empty `main.py`. Remove the stray class attributes in `RestStageAction`. Fix the `enrichment.body_json or enrichment.body_json` typo (`folker/module/rest/action.py:81`). Update `docs/Documentation.md` for the behaviour changes from BUG-06, BUG-15 and IMP-01 (BUG-11 is already documented).
 - **Impact:** Low.
 - **Cost:** XS.
 - **Benefit:** Less confusion for contributors.
@@ -478,13 +470,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 - **Cost:** M.
 - **Benefit:** Robust tests against eventually-consistent systems.
 - **Depends on:** BUG-14.
-
-### FEAT-05 — Ordered merging of multiple profiles
-- **What / why:** Allow `-p base -p staging`, merged in order (later wins), for example shared defaults plus per-environment overrides.
-- **Impact:** Med.
-- **Cost:** S.
-- **Benefit:** Fewer duplicated profile files.
-- **Depends on:** BUG-11.
 
 ### FEAT-06 — `--list`
 - **What / why:** Print the tests that would run with the current tag and file filters, without running them.
@@ -548,8 +533,8 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 
 1. **Safety net (≈1–2 days):** TST-03
 1b. **Security advisories (≈½ day, do first):** DEP-11, DEP-21, DEP-13, DEP-14, DEP-12, DEP-15, DEP-22, DEP-16, DEP-17, DEP-20, DEP-19, DEP-18 (DEP-03 and DEP-02 close several of them for free)
-2. **Remaining bugs (≈2 days):** BUG-11, BUG-12, BUG-18, IMP-01, IMP-12
+2. **Remaining bugs (≈2 days):** BUG-12, BUG-18, IMP-01, IMP-12
 3. **Pipeline hardening (≈2–3 days):** CI-07, CI-08, CI-13, TST-04, TST-05
 4. **Dependency overhaul (≈1 week, ADRs first):** DEP-02, DEP-03, DEP-01, DEP-05, DEP-06, DEP-04, DEP-07, DEP-08, CI-11
 5. **Structural (incremental):** IMP-07, IMP-10, IMP-03, IMP-04, DEP-10, TST-08, IMP-05, IMP-02, IMP-06, IMP-09, IMP-11
-6. **Release and features:** CI-09, CI-10, FEAT-01, FEAT-02, FEAT-03, FEAT-04, FEAT-05, FEAT-06, FEAT-07, FEAT-08, FEAT-09, IMP-08
+6. **Release and features:** CI-09, CI-10, FEAT-01, FEAT-02, FEAT-03, FEAT-04, FEAT-06, FEAT-07, FEAT-08, FEAT-09, IMP-08

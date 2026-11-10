@@ -19,6 +19,16 @@ class RequireGreetingStage(Stage):
         return context
 
 
+class ExpectGreetingStage(Stage):
+    def __init__(self, expected=None, **kwargs):
+        super().__init__(**kwargs)
+        self.expected = expected
+
+    def execute(self, logger, context):
+        assert context.resolve_variable_reference('greeting') == self.expected
+        return context
+
+
 @pytest.fixture()
 def start_method(request, monkeypatch):
     """Make ParallelExecutor's pool use the given start method, without touching global state."""
@@ -45,6 +55,17 @@ class TestParallelExecutorProfile:
         success, failures = ParallelExecutor().execute(Configuration(profiles={'profile'}), _tests())
 
         assert (success, failures) == (['test_0', 'test_1'], [])
+
+    def test_merged_profiles_reach_the_workers(self, start_method, monkeypatch):
+        monkeypatch.setitem(folker.profiles, 'base', Profile(name='base', context={'greeting': 'hi'}))
+        monkeypatch.setitem(folker.profiles, 'override',
+                            Profile(name='override', context={'greeting': 'hello'}))
+
+        success, failures = ParallelExecutor().execute(
+            Configuration(profiles=['base', 'override']),
+            [FolkerTest(name='test', stages=[ExpectGreetingStage(name='stage', expected='hello')])])
+
+        assert (success, failures) == (['test'], [])
 
     def test_variables_from_configuration_reach_the_workers(self, start_method):
         config = Configuration(context={'greeting': 'hello'})

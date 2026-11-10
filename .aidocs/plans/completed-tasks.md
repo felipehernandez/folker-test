@@ -135,6 +135,7 @@ Tasks only partly done (◐) stay in the plan.
 | BUG-08 | Shared mutable default `foreach={}` in `Test` | Low | XS | 2026-11-10 |
 | BUG-09 | Integer identity comparison in assertions | Low | XS | 2026-11-10 |
 | BUG-10 | Non-raw regex string (warning in 3.12+) | Low | XS | 2026-11-10 |
+| BUG-11 | Multiple profiles: random one picked, rest ignored | Med | XS | 2026-11-10 |
 | BUG-13 | Secrets leaked in REST debug logs | Med | S | 2026-11-10 |
 | BUG-14 | Network calls without timeouts can hang forever | High | S | 2026-11-10 |
 | BUG-15 | Failing `if:` condition silently skips the stage | Med | XS | 2026-11-10 |
@@ -221,6 +222,14 @@ Tasks only partly done (◐) stay in the plan.
 - **Completed:** 2026-11-10
 - **Done:** already fixed when picked up: `contains_variable_reference` uses `r'\${([^{}]+)}'` (raw string, since `8620ad8`), and compiling every `.py` file under `folker/`, `tests/` and `example/` on Python 3.12 with warnings as errors reports nothing. What was missing was a guard, so `tests/test_source_warnings.py` compiles each source file with warnings as errors (an invalid escape is a `DeprecationWarning` on 3.10/3.11 and a `SyntaxWarning` on 3.12+, and pytest misses it whenever a cached `.pyc` exists) and checks that it detects a bad escape. It fails on the pre-fix `context.py` on 3.10 and 3.12 and passes now. The guard has no third-party imports, so it also runs on 3.12 with only pytest (`--noconftest`), which is useful for DEP-04 while `grpcio-tools==1.48.1` still won't install there (DEP-06).
 
+### BUG-11 — Multiple profiles: random one picked, rest ignored
+- **What / why:** `config.profiles` is a `set`, and both executors use `list(config.profiles)[0]`. With `-p a -p b` the chosen profile is arbitrary and the others are ignored without a warning. Short-term fix: error out or warn when more than one is given, and fail on an unknown profile name (it currently falls back to DEFAULT silently). Merging is FEAT-05.
+- **Impact:** Med.
+- **Cost:** XS.
+- **Benefit:** Deterministic configuration.
+- **Completed:** 2026-11-10
+- **Done:** (superseded for several profiles by FEAT-05: they are now merged instead of rejected) verified on the old code: `-p stagin` (a typo) and `-p base -p staging` both exited 0 and ran with DEFAULT or an arbitrary profile. New `select_profile(config)` in `folker/executor/__init__.py`, used by both executors, now returns DEFAULT when no profile is given and otherwise requires exactly one loaded profile: an unknown name or several names raise `InvalidProfileSelectionException`, listing what was selected and which profiles exist. `folker/cli.py` calls it right after loading, so the run fails before any test executes, including when no test would reach an executor. The docs claimed `-p a -p b` was supported, so the `-p` row of `docs/Documentation.md` now says exactly one profile. Tests in `tests/executor/test_profile_selection.py` and `tests/test_cli.py` (end to end through the CLI). Changelog (CI-10): a profile name that does not exist now fails the run. See FEAT-05 for several profiles.
+
 ### BUG-13 — Secrets leaked in REST debug logs
 - **What / why:** `RestStageAction._log_debug` dumps headers, auth and body after variable resolution, so secrets referenced via `${...}` print in clear text with `--debug`. Apply the same obfuscation the test logger uses for secrets.
 - **Impact:** Med. Credentials end up in CI logs.
@@ -270,3 +279,20 @@ Tasks only partly done (◐) stay in the plan.
 - **Cost:** XS. ~10 lines plus a CLI regression test (`tests/test_cli.py`).
 - **Benefit:** Same behaviour for Docker, pip and editable installs.
 - **Note:** `0e8c453` also changed the image `WORKDIR` from `/` to `/app`. Mention it in the changelog (CI-10) for users who mount test files into the container.
+
+---
+
+## 6 · Features
+
+| ID | Title | Impact | Cost | Completed |
+|---|---|---|---|---|
+| FEAT-05 | Ordered merging of multiple profiles | Med | S | 2026-11-10 |
+
+### FEAT-05 — Ordered merging of multiple profiles
+- **What / why:** Allow `-p base -p staging`, merged in order (later wins), for example shared defaults plus per-environment overrides.
+- **Impact:** Med.
+- **Cost:** S.
+- **Benefit:** Fewer duplicated profile files.
+- **Completed:** 2026-11-10
+- **Done:** `-p base -p staging` (or `-p base,staging`) builds one profile, named `base,staging`, merging the definitions in command-line order. `Configuration.profiles` is now an ordered list (it was a set, which has no order); empty names (`-p a,,b`) are ignored and a name repeated later takes precedence again. `select_profile` (`folker/executor/__init__.py`) merges `context` and `secrets` with `mergedeep`: nested mappings combine key by key, and on any other conflict (scalar vs scalar, list vs list, mapping vs scalar) the later profile's value replaces the earlier one. Lists are replaced, not concatenated. The registered profiles are not modified, and the single-profile case returns the profile itself. A name that is not loaded still fails with `InvalidProfileSelectionException` (BUG-11 fixed the silent fallback to DEFAULT). Precedence overall is unchanged: `-c` / `-s` values beat any profile. `-p` row of `docs/Documentation.md` updated. Tests in `tests/executor/test_profile_selection.py`, `tests/test_parameters.py`, `tests/test_cli.py` (end to end, both orders) and `tests/executor/test_parallel_executor.py` (merged profile reaches workers under fork, spawn and forkserver).
+

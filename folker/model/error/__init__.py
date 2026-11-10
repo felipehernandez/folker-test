@@ -3,7 +3,9 @@ from .assertions import TestFailException, \
     UnresolvableAssertionException, \
     UnresolvableConditionException
 from .error import SourceException
-from .folker import TestSuiteNumberExecutionsException, TestSuiteResultException
+from .folker import InvalidProfileSelectionException, \
+    TestSuiteNumberExecutionsException, \
+    TestSuiteResultException
 from .load import FileException, \
     UnrecognisedSchemaException, \
     InvalidSchemaDefinitionException, \
