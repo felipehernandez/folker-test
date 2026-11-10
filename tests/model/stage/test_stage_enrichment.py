@@ -35,6 +35,19 @@ class TestStageEnrichment:
 
         assert result.action.time == 2
 
+    def test_enrich_action_of_void_template(self):
+        # BUG-04: a template with only shared save/log/assertions, extended by a stage with an action
+        original = Stage(name='a_template',
+                         action=VoidStageAction(),
+                         save={'a_key': 'a_value'})
+        enrichment = Stage(name='a_name',
+                           action=WaitStageAction(time=3))
+
+        result = original + enrichment
+
+        assert result.action.time == 3
+        assert result.save.save == {'a_key': 'a_value'}
+
     def test_enrich_save(self):
         original = Stage(name='a_name',
                          action=WaitStageAction(time=2))

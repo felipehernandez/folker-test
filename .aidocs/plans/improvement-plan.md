@@ -54,7 +54,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 | DEP-10 | Optional extras per module 📐 | Med | S | ☐ |
 | **4 · Bugs** |||||
 | BUG-03 | `foreach` stops after first failing iteration ✅ | High | XS | ☐ |
-| BUG-04 | VOID template + real action → `action = None` ✅ | High | XS | ☐ |
 | BUG-05 | Stage's own `foreach` lost when using a template ✅ | Med | XS | ☐ |
 | BUG-06 | Validation ignores `wrong_fields` ✅ | Med | XS | ☐ |
 | BUG-07 | Test files in paths with spaces fail to load ✅ | Med | XS | ☐ |
@@ -250,12 +249,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 - **Impact:** High. Data-driven tests hide failures.
 - **Cost:** XS. Evaluate first, then combine.
 - **Benefit:** Complete results for data-driven tests.
-
-### BUG-04 — VOID template + real action → `action = None` ✅
-- **What / why:** `VoidStageAction.__add__` (`folker/module/void/action.py:12`) returns `None`, so a template stage without an action, extended by a stage with an action, ends up with no action and crashes. It should return the enrichment (or a copy of self when the enrichment is also VOID).
-- **Impact:** High.
-- **Cost:** XS.
-- **Benefit:** Templates usable for shared save/log/assert blocks.
 
 ### BUG-05 — Stage's own `foreach` lost when using a template ✅
 - **What / why:** `folker/model/stage/stage.py:62` writes the merged dict to `result.params` instead of `result.foreach`.
@@ -514,7 +507,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 
 ## Suggested order (waves)
 
-1. **Safety net (≈1–2 days):** TST-03, BUG-03, BUG-04, BUG-05, BUG-07, BUG-08, BUG-09, BUG-10
+1. **Safety net (≈1–2 days):** TST-03, BUG-03, BUG-05, BUG-07, BUG-08, BUG-09, BUG-10
 2. **Remaining bugs (≈2 days):** BUG-06, BUG-11, BUG-12, BUG-13, BUG-14, BUG-15, BUG-16, IMP-01, IMP-12
 3. **Pipeline hardening (≈2–3 days):** CI-07, CI-08, TST-04, TST-05
 4. **Dependency overhaul (≈1 week, ADRs first):** DEP-02, DEP-03, DEP-01, DEP-05, DEP-06, DEP-04, DEP-07, DEP-08, CI-11

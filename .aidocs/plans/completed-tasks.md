@@ -126,6 +126,7 @@ Tasks only partly done (◐) stay in the plan.
 |---|---|---|---|---|
 | BUG-01 | `collections.Mapping` crash on Python ≥ 3.10 ✅ | High | XS | 2026-11-06 |
 | BUG-02 | Parallel tests lose the selected profile | High | S | 2026-11-10 |
+| BUG-04 | VOID template + real action → `action = None` | High | XS | 2026-11-10 |
 | BUG-17 | Working-directory modules not importable from an installed CLI ✅ | High | XS | 2026-11-07 |
 
 ### BUG-01 — `collections.Mapping` crash on Python ≥ 3.10 ✅
@@ -143,6 +144,14 @@ Tasks only partly done (◐) stay in the plan.
 - **Benefit:** Parallel runs behave like sequential ones.
 - **Depends on:** TST-03 recommended. Root cause addressed in IMP-03.
 - **Done:** `ParallelExecutor.execute` now resolves the selected profile in the parent process and passes it to each worker, instead of the worker reading the global `folker.profiles` (empty under `spawn`/`forkserver`). Reproduced first on Python 3.10: sequential and `fork` passed, `spawn` and `forkserver` failed every test with "Missing reference". Regression tests in `tests/executor/test_parallel_executor.py` run the executor under all three start methods; the profile test failed under `spawn`/`forkserver` before the fix. Root cause (global registries) is still addressed by IMP-03.
+
+### BUG-04 — VOID template + real action → `action = None`
+- **Completed:** 2026-11-10
+- **What / why:** `VoidStageAction.__add__` (`folker/module/void/action.py:12`) returns `None`, so a template stage without an action, extended by a stage with an action, ends up with no action and crashes. It should return the enrichment (or a copy of self when the enrichment is also VOID).
+- **Impact:** High.
+- **Cost:** XS.
+- **Benefit:** Templates usable for shared save/log/assert blocks.
+- **Done:** `VoidStageAction.__add__` returns a copy of the enrichment (so VOID + real action gives the real action, and VOID + VOID stays VOID) instead of `None`. Reproduced first on Python 3.10: a VOID template stage extended by a `WaitStageAction` stage ended with `action = None`. Regression tests: `tests/module/void/test_action_enrichment.py` and `test_enrich_action_of_void_template` in `tests/model/stage/test_stage_enrichment.py`; they failed before the fix. The reverse order (real template + VOID stage) already worked.
 
 ### BUG-17 — Working-directory modules not importable from an installed CLI ✅
 - **Completed:** 2026-11-07
