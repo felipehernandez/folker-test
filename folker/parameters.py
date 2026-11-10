@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import List
+from typing import Collection, List
 
 import click
 
@@ -39,7 +39,7 @@ class Configuration:
                  context: dict = None,
                  secrets: dict = None,
                  expected_test_count: int = None,
-                 test_files: {str} = None,
+                 test_files: Collection[str] = None,
                  test_files_re: str = None
                  ) -> None:
         self.debug_mode = debug or trace
@@ -49,14 +49,13 @@ class Configuration:
         self.logger_type = Configuration.LoggerType[logger_type] \
             if logger_type \
             else Configuration.LoggerType.COLOR
-        self.test_files = test_files
+        self.test_files = set(test_files) if test_files else set()
         resolved_test_files_re = test_files_re if test_files_re else DEFAULT_TEST_FILES_RE
         self.test_files_re = f'**/{resolved_test_files_re}'
         self.template_files_re = f'**/{DEFAULT_TEMPLATE_FILES_RE}'
         self.profile_files_re = f'**/{DEFAULT_PROFILE_FILES_RE}'
         self.execute_tags = set(tags) if tags else set()
         self.skip_tags = set(skip_tags) if skip_tags else set()
-        # A set has no order, and the order decides which profile wins a conflict
         self.profiles = (sorted(profiles) if isinstance(profiles, (set, frozenset))
                          else list(profiles)) if profiles else []
         self.context = context if context else dict()

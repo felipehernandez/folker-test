@@ -136,11 +136,13 @@ Tasks only partly done (◐) stay in the plan.
 | BUG-09 | Integer identity comparison in assertions | Low | XS | 2026-11-10 |
 | BUG-10 | Non-raw regex string (warning in 3.12+) | Low | XS | 2026-11-10 |
 | BUG-11 | Multiple profiles: random one picked, rest ignored | Med | XS | 2026-11-10 |
+| BUG-12 | Proto generation failures reported as success | Med | XS | 2026-11-10 |
 | BUG-13 | Secrets leaked in REST debug logs | Med | S | 2026-11-10 |
 | BUG-14 | Network calls without timeouts can hang forever | High | S | 2026-11-10 |
 | BUG-15 | Failing `if:` condition silently skips the stage | Med | XS | 2026-11-10 |
 | BUG-16 | REST debug logging can turn a request into an error | Low | XS | 2026-11-10 |
 | BUG-17 | Working-directory modules not importable from an installed CLI ✅ | High | XS | 2026-11-07 |
+| BUG-18 | `Configuration()` without `test_files` crashes the loader | Low | XS | 2026-11-10 |
 
 ### BUG-01 — `collections.Mapping` crash on Python ≥ 3.10 ✅
 - **Completed:** 2026-11-06
@@ -230,6 +232,14 @@ Tasks only partly done (◐) stay in the plan.
 - **Completed:** 2026-11-10
 - **Done:** (superseded for several profiles by FEAT-05: they are now merged instead of rejected) verified on the old code: `-p stagin` (a typo) and `-p base -p staging` both exited 0 and ran with DEFAULT or an arbitrary profile. New `select_profile(config)` in `folker/executor/__init__.py`, used by both executors, now returns DEFAULT when no profile is given and otherwise requires exactly one loaded profile: an unknown name or several names raise `InvalidProfileSelectionException`, listing what was selected and which profiles exist. `folker/cli.py` calls it right after loading, so the run fails before any test executes, including when no test would reach an executor. The docs claimed `-p a -p b` was supported, so the `-p` row of `docs/Documentation.md` now says exactly one profile. Tests in `tests/executor/test_profile_selection.py` and `tests/test_cli.py` (end to end through the CLI). Changelog (CI-10): a profile name that does not exist now fails the run. See FEAT-05 for several profiles.
 
+### BUG-12 — Proto generation failures reported as success
+- **What / why:** `folker/load/protos.py`: `subprocess.run` without `check=True` means protoc errors are logged "OK". It also calls `python3` instead of `sys.executable`, so it can pick the wrong interpreter or venv.
+- **Impact:** Med. Confusing downstream import errors.
+- **Cost:** XS.
+- **Benefit:** Failures reported where they happen.
+- **Completed:** 2026-11-10
+- **Done:** verified with real protoc runs: a `.proto` with a syntax error was logged `<OK>` and counted as generated. `folker/load/protos.py` now runs protoc with `check=True` and `capture_output=True`, so a non-zero exit (or a protoc that cannot start) is reported and the file is not added to the generated list. It uses `sys.executable` instead of `python3`, so the `grpc_tools` installed next to folker is the one used, also inside a virtualenv. The report is the new `SystemLogger.proto_generation_failed(file, error)`, which carries protoc's stderr and, unlike `loading_file_error` (trace only), is always printed: the generated `_pb2` modules will be missing and the later import errors would not point back at the file. Generation continues with the remaining files, and the run itself does not fail; failing the run on load errors is IMP-01. protoc output on success is now captured and not shown. Tests in `tests/load/test_protos.py` (real protoc for valid, broken and mixed files, interpreter used, startup failure, missing `grpc_tools`, visibility without debug or trace); the failure and interpreter tests failed before the fix.
+
 ### BUG-13 — Secrets leaked in REST debug logs
 - **What / why:** `RestStageAction._log_debug` dumps headers, auth and body after variable resolution, so secrets referenced via `${...}` print in clear text with `--debug`. Apply the same obfuscation the test logger uses for secrets.
 - **Impact:** Med. Credentials end up in CI logs.
@@ -279,6 +289,14 @@ Tasks only partly done (◐) stay in the plan.
 - **Cost:** XS. ~10 lines plus a CLI regression test (`tests/test_cli.py`).
 - **Benefit:** Same behaviour for Docker, pip and editable installs.
 - **Note:** `0e8c453` also changed the image `WORKDIR` from `/` to `/app`. Mention it in the changelog (CI-10) for users who mount test files into the container.
+
+### BUG-18 — `Configuration()` without `test_files` crashes the loader
+- **What / why:** `Configuration.test_files` defaults to `None`, and `_should_load_file` calls `len(selected_test_files)` (`folker/load/files.py`), so loading with a hand-built `Configuration()` raises `TypeError: object of type 'NoneType' has no len()`. The CLI always passes a list, so it only affects code (and tests) that build a `Configuration` directly. Found while writing the BUG-07 tests, which had to pass `test_files=[]`.
+- **Impact:** Low.
+- **Cost:** XS. Default to an empty collection in the constructor, as `profiles`, `context` and `secrets` already do.
+- **Benefit:** `Configuration()` is usable as is, and tests don't need a workaround.
+- **Completed:** 2026-11-10
+- **Done:** `Configuration.__init__` stores `set(test_files) if test_files else set()`, like `execute_tags`, `skip_tags` and `profiles`, so `None`, a list and a set are all accepted and `Configuration().test_files == set()`. The type hint says so (`Collection[str]`). The two BUG-07 loader tests no longer pass `test_files=[]`. New tests in `tests/load/test_load_files.py`: no selection (`None`, `[]`, `set()`) loads every file, and a selection (list or set) loads only the named ones; eight failed before the fix with the `TypeError`. The CLI is unaffected: it always passed a set.
 
 ---
 

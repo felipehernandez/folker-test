@@ -66,8 +66,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 | DEP-21 | Vuln: certifi: GLOBALTRUST root certificate removed | Low | XS | ☐ |
 | DEP-22 | Vuln: pyOpenSSL: TLS connection bypass through an unhandled SNI callback exception | Low | XS | ☐ |
 | **4 · Bugs** |||||
-| BUG-12 | Proto generation failures reported as success | Med | XS | ☐ |
-| BUG-18 | `Configuration()` without `test_files` crashes the loader ✅ | Low | XS | ☐ |
 | **5 · Improvements** |||||
 | IMP-01 | Strict loading: broken YAML fails the run | High | S | ☐ |
 | IMP-02 | Narrow broad `except Exception` handling | Med | M | ☐ |
@@ -342,18 +340,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 
 ## 4 · Bugs
 
-### BUG-12 — Proto generation failures reported as success
-- **What / why:** `folker/load/protos.py`: `subprocess.run` without `check=True` means protoc errors are logged "OK". It also calls `python3` instead of `sys.executable`, so it can pick the wrong interpreter or venv.
-- **Impact:** Med. Confusing downstream import errors.
-- **Cost:** XS.
-- **Benefit:** Failures reported where they happen.
-
-### BUG-18 — `Configuration()` without `test_files` crashes the loader ✅
-- **What / why:** `Configuration.test_files` defaults to `None`, and `_should_load_file` calls `len(selected_test_files)` (`folker/load/files.py`), so loading with a hand-built `Configuration()` raises `TypeError: object of type 'NoneType' has no len()`. The CLI always passes a list, so it only affects code (and tests) that build a `Configuration` directly. Found while writing the BUG-07 tests, which had to pass `test_files=[]`.
-- **Impact:** Low.
-- **Cost:** XS. Default to an empty collection in the constructor, as `profiles`, `context` and `secrets` already do.
-- **Benefit:** `Configuration()` is usable as is, and tests don't need a workaround.
-
 ---
 
 ## 5 · Improvements
@@ -533,7 +519,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 
 1. **Safety net (≈1–2 days):** TST-03
 1b. **Security advisories (≈½ day, do first):** DEP-11, DEP-21, DEP-13, DEP-14, DEP-12, DEP-15, DEP-22, DEP-16, DEP-17, DEP-20, DEP-19, DEP-18 (DEP-03 and DEP-02 close several of them for free)
-2. **Remaining bugs (≈2 days):** BUG-12, BUG-18, IMP-01, IMP-12
+2. **Remaining bugs (≈2 days):** IMP-01, IMP-12
 3. **Pipeline hardening (≈2–3 days):** CI-07, CI-08, CI-13, TST-04, TST-05
 4. **Dependency overhaul (≈1 week, ADRs first):** DEP-02, DEP-03, DEP-01, DEP-05, DEP-06, DEP-04, DEP-07, DEP-08, CI-11
 5. **Structural (incremental):** IMP-07, IMP-10, IMP-03, IMP-04, DEP-10, TST-08, IMP-05, IMP-02, IMP-06, IMP-09, IMP-11
