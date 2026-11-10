@@ -1,6 +1,6 @@
 # folker-test — Improvement Execution Plan
 
-Created: 2026-11-05 · Baseline: branch `beta` @ `2c625c6`
+Created: 2026-11-05 · Last updated: 2026-11-10 · Baseline: branch `beta` @ `2c625c6`
 
 Pick tasks by ID ("work on BUG-03"). Each task is meant to be one small PR.
 Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with their completion dates and notes.
@@ -35,6 +35,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 | CI-09 | Image vulnerability scan, SBOM, multi-arch build | Med | S | ☐ |
 | CI-10 | Versioning and release process | Med | M | ☐ |
 | CI-11 | Renovate guardrails and grouping | Med | XS | ☐ |
+| CI-13 | Branch rules as code, in sync with the pipeline | Med | S | ☐ |
 | **2 · Testability** |||||
 | TST-02 | Regression-test policy for bug fixes | High | — | ☐ |
 | TST-03 | Executor tests (sequential/parallel, start methods) | High | S | ☐ |
@@ -62,6 +63,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 | BUG-14 | Network calls without timeouts can hang forever | High | S | ☐ |
 | BUG-15 | Failing `if:` condition silently skips the stage | Med | XS | ☐ |
 | BUG-16 | REST debug logging can turn a request into an error 🔍 | Low | XS | ☐ |
+| BUG-18 | `Configuration()` without `test_files` crashes the loader ✅ | Low | XS | ☐ |
 | **5 · Improvements** |||||
 | IMP-01 | Strict loading: broken YAML fails the run | High | S | ☐ |
 | IMP-02 | Narrow broad `except Exception` handling | Med | M | ☐ |
@@ -125,6 +127,14 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 - **Cost:** XS. `renovate.json`.
 - **Benefit:** Fewer, safer dependency PRs.
 - **Depends on:** CI-01, CI-02, CI-03.
+
+### CI-13 — Branch rules as code, in sync with the pipeline
+- **What / why:** The required status checks on `beta` and `main` live only in GitHub settings, and nothing ties them to the CircleCI job names. Deleting `validate-integration-tests` in CI-05 left the PR waiting forever on a check that no longer existed. Today: `beta` has a ruleset (24 required checks, strict, no bypass), `main` still has the old classic protection requiring `validate-integration-tests`, so the first `beta` → `main` PR will get stuck the same way. `ci/circleci: unit-tests-3.10` is not required on either, so a PR can merge with failing unit tests.
+- **Impact:** Med. Merges can't be blocked by a ghost check, and a failing unit-test or lint job can't be merged by mistake.
+- **Cost:** S. `.github/rulesets/beta.json` and `main.json` (exported from the live ruleset, normalised), `scripts/check_rulesets.py` run in the `lint` job, and optionally `scripts/apply_rulesets.sh`.
+- **Benefit:** Reviewable branch rules. The check script fails when a required check doesn't match a job in `.circleci/config.yml` (matrix expanded), or when a job such as lint or unit tests isn't required, so a rename or removal is caught in the PR that makes it.
+- **Depends on:** CI-05 (done). Needs a repo admin to apply the rulesets; the API refuses non-admins. Remove the classic protection on `main` once its ruleset exists.
+- **Note:** the unit-test check name carries the Python version (`unit-tests-3.10`), so DEP-04 must update the required check in the same change.
 
 ---
 
@@ -199,6 +209,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 - **Cost:** S.
 - **Benefit:** Supported runtime.
 - **Depends on:** BUG-01, BUG-10, CI-01, DEP-06.
+- **Note:** the `unit-tests-<python>` check name changes with the version. Update the required checks in the same change (CI-13), or merges block on a check that never reports.
 
 ### DEP-05 — `google-cloud-pubsub` 1.7.2 → 2.x 📐
 - **What / why:** The 2020 release holds `google-api-core`, `grpcio` and `protobuf` back. During analysis the resolver couldn't find any buildable grpc set alongside it on Python 3.9/arm64. The 2.x API changed (request objects, `subscribe` flow), so `folker/module/gcp/pubsub/action.py` (313 lines) needs porting.
@@ -294,6 +305,12 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 - **Impact:** Low.
 - **Cost:** XS.
 - **Benefit:** Debug mode never changes behaviour.
+
+### BUG-18 — `Configuration()` without `test_files` crashes the loader ✅
+- **What / why:** `Configuration.test_files` defaults to `None`, and `_should_load_file` calls `len(selected_test_files)` (`folker/load/files.py`), so loading with a hand-built `Configuration()` raises `TypeError: object of type 'NoneType' has no len()`. The CLI always passes a list, so it only affects code (and tests) that build a `Configuration` directly. Found while writing the BUG-07 tests, which had to pass `test_files=[]`.
+- **Impact:** Low.
+- **Cost:** XS. Default to an empty collection in the constructor, as `profiles`, `context` and `secrets` already do.
+- **Benefit:** `Configuration()` is usable as is, and tests don't need a workaround.
 
 ---
 
@@ -480,8 +497,8 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 ## Suggested order (waves)
 
 1. **Safety net (≈1–2 days):** TST-03, BUG-09, BUG-10
-2. **Remaining bugs (≈2 days):** BUG-06, BUG-11, BUG-12, BUG-13, BUG-14, BUG-15, BUG-16, IMP-01, IMP-12
-3. **Pipeline hardening (≈2–3 days):** CI-07, CI-08, TST-04, TST-05
+2. **Remaining bugs (≈2 days):** BUG-06, BUG-11, BUG-12, BUG-18, BUG-13, BUG-14, BUG-15, BUG-16, IMP-01, IMP-12
+3. **Pipeline hardening (≈2–3 days):** CI-07, CI-08, CI-13, TST-04, TST-05
 4. **Dependency overhaul (≈1 week, ADRs first):** DEP-02, DEP-03, DEP-01, DEP-05, DEP-06, DEP-04, DEP-07, DEP-08, CI-11
 5. **Structural (incremental):** IMP-07, IMP-10, IMP-03, IMP-04, DEP-10, TST-08, IMP-05, IMP-02, IMP-06, IMP-09, IMP-11
 6. **Release and features:** CI-09, CI-10, FEAT-01, FEAT-02, FEAT-03, FEAT-04, FEAT-05, FEAT-06, FEAT-07, FEAT-08, FEAT-09, IMP-08

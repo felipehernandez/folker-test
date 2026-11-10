@@ -61,6 +61,7 @@ Tasks only partly done (◐) stay in the plan.
 - **Benefit:** Faster, honest pipelines.
 - **Depends on:** TST-07.
 - **Done:** `run-integration-tests` runs `docker-compose run` once (no retry, no `sleep`), after a step that prints the compose version. `validate-integration-tests` is deleted and `publish-beta`/`publish-latest` require `run-integration-tests` directly (CircleCI waits for every matrix variant). Done together with TST-07 in one change.
+- **Follow-up:** deleting `validate-integration-tests` left the PR waiting on that check, because `beta` required it in GitHub's branch protection (the API call that was meant to confirm this had been refused to a non-admin token, which looked like "no protection"). The required checks were then updated in a `beta` ruleset; `main` still needs the same. Tracked as CI-13.
 
 ### CI-06 — De-duplicate the three CircleCI workflows
 - **Completed:** 2026-11-07
