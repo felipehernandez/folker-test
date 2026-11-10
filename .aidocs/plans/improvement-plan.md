@@ -30,7 +30,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 | ID | Title | Impact | Cost | Status |
 |---|---|---|---|---|
 | **1 · CI/CD** |||||
-| CI-07 | Pin integration service images (Kafka/ZooKeeper done) | High | S | ◐ |
 | CI-08 | Update EOL executors and actions | Med | XS | ☐ |
 | CI-09 | Image vulnerability scan, SBOM, multi-arch build | Med | S | ☐ |
 | CI-10 | Versioning and release process | Med | M | ☐ |
@@ -94,14 +93,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 ---
 
 ## 1 · CI/CD
-
-### CI-07 — Pin integration service images
-- **What / why:** `mockserver:latest`, `gcloud-pubsub-emulator:latest` and `postgres` (untagged) drift silently. Pin by version (ideally digest) and let Renovate bump them.
-- **Already happened (2026-11-05):** ✅ Bitnami removed its free images from `docker.io/bitnami`, and CI failed with `manifest for bitnami/kafka:3 not found`. A `bitnamilegacy` hotfix was replaced by official images: `apache/kafka:4.1.0` in single-node KRaft mode (no ZooKeeper dependency) and `zookeeper:3.9.4`. The unused `kafka2` service was removed (verified: kafka 1/1, zookeeper 4/4). **Remaining:** pin `mockserver`, the pubsub emulator and `postgres`; update the commented-out Bitnami services in `.devcontainer/docker-compose.yml`.
-- **Impact:** High. External changes can break CI with no code change.
-- **Cost:** S. `docker-compose.yaml` and `.devcontainer/docker-compose.yml`.
-- **Benefit:** Reproducible builds. Upgrades become visible PRs.
-- **Depends on:** none.
 
 ### CI-08 — Update EOL executors and actions
 - **What / why:** `circleci/buildpack-deps:stretch` (Debian 9, EOL) and `github/codeql-action@v2` (deprecated) need replacing with `cimg/base` and `@v3`. Review orb versions.
@@ -537,7 +528,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 1. **Safety net (≈1–2 days):** TST-03
 1b. **Security advisories (≈½ day, do first):** DEP-11, DEP-21, DEP-13, DEP-14, DEP-12, DEP-15, DEP-22, DEP-16, DEP-17, DEP-20, DEP-19, DEP-18 (DEP-03 and DEP-02 close several of them for free)
 2. **Remaining bugs (≈2 days):** BUG-19, BUG-20, BUG-21, IMP-01, IMP-12
-3. **Pipeline hardening (≈2–3 days):** CI-07, CI-08, CI-13, TST-04, TST-05
+3. **Pipeline hardening (≈2–3 days):** CI-08, CI-13, TST-04, TST-05
 4. **Dependency overhaul (≈1 week, ADRs first):** DEP-02, DEP-03, DEP-01, DEP-05, DEP-06, DEP-04, DEP-07, DEP-08, CI-11
 5. **Structural (incremental):** IMP-07, IMP-10, IMP-03, IMP-04, DEP-10, IMP-05, IMP-02, IMP-06, IMP-09, IMP-11
 6. **Release and features:** CI-09, CI-10, FEAT-01, FEAT-02, FEAT-03, FEAT-04, FEAT-06, FEAT-07, FEAT-08, FEAT-09, IMP-08

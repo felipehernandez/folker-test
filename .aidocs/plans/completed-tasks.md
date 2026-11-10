@@ -14,6 +14,7 @@ Tasks only partly done (◐) stay in the plan.
 | CI-04 | Test the exact image you publish | High | M | 2026-11-07 |
 | CI-05 | Remove retry loop and no-op validation job | Med | S | 2026-11-10 |
 | CI-06 | De-duplicate the three CircleCI workflows | Med | S | 2026-11-07 |
+| CI-07 | Pin integration service images | High | S | 2026-11-10 |
 | CI-12 | Single source of truth for the Python version | Med | S | 2026-11-07 |
 
 ### CI-01 — Run unit tests on the runtime Python version
@@ -71,6 +72,17 @@ Tasks only partly done (◐) stay in the plan.
 - **Benefit:** One place to change. Fewer "forgot one workflow" mistakes.
 - **Depends on:** none.
 - **Done:** the three workflows are merged into one `build-test-publish` workflow; only `publish-beta` (`beta`) and `publish-latest` (`main`) are branch-filtered. Config 290 → 219 lines; adding a module is one matrix entry plus one compose service (which now shares a YAML anchor).
+
+### CI-07 — Pin integration service images
+- **What / why:** `mockserver:latest`, `gcloud-pubsub-emulator:latest` and `postgres` (untagged) drift silently. Pin by version (ideally digest) and let Renovate bump them.
+- **Already happened (2026-11-05):** ✅ Bitnami removed its free images from `docker.io/bitnami`, and CI failed with `manifest for bitnami/kafka:3 not found`. A `bitnamilegacy` hotfix was replaced by official images: `apache/kafka:4.1.0` in single-node KRaft mode (no ZooKeeper dependency) and `zookeeper:3.9.4`. The unused `kafka2` service was removed (verified: kafka 1/1, zookeeper 4/4). **Remaining:** pin `mockserver`, the pubsub emulator and `postgres`; update the commented-out Bitnami services in `.devcontainer/docker-compose.yml`.
+- **Impact:** High. External changes can break CI with no code change.
+- **Cost:** S. `docker-compose.yaml` and `.devcontainer/docker-compose.yml`.
+- **Benefit:** Reproducible builds. Upgrades become visible PRs.
+- **Depends on:** none.
+- **Completed:** 2026-11-10
+- **Done:** every external image in `docker-compose.yaml` is now `name:version@sha256:digest` (the multi-arch manifest digest): `mockserver/mockserver:9.2.0`, `postgres:18.6` (what the untagged image ran), `rabbitmq:3.13.7-management` (was the floating `3-management`), `folkertest/grpc-test-server:0.2.59`, `folkertest/graphql-test-server:0.1.52` (both were `:latest`, which equal their newest release, last published 2021), and digests added to the Kafka and ZooKeeper tags. `messagebird/gcloud-pubsub-emulator` has no versioned tag (last push 2022, amd64 only), so it is `latest@sha256:...` and the digest is its only pin. `renovate.json` gets a `pinDigests` rule for the `docker` datasource, so Renovate bumps tag and digest together; a digest-only update is not covered by the minor/patch automerge rule and arrives as a normal PR (guardrails stay in CI-11). The commented-out services in `.devcontainer/docker-compose.yml` mirror the pinned images, and its Bitnami ZooKeeper and Kafka are replaced by the official single-node setup used in CI. Verified locally by building the integration image and running the compose jobs for rest, postgres, rabbitmq, template (mockserver), grpc, graphql, pubsub, kafka and zookeeper: all passed with the pinned images (gRPC, GraphQL and Pub/Sub are amd64-only and ran emulated on arm64). Not changed: the Python base images in the Dockerfiles (CI-09, DEP-04) and the folkertest images built by CI itself.
+
 
 ### CI-12 — Single source of truth for the Python version
 - **Completed:** 2026-11-07

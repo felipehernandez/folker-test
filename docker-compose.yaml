@@ -11,12 +11,12 @@ x-integration-test: &integration-test
 
 services:
   mockserver:
-    image: mockserver/mockserver:latest
+    image: mockserver/mockserver:9.2.0@sha256:016f7d16bc88d2e1aa52d5a177f1aafee758cf70bea5e0624b0ab2c32f394df1
     ports:
       - 1080:1080
 
   gcp-pubsub-emulator:
-    image: messagebird/gcloud-pubsub-emulator:latest
+    image: messagebird/gcloud-pubsub-emulator:latest@sha256:7ac0917f6278e3c1d27ecc3d390edfe913b66887ea23af9d3aa459e766ed736c
     ports:
       - 8681:8681
     environment:
@@ -30,7 +30,7 @@ services:
       retries: 20
 
   grpc-test-server:
-    image: folkertest/grpc-test-server:latest
+    image: folkertest/grpc-test-server:0.2.59@sha256:6619dee6fd5a21a59b15da2b5bad2c30f36c259ce2c8a5f8574c5c3d8a2f2eb6
     ports:
       - 8682:8682
     # Proves the server accepts connections. Tool: bash /dev/tcp.
@@ -41,7 +41,7 @@ services:
       retries: 20
 
   graphql-test-server:
-    image: folkertest/graphql-test-server:latest
+    image: folkertest/graphql-test-server:0.1.52@sha256:7ed8d04c25d13252a41eb28d87b72a862a85dc9050aacad51d4f0d1e15cfdcd1
     ports:
       - 8683:8683
     # Proves the server accepts connections. Tool: bash /dev/tcp.
@@ -52,7 +52,7 @@ services:
       retries: 20
 
   postgres-server:
-    image: postgres
+    image: postgres:18.6@sha256:e3d24f6906d0760bf4da0dae872415391ededefad23fd471c47dc53b0ddf3c42
     ports:
       - 5432:5432
     environment:
@@ -67,7 +67,7 @@ services:
       retries: 20
 
   zookeeper:
-    image: zookeeper:3.9.7
+    image: zookeeper:3.9.7@sha256:1554cb1e26e648ced8ec6f65100be140d4897b515d47720616dbae812a3caf54
     ports:
       - 2181:2181
     # Proves ZooKeeper answers the `srvr` four-letter command. Tool: nc.
@@ -78,7 +78,7 @@ services:
       retries: 20
 
   kafka:
-    image: apache/kafka:4.4.0
+    image: apache/kafka:4.4.0@sha256:833b867a9585a141da455dc2b57431c65cbccb27f11c91f694444cca9f777e0f
     ports:
       - 9092:9092
       - 9093:9093
@@ -107,7 +107,7 @@ services:
       start_period: 20s
 
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:3.13.7-management@sha256:e582c0bc7766f3342496d8485efb5a1df782b5ce3886ad017e2eaae442311f69
     ports:
       - 5672:5672
       - 15672:15672
