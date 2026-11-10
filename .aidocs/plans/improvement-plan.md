@@ -3,6 +3,7 @@
 Created: 2026-11-05 · Baseline: branch `beta` @ `2c625c6`
 
 Pick tasks by ID ("work on BUG-03"). Each task is meant to be one small PR.
+Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with their completion dates and notes.
 ✅ = reproduced during analysis · 🔍 = suspected, verify first · 📐 = needs an ADR (per `.aidocs/STRATEGY.md`)
 
 ## Scales
@@ -29,26 +30,17 @@ Pick tasks by ID ("work on BUG-03"). Each task is meant to be one small PR.
 | ID | Title | Impact | Cost | Status |
 |---|---|---|---|---|
 | **1 · CI/CD** |||||
-| CI-01 | Run unit tests on the runtime Python version (matrix) | High | S | ☑ |
-| CI-02 | Lint / static-analysis quality gate | Med | S | ☑ |
-| CI-03 | Coverage gate (scoped to `folker/`, ratchet) | Med | XS | ☑ |
-| CI-04 | Test the exact image you publish | High | M | ☑ |
-| CI-05 | Remove retry loop and no-op validation job | Med | S | ☑ |
-| CI-06 | De-duplicate the three CircleCI workflows | Med | S | ☑ |
 | CI-07 | Pin integration service images (Kafka/ZooKeeper done) | High | S | ◐ |
 | CI-08 | Update EOL executors and actions | Med | XS | ☐ |
 | CI-09 | Image vulnerability scan, SBOM, multi-arch build | Med | S | ☐ |
 | CI-10 | Versioning and release process | Med | M | ☐ |
 | CI-11 | Renovate guardrails and grouping | Med | XS | ☐ |
-| CI-12 | Single source of truth for the Python version | Med | S | ☑ |
 | **2 · Testability** |||||
-| TST-01 | Fix pytest configuration (markers, warnings as errors) | Med | XS | ☑ |
 | TST-02 | Regression-test policy for bug fixes | High | — | ☐ |
 | TST-03 | Executor tests (sequential/parallel, start methods) | High | S | ☐ |
 | TST-04 | Loader tests (`folker/load/files.py`) | Med | S | ☐ |
 | TST-05 | In-process CLI end-to-end tests (no Docker) | High | M | ☐ |
 | TST-06 | Execution tests for untested actions | Med | M | ☐ |
-| TST-07 | Deterministic integration environment (healthchecks) | Med | S | ☑ |
 | TST-08 | Template/enrichment merge test matrix | Med | S | ☐ |
 | **3 · Dependencies** |||||
 | DEP-01 | Single dependency source: `pyproject.toml` + lock 📐 | High | M | ☐ |
@@ -59,11 +51,8 @@ Pick tasks by ID ("work on BUG-03"). Each task is meant to be one small PR.
 | DEP-06 | Align `grpcio` / `grpcio-tools` / `protobuf` | High | S | ☐ |
 | DEP-07 | Gmail: `oauth2client` → `google-auth` | Med | S | ☐ |
 | DEP-08 | `gql` 2.0 → 3.x | Med | S | ☐ |
-| DEP-09 | marshmallow deprecations (prepare for 4.x) | Low | XS | ☑ |
 | DEP-10 | Optional extras per module 📐 | Med | S | ☐ |
 | **4 · Bugs** |||||
-| BUG-01 | `collections.Mapping` crash on Python ≥ 3.10 ✅ | High | XS | ☑ |
-| BUG-02 | Parallel tests lose the selected profile ✅ | High | S | ☐ |
 | BUG-03 | `foreach` stops after first failing iteration ✅ | High | XS | ☐ |
 | BUG-04 | VOID template + real action → `action = None` ✅ | High | XS | ☐ |
 | BUG-05 | Stage's own `foreach` lost when using a template ✅ | Med | XS | ☐ |
@@ -78,7 +67,6 @@ Pick tasks by ID ("work on BUG-03"). Each task is meant to be one small PR.
 | BUG-14 | Network calls without timeouts can hang forever | High | S | ☐ |
 | BUG-15 | Failing `if:` condition silently skips the stage | Med | XS | ☐ |
 | BUG-16 | REST debug logging can turn a request into an error 🔍 | Low | XS | ☐ |
-| BUG-17 | Working-directory modules not importable from an installed CLI ✅ | High | XS | ☑ |
 | **5 · Improvements** |||||
 | IMP-01 | Strict loading: broken YAML fails the run | High | S | ☐ |
 | IMP-02 | Narrow broad `except Exception` handling | Med | M | ☐ |
@@ -106,55 +94,6 @@ Pick tasks by ID ("work on BUG-03"). Each task is meant to be one small PR.
 ---
 
 ## 1 · CI/CD
-
-### CI-01 — Run unit tests on the runtime Python version
-- **What / why:** CircleCI's `build` job uses `python/default`, but the Docker images run `python:3.10`. Locally the suite passes on 3.9 while the shipped runtime crashes (BUG-01). Add a Python version matrix covering the Docker image's version (plus the next one).
-- **Impact:** High. Catches version-specific breakage before release.
-- **Cost:** S. ~20 lines in `.circleci/config.yml`.
-- **Benefit:** The test suite becomes a real signal for what's shipped. Makes DEP-04 safe.
-- **Depends on:** none (do first).
-- **Lesson:** [Test on the runtime Python version](../lessons/20261105-test-on-runtime-python-version.md)
-
-### CI-02 — Lint / static-analysis quality gate
-- **What / why:** `pylint` is installed (even at runtime) but never run in CI. Add `ruff` (fast; replaces most pylint checks), non-blocking first, then blocking once the baseline is clean.
-- **Impact:** Med. Prevents new dead code, unused imports, shadowed builtins and similar.
-- **Cost:** S. CI job plus config; fixing the baseline may touch many files mechanically.
-- **Benefit:** Consistent style. Reviewers focus on logic.
-- **Depends on:** DEP-01 (config lives in `pyproject.toml`).
-- **Done:** `ruff.toml` (moves into `pyproject.toml` with DEP-01), blocking `lint` job from the start (CircleCI has no "allow failure", and `|| true` would hide results), `ruff==0.17.4` pinned in `requirements-lint.txt` so Renovate bumps it, `make lint` / `make lint-fix`. Rules: `E4, E7, E9, F, W6`, with a clean baseline. Fixing it uncovered 3 tests that never ran because of duplicate names; one of them needed its assertion corrected.
-- **Follow-ups:** widen the rules one family at a time (`B`, `UP`, `I`, `SIM`; about 220 findings today), `ruff format` (126 files would change; do it in a dedicated commit and add it to `.git-blame-ignore-revs`), drop `pylint` together with DEP-02.
-
-### CI-03 — Coverage gate
-- **What / why:** Coverage is generated but not enforced, and the `--omit` patterns don't restrict it to `folker/`. Use `--source=folker`, record the baseline, and fail when it drops (ratchet).
-- **Impact:** Med.
-- **Cost:** XS. A few config lines.
-- **Benefit:** Stops coverage erosion, especially for the BUG work.
-- **Depends on:** TST-01.
-- **Done:** the printed total was 94% because it counted `tests/`, and the xml/html reports also picked up pytest temp files. Coverage is now `source_pkgs = ["folker"]` with branch coverage, configured in `pyproject.toml` (`coverage[toml]==7.16.2`, so `tomli` is explicit on 3.10). Baseline is 86.42% (2902 statements, 530 branches) on Python 3.10, and `fail_under = 86.4`. The threshold is raised by hand when coverage rises and never lowered. A Renovate bump of `coverage` may shift the number; the gate catching that is intended. When a Python version is added to the matrix (DEP-04), re-measure on it, because `fail_under` must hold on every version. The xml/html steps run with `--fail-under=0`, so `coverage report` (the `Coverage gate` step) is the only gate, and artifacts upload with `when: always`.
-
-### CI-04 — Test the exact image you publish
-- **What / why:** Integration tests run images built from `Dockerfile-integration` by docker-compose, while `build-docker-image` separately builds `Dockerfile`. The published artifact is never tested. Build once with a multi-stage `runtime` target, layer the integration fixtures on top of it, and publish the tested digest.
-- **Impact:** High. Release confidence.
-- **Cost:** M. Dockerfiles, compose and CI jobs.
-- **Benefit:** "Green CI" means the published image works. Removes the duplicated Dockerfile.
-- **Depends on:** CI-06 recommended first.
-- **Done:** one `Dockerfile` with `builder` → `runtime` (published) → `integration` (runtime + `example/` fixtures) targets; `Dockerfile-integration` removed. `build-docker-image` builds both and saves them in one tar, the integration jobs `docker load` it (and fail if it is missing, so compose can never rebuild), and publishing re-tags and pushes the same `runtime` image. Verified locally: the runtime layers are an exact prefix of the integration image, and code/void/template/protobuf/grpc/kafka pass through compose without a rebuild. The image is now built on every branch, not only `beta`/`main`.
-
-### CI-05 — Remove retry loop and no-op validation job
-- **What / why:** Integration jobs retry up to 3× with `sleep 10`, which hides flakiness and real failures. `validate-integration-tests` only runs `echo`. Replace the retry with readiness checks (TST-07). Use real `requires` fan-in, or delete the job.
-- **Impact:** Med. Flaky failures become visible and get fixed.
-- **Cost:** S.
-- **Benefit:** Faster, honest pipelines.
-- **Depends on:** TST-07.
-- **Done:** `run-integration-tests` runs `docker-compose run` once (no retry, no `sleep`), after a step that prints the compose version. `validate-integration-tests` is deleted and `publish-beta`/`publish-latest` require `run-integration-tests` directly (CircleCI waits for every matrix variant). Done together with TST-07 in one change.
-
-### CI-06 — De-duplicate the three CircleCI workflows
-- **What / why:** `development`, `beta` and `main` each copy the same 21-entry integration matrix. Use YAML anchors or pipeline parameters for the shared part.
-- **Impact:** Med. Adding a module currently needs 3 edits plus the Makefile plus compose.
-- **Cost:** S. Config shrinks by ~100 lines.
-- **Benefit:** One place to change. Fewer "forgot one workflow" mistakes.
-- **Depends on:** none.
-- **Done:** the three workflows are merged into one `build-test-publish` workflow; only `publish-beta` (`beta`) and `publish-latest` (`main`) are branch-filtered. Config 290 → 219 lines; adding a module is one matrix entry plus one compose service (which now shares a YAML anchor).
 
 ### CI-07 — Pin integration service images
 - **What / why:** `mockserver:latest`, `gcloud-pubsub-emulator:latest` and `postgres` (untagged) drift silently. Pin by version (ideally digest) and let Renovate bump them.
@@ -192,27 +131,9 @@ Pick tasks by ID ("work on BUG-03"). Each task is meant to be one small PR.
 - **Benefit:** Fewer, safer dependency PRs.
 - **Depends on:** CI-01, CI-02, CI-03.
 
-### CI-12 — Single source of truth for the Python version
-- **What / why:** The Python version is repeated in `Dockerfile`, `Dockerfile-integration`, `.devcontainer`, the CI executor and (after DEP-01) `requires-python`. CI-01 fixes today's mismatch, but the next bump can drift again. Declare the version once (`.python-version`), pass it to the Dockerfiles as `ARG PYTHON_VERSION`, read it into the CI matrix, and add a CI check that fails if any of these disagree.
-- **Impact:** Med. Prevents the class of bug behind BUG-01 from coming back.
-- **Cost:** S. ~30 lines across Dockerfiles, devcontainer and CI config, plus a small check script.
-- **Benefit:** Version bumps (DEP-04) become a one-line change. Test and runtime environments can't diverge silently.
-- **Depends on:** CI-01. Best done right before DEP-04.
-- **Lesson:** [Test on the runtime Python version](../lessons/20261105-test-on-runtime-python-version.md)
-- **Done:** `.python-version` is the source. Dockerfile takes `ARG PYTHON_VERSION` (CI passes the file's value), CI executors and the unit-test matrix use the `python-version` pipeline parameter, compose and the devcontainer pass it through. `scripts/check_python_version.py` (run in the `lint` job) fails on any disagreement and on hard-coded versions. This found and fixed the devcontainer still on 3.9 (and its unquoted `3.9`, which YAML would read as `3.1` for `3.10`). DEP-04 becomes: edit `.python-version`, run the script, follow its errors.
-
 ---
 
 ## 2 · Testability
-
-### TST-01 — Fix pytest configuration
-- **What / why:** `tests/pytest.ini` isn't used when pytest runs from the repo root (about 150 "unknown mark" warnings), and its marker list mixes tabs and spaces. Move the config to `pyproject.toml`, add `--strict-markers`, and set `filterwarnings = error::DeprecationWarning` (this alone would have caught BUG-01).
-- **Impact:** Med.
-- **Cost:** XS.
-- **Benefit:** Typos in marks fail. Deprecations surface early.
-- **Depends on:** DEP-01 (or do it in a root `pytest.ini` now).
-- **Lesson:** [Test on the runtime Python version](../lessons/20261105-test-on-runtime-python-version.md)
-- **Done:** `tests/pytest.ini` removed (pytest never loaded it from the repo root, and the marker list mixed tabs and spaces). `[tool.pytest.ini_options]` in `pyproject.toml` registers the same markers, sets `--strict-markers`, and treats `DeprecationWarning` as an error. Two ignores remain, both outside our code: `pkg_resources` (pulled in by `google-cloud-pubsub` 1.7.2; goes away with DEP-05) and `pyparsing` (called by the pinned `httplib2`). The file has no `[project]` table; dependency consolidation stays with DEP-01. Turning the filter on required the two marshmallow fixes tracked as DEP-09, otherwise collection dies at import.
 
 ### TST-02 — Regression-test policy for bug fixes
 - **What / why:** Every BUG-xx gets a test that fails before the fix and passes after. The probe scripts from the analysis are the starting point.
@@ -226,6 +147,7 @@ Pick tasks by ID ("work on BUG-03"). Each task is meant to be one small PR.
 - **Cost:** S. ~100 lines of tests.
 - **Benefit:** Safe refactoring of execution (IMP-03, IMP-07).
 - **Depends on:** none.
+- **Progress:** `ParallelExecutor` already has tests in `tests/executor/test_parallel_executor.py` (context, profile and failure reporting under `fork`, `spawn` and `forkserver`), added with BUG-02. Still open: `SequentialExecutor` tests and the remaining parallel cases (empty list, result ordering, foreach tests).
 
 ### TST-04 — Loader tests
 - **What / why:** `folker/load/files.py` (globbing, template enrichment, profile loading, error handling) is mostly untested. Cover paths with spaces (BUG-07), broken YAML, missing template ids and `-tf` filtering, using `tmp_path`.
@@ -245,13 +167,6 @@ Pick tasks by ID ("work on BUG-03"). Each task is meant to be one small PR.
 - **Impact:** Med.
 - **Cost:** M. One file per module.
 - **Benefit:** Dependency upgrades (DEP-05..08) become verifiable without Docker.
-
-### TST-07 — Deterministic integration environment
-- **What / why:** Integration jobs rely on retries instead of readiness checks. Add `healthcheck` plus `depends_on: condition: service_healthy` for kafka, rabbitmq, postgres, zookeeper and the emulators.
-- **Impact:** Med.
-- **Cost:** S.
-- **Benefit:** Unlocks CI-05. Fewer flaky reruns.
-- **Done:** every service a test depends on has a `healthcheck`, and every `depends_on` uses `condition: service_healthy`; the obsolete `version:` line is removed. What each probe proves (tool in brackets): postgres accepts TCP connections, `-h 127.0.0.1` so it can't pass on the init-time temporary server (`pg_isready`); RabbitMQ is running *and* the imported queues exist (`rabbitmq-diagnostics`, `rabbitmqctl`); Kafka answers an API request, `interval/timeout 10s` because each probe starts a JVM (`kafka-broker-api-versions.sh`); ZooKeeper answers `srvr` (`nc`); gRPC, GraphQL and the Pub/Sub emulator accept connections on their port (bash `/dev/tcp`; the emulator image opens 8682 only after it has created its topics); MockServer uses the image's own healthcheck. Probes in `latest` images depend on their tools staying present until CI-07 pins them. If CI's `docker-compose` is too old for `condition: service_healthy`, fall back to `docker-compose up -d` plus a bounded `docker inspect` health poll in the job.
 
 ### TST-08 — Template/enrichment merge test matrix
 - **What / why:** `__add__` merges caused BUG-04 and BUG-05. Add a parametrised matrix: for each action type × (template has field / stage has field / both / neither), assert the merged result.
@@ -318,13 +233,6 @@ Pick tasks by ID ("work on BUG-03"). Each task is meant to be one small PR.
 - **Benefit:** Supported client.
 - **Depends on:** TST-06 (graphql).
 
-### DEP-09 — marshmallow deprecations
-- **What / why:** `fields.Boolean(default=False)` (`folker/load/schemas.py:47`) is deprecated and removed in marshmallow 4. Use `load_default`, and check the other schemas for the same pattern.
-- **Impact:** Low (Renovate will propose 4.x eventually).
-- **Cost:** XS.
-- **Benefit:** Smooth major upgrade.
-- **Done:** `default=False` is now `dump_default=False`. That is the 3.13 rename of `default` (dump-only); `load_default` would have changed loading, and omitted `parallel` already falls through to `Test.__init__`'s `False`. The only other marshmallow 4 warning was `fields.String(strict=False)` on the wait schema, which was unused metadata (the `pre_load` hook already stringifies `time`), so the argument was removed. No `RemovedInMarshmallow4Warning` left in the unit suite.
-
 ### DEP-10 — Optional extras per module 📐
 - **What / why:** Every install pulls Kafka, Postgres, Google, grpc, ZooKeeper and RabbitMQ clients. Offer `folker-test[rest,kafka,gcp,...]` plus `[all]`, and keep `[all]` for the Docker image.
 - **Impact:** Med. Smaller installs, fewer conflicts for pip users.
@@ -336,19 +244,6 @@ Pick tasks by ID ("work on BUG-03"). Each task is meant to be one small PR.
 ---
 
 ## 4 · Bugs
-
-### BUG-01 — `collections.Mapping` crash on Python ≥ 3.10 ✅
-- **What / why:** `folker/model/context/context.py:202` uses `collections.Mapping`, which was removed in Python 3.10. Any nested `save` into an existing dict raises `AttributeError` in the shipped 3.10 image.
-- **Impact:** High.
-- **Cost:** XS. 1 line (`collections.abc.Mapping`).
-- **Benefit:** Nested saves work in production.
-
-### BUG-02 — Parallel tests lose the selected profile ✅
-- **What / why:** `parallel_executor.py:13-15` reads the global `folker.profiles` inside the worker. Under `spawn` (macOS) or `forkserver` (Linux from 3.14) it's empty. Reproduced: the same test passes sequentially and fails with "Missing reference" when `parallel: true`. Fix: resolve the profile into the `Context` in the parent and pass it to the worker.
-- **Impact:** High.
-- **Cost:** S. ~15 lines.
-- **Benefit:** Parallel runs behave like sequential ones.
-- **Depends on:** TST-03 recommended. Root cause addressed in IMP-03.
 
 ### BUG-03 — `foreach` stops after first failing iteration ✅
 - **What / why:** `folker/model/test.py:55`: `executions_result and self._execute(...)` short-circuits, so iterations after a failure never run or report.
@@ -434,13 +329,6 @@ Pick tasks by ID ("work on BUG-03"). Each task is meant to be one small PR.
 - **Impact:** Low.
 - **Cost:** XS.
 - **Benefit:** Debug mode never changes behaviour.
-
-### BUG-17 — Working-directory modules not importable from an installed CLI ✅
-- **What / why:** Generated `protos/*_pb2.py` (protobuf, grpc, rest-proto) and CODE action modules are imported relative to the working directory, but folker never put it on `sys.path`. It only worked because the old Dockerfile used `pip install -e .` from `/`. After the multi-stage Dockerfile (`0e8c453`), the `folker-test` console script only had `/usr/local/bin` on the path, and the protobuf, grpc and code integration tests failed with `No module named 'protos'` / `'testcode'`. Plain `pip install` users were affected too. Fix: `make_working_directory_importable()` in `folker/cli.py` adds the working directory to `sys.path` at startup.
-- **Impact:** High. Three modules were unusable from any non-editable install, including the new image.
-- **Cost:** XS. ~10 lines plus a CLI regression test (`tests/test_cli.py`).
-- **Benefit:** Same behaviour for Docker, pip and editable installs.
-- **Note:** `0e8c453` also changed the image `WORKDIR` from `/` to `/app`. Mention it in the changelog (CI-10) for users who mount test files into the container.
 
 ---
 
@@ -626,9 +514,9 @@ Pick tasks by ID ("work on BUG-03"). Each task is meant to be one small PR.
 
 ## Suggested order (waves)
 
-1. **Safety net (≈1–2 days):** CI-01, TST-01, TST-03, BUG-01, BUG-03, BUG-04, BUG-05, BUG-07, BUG-08, BUG-09, BUG-10
-2. **Remaining bugs (≈2 days):** BUG-02, BUG-06, BUG-11, BUG-12, BUG-13, BUG-14, BUG-15, BUG-16, IMP-01, IMP-12
-3. **Pipeline hardening (≈2–3 days):** CI-06, CI-07, CI-08, TST-07, CI-05, CI-03, CI-02, TST-04, TST-05
-4. **Dependency overhaul (≈1 week, ADRs first):** DEP-02, DEP-03, DEP-09, DEP-01, DEP-05, DEP-06, CI-12, DEP-04, DEP-07, DEP-08, CI-11
+1. **Safety net (≈1–2 days):** TST-03, BUG-03, BUG-04, BUG-05, BUG-07, BUG-08, BUG-09, BUG-10
+2. **Remaining bugs (≈2 days):** BUG-06, BUG-11, BUG-12, BUG-13, BUG-14, BUG-15, BUG-16, IMP-01, IMP-12
+3. **Pipeline hardening (≈2–3 days):** CI-07, CI-08, TST-04, TST-05
+4. **Dependency overhaul (≈1 week, ADRs first):** DEP-02, DEP-03, DEP-01, DEP-05, DEP-06, DEP-04, DEP-07, DEP-08, CI-11
 5. **Structural (incremental):** IMP-07, IMP-10, IMP-03, IMP-04, DEP-10, TST-08, IMP-05, IMP-02, IMP-06, IMP-09, IMP-11
-6. **Release and features:** CI-04, CI-09, CI-10, FEAT-01, FEAT-02, FEAT-03, FEAT-04, FEAT-05, FEAT-06, FEAT-07, FEAT-08, FEAT-09, IMP-08
+6. **Release and features:** CI-09, CI-10, FEAT-01, FEAT-02, FEAT-03, FEAT-04, FEAT-05, FEAT-06, FEAT-07, FEAT-08, FEAT-09, IMP-08
