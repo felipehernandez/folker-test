@@ -168,7 +168,7 @@ class TestLogger(ABC):
 
     def assert_test_result(self, total, success, failures):
         message = f'\tAsserts: Success[ {success} ] Fail[ {failures} ] Total[ {total} ]'
-        if success is not total:
+        if success != total:
             self.report.append(LogEntry(type=LogEntryType.ACTION_ASSERTION_REPORT_FAIL,
                                         text=message))
         elif self.debug:

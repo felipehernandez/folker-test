@@ -55,7 +55,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 | DEP-10 | Optional extras per module 📐 | Med | S | ☐ |
 | **4 · Bugs** |||||
 | BUG-06 | Validation ignores `wrong_fields` ✅ | Med | XS | ☐ |
-| BUG-09 | Integer identity comparison in assertions | Low | XS | ☐ |
 | BUG-10 | Non-raw regex string (warning in 3.12+) | Low | XS | ☐ |
 | BUG-11 | Multiple profiles: random one picked, rest ignored | Med | XS | ☐ |
 | BUG-12 | Proto generation failures reported as success | Med | XS | ☐ |
@@ -256,12 +255,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 - **Impact:** Med. May surface previously hidden errors in user suites, so call it out in the changelog.
 - **Cost:** XS.
 - **Benefit:** Errors at load time instead of mid-run.
-
-### BUG-09 — Integer identity comparison in assertions
-- **What / why:** `folker/model/stage/assertions.py:77`: `success is not executed` only works because CPython caches small ints. Use `!=`.
-- **Impact:** Low.
-- **Cost:** XS.
-- **Benefit:** Correct for any count. Removes a `SyntaxWarning`.
 
 ### BUG-10 — Non-raw regex string
 - **What / why:** `folker/model/context/context.py:12`: `'\${...}'` raises a `SyntaxWarning` on 3.12+ and will eventually be an error.
@@ -496,7 +489,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 
 ## Suggested order (waves)
 
-1. **Safety net (≈1–2 days):** TST-03, BUG-09, BUG-10
+1. **Safety net (≈1–2 days):** TST-03, BUG-10
 2. **Remaining bugs (≈2 days):** BUG-06, BUG-11, BUG-12, BUG-18, BUG-13, BUG-14, BUG-15, BUG-16, IMP-01, IMP-12
 3. **Pipeline hardening (≈2–3 days):** CI-07, CI-08, CI-13, TST-04, TST-05
 4. **Dependency overhaul (≈1 week, ADRs first):** DEP-02, DEP-03, DEP-01, DEP-05, DEP-06, DEP-04, DEP-07, DEP-08, CI-11

@@ -132,6 +132,7 @@ Tasks only partly done (◐) stay in the plan.
 | BUG-05 | Stage's own `foreach` lost when using a template | Med | XS | 2026-11-10 |
 | BUG-07 | Test files in paths with spaces fail to load | Med | XS | 2026-11-10 |
 | BUG-08 | Shared mutable default `foreach={}` in `Test` | Low | XS | 2026-11-10 |
+| BUG-09 | Integer identity comparison in assertions | Low | XS | 2026-11-10 |
 | BUG-17 | Working-directory modules not importable from an installed CLI ✅ | High | XS | 2026-11-07 |
 
 ### BUG-01 — `collections.Mapping` crash on Python ≥ 3.10 ✅
@@ -189,6 +190,14 @@ Tasks only partly done (◐) stay in the plan.
 - **Cost:** XS.
 - **Benefit:** Removes a source of cross-test contamination.
 - **Done:** `Test.__init__` takes `foreach: dict = None` and stores `foreach if foreach else {}`, the same pattern it already used for `tags` and `stages`, so each `Test` gets its own dict. It was the only mutable default argument in `folker/`. Test in `tests/model/test_test_defaults.py`: mutating the `foreach` of one default-constructed `Test` no longer shows up in another (failed before the fix); guard tests cover an explicit `{}`, a given `foreach`, and `tags`/`stages`.
+
+### BUG-09 — Integer identity comparison in assertions
+- **Completed:** 2026-11-10
+- **What / why:** `folker/model/stage/assertions.py:77`: `success is not executed` only works because CPython caches small ints. Use `!=`.
+- **Impact:** Low.
+- **Cost:** XS.
+- **Benefit:** Correct for any count. Removes a `SyntaxWarning`.
+- **Done:** both counts are now compared with `!=`, in `StageAssertions._wrap_up_test` (the one the task names) and in `TestLogger.assert_test_result` (`folker/logger/test_logger.py`, same pattern, not listed in the task). Beyond CPython's small-int cache (-5..256), a stage with more than 256 passing assertions raised a failure with an empty failure list, and the logger reported a passing run as failed. Tests: 300 passing assertions no longer raise, one failure among 300 is still the only reported failure, and the logger prints a failure line only when the counts differ (the logger test builds its ints at runtime, since two equal literals in one function are the same object). The task's remark about removing a `SyntaxWarning` was not verified: no such warning was seen on Python 3.10.
 
 ### BUG-17 — Working-directory modules not importable from an installed CLI ✅
 - **Completed:** 2026-11-07
