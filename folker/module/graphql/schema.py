@@ -11,6 +11,7 @@ class GraphQLActionSchema(Schema):
 
     query = fields.String()
     mutation = fields.String()
+    timeout = fields.Float()
 
     @post_load
     def make_action(self, data, **kwargs):

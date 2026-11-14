@@ -2,17 +2,15 @@ from itertools import repeat
 from multiprocessing.pool import Pool
 from os import cpu_count
 
-from folker import profiles
-from folker.executor import DEFAULT_PROFILE
+from folker.executor import select_profile
 from folker.logger import logger_factory, LoggerType
 from folker.model import Context
+from folker.model import Profile
 from folker.model import Test
 from folker.parameters import Configuration
 
 
-def _test_execution(config: Configuration, test: Test):
-    param_profile = list(config.profiles)[0] if config.profiles else None
-    profile = profiles.get(param_profile, DEFAULT_PROFILE)
+def _test_execution(config: Configuration, test: Test, profile: Profile):
     context = Context(
         test_variables={
             **(profile.context),
@@ -29,8 +27,12 @@ def _test_execution(config: Configuration, test: Test):
 
 class ParallelExecutor:
     def execute(self, config: Configuration, tests: [Test]):
+        # Resolve the profile here, in the parent: workers started with spawn/forkserver
+        # don't inherit the global `folker.profiles` registry (BUG-02).
+        profile = select_profile(config)
+
         pool = Pool(cpu_count())
-        results = pool.starmap(_test_execution, zip(repeat(config), tests))
+        results = pool.starmap(_test_execution, zip(repeat(config), tests, repeat(profile)))
         pool.close()
         return [name for (result, name) in results if result], \
                [name for (result, name) in results if not result]

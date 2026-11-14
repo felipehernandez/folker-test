@@ -13,6 +13,7 @@ class GrpcActionSchema(Schema):
     stub = fields.String()
     method = fields.String()
     data = fields.String()
+    timeout = fields.Float()
 
     @post_load
     def make_action(self, data, **kwargs):

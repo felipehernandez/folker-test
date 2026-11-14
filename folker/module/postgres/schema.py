@@ -22,6 +22,7 @@ class PostgresActionSchema(Schema):
     password = fields.String()
     database = fields.String()
     sql = fields.String()
+    timeout = fields.Float()
 
     @pre_load
     def parse_port(self, in_data, **kwargs):

@@ -52,6 +52,13 @@ class SystemLogger(ABC):
         if self.trace:
             self.report.append(LogEntry(type=LogEntryType.SYSTEM_TRACE_FAIL, text=f"{'<ERROR>':8}{filename} - {e}"))
 
+    def proto_generation_failed(self, filename, error):
+        # Always shown, unlike loading_file_error: the generated sources (_pb2) will be
+        # missing, and the import errors that follow would not point back to this file
+        self.report.append(LogEntry(type=LogEntryType.SYSTEM_TRACE_FAIL,
+                                    text=f'Proto file {filename} could not be generated:\n{error}'))
+        self._log()
+
     def loading_proto_files_completed(self, processed_files):
         self._log()
 

@@ -8,6 +8,7 @@ from folker.decorator import loggable_action, resolvable_variables, timed_action
 from folker.logger import TestLogger
 from folker.model import StageAction, Context
 from folker.model.error import InvalidSchemaDefinitionException
+from folker.module.timeout import effective_timeout
 from folker.module.void.action import VoidStageAction
 
 
@@ -33,6 +34,7 @@ class RabbitMQStageAction(StageAction):
 
     queue: str
     ack: bool
+    timeout: float = None
 
     def __init__(self,
                  method: str = None,
@@ -45,6 +47,7 @@ class RabbitMQStageAction(StageAction):
                  message=None,
                  queue: str = None,
                  ack: bool = None,
+                 timeout: float = None,
                  **kargs) -> None:
         super().__init__()
 
@@ -66,6 +69,7 @@ class RabbitMQStageAction(StageAction):
 
         self.queue = queue
         self.ack = ack
+        self.timeout = timeout
 
     def __copy__(self):
         return deepcopy(self)
@@ -93,6 +97,8 @@ class RabbitMQStageAction(StageAction):
             result.queue = enrichment.queue
         if enrichment.ack:
             result.ack = enrichment.ack
+        if enrichment.timeout is not None:
+            result.timeout = enrichment.timeout
 
         return result
 
@@ -112,7 +118,11 @@ class RabbitMQStageAction(StageAction):
         pass
 
     def create_connection(self):
-        connection_properties = {'host': self.host}
+        timeout = effective_timeout(self.timeout)
+        connection_properties = {'host': self.host,
+                                 'socket_timeout': timeout,
+                                 'stack_timeout': timeout,
+                                 'blocked_connection_timeout': timeout}
         if self.port:
             connection_properties['port'] = self.port
         if self.vhost:

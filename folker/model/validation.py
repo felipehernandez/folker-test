@@ -13,7 +13,7 @@ class ValidationReport:
         self.wrong_fields = wrong_fields if wrong_fields else set()
 
     def __bool__(self):
-        return len(self.missing_fields) == len(self.missing_fields) == 0
+        return len(self.missing_fields) == 0 and len(self.wrong_fields) == 0
 
     def __add__(self, other: 'ValidationReport'):
         self.missing_fields.update(other.missing_fields)

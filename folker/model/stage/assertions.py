@@ -74,5 +74,5 @@ class StageAssertions(StageStep):
 
     def _wrap_up_test(self, logger: TestLogger, executed, success, failures):
         logger.assert_test_result(executed, success, executed - success)
-        if success is not executed:
+        if success != executed:
             raise TestFailException(failure_messages=failures)

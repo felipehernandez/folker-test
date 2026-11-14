@@ -1,5 +1,3 @@
-version: '3.4'
-
 # Integration test runners share one image: the `integration` target of Dockerfile, i.e. the
 # published runtime plus example fixtures (CI-04). CI loads the image it built and tested, so
 # compose finds it locally and skips the build; locally, `docker compose run` builds it.
@@ -13,42 +11,74 @@ x-integration-test: &integration-test
 
 services:
   mockserver:
-    image: mockserver/mockserver:latest
+    image: mockserver/mockserver:9.2.0@sha256:016f7d16bc88d2e1aa52d5a177f1aafee758cf70bea5e0624b0ab2c32f394df1
     ports:
       - 1080:1080
 
   gcp-pubsub-emulator:
-    image: messagebird/gcloud-pubsub-emulator:latest
+    image: messagebird/gcloud-pubsub-emulator:latest@sha256:7ac0917f6278e3c1d27ecc3d390edfe913b66887ea23af9d3aa459e766ed736c
     ports:
       - 8681:8681
     environment:
       PUBSUB_PROJECT1: "folker-test-gcp-test,a_topic:a_subscription"
+    # The image opens port 8682 only after it has created the topics and subscriptions from
+    # PUBSUB_PROJECT1, so a TCP check on it proves the fixtures exist. Tool: bash /dev/tcp.
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/localhost/8682"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   grpc-test-server:
-    image: folkertest/grpc-test-server:latest
+    image: folkertest/grpc-test-server:0.2.59@sha256:6619dee6fd5a21a59b15da2b5bad2c30f36c259ce2c8a5f8574c5c3d8a2f2eb6
     ports:
       - 8682:8682
+    # Proves the server accepts connections. Tool: bash /dev/tcp.
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/localhost/8682"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   graphql-test-server:
-    image: folkertest/graphql-test-server:latest
+    image: folkertest/graphql-test-server:0.1.52@sha256:7ed8d04c25d13252a41eb28d87b72a862a85dc9050aacad51d4f0d1e15cfdcd1
     ports:
       - 8683:8683
+    # Proves the server accepts connections. Tool: bash /dev/tcp.
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/localhost/8683"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   postgres-server:
-    image: postgres
+    image: postgres:18.6@sha256:e3d24f6906d0760bf4da0dae872415391ededefad23fd471c47dc53b0ddf3c42
     ports:
       - 5432:5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: docker
+    # -h 127.0.0.1 is required: without it pg_isready uses the unix socket, which the temporary
+    # server of the image's first-start init also answers, so it could report healthy early.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   zookeeper:
-    image: zookeeper:3.9.7
+    image: zookeeper:3.9.7@sha256:1554cb1e26e648ced8ec6f65100be140d4897b515d47720616dbae812a3caf54
     ports:
       - 2181:2181
+    # Proves ZooKeeper answers the `srvr` four-letter command. Tool: nc.
+    healthcheck:
+      test: ["CMD-SHELL", "echo srvr | nc localhost 2181 | grep -q Zxid"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   kafka:
-    image: apache/kafka:4.4.0
+    image: apache/kafka:4.4.0@sha256:833b867a9585a141da455dc2b57431c65cbccb27f11c91f694444cca9f777e0f
     ports:
       - 9092:9092
       - 9093:9093
@@ -67,21 +97,37 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    # Proves the broker answers an API request on the INSIDE listener. The probe starts a JVM,
+    # hence the longer interval/timeout.
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9093 > /dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+      start_period: 20s
 
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:3.13.7-management@sha256:e582c0bc7766f3342496d8485efb5a1df782b5ce3886ad017e2eaae442311f69
     ports:
       - 5672:5672
       - 15672:15672
     volumes:
       - ./.circleci/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
       - ./.circleci/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
+    # Proves the node is running and the definitions (vhost `test`, queues) have been imported.
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q check_running && rabbitmqctl -q list_queues -p test name | grep -qx test-exchange-single.queue-single-1"]
+      interval: 5s
+      timeout: 10s
+      retries: 20
+      start_period: 20s
 
   integration-tests-template:
     <<: *integration-test
     command: -t template -n 3 --trace
     depends_on:
-      - mockserver
+      mockserver:
+        condition: service_healthy
   integration-tests-profile:
     <<: *integration-test
     command: -p test-profile -t profile -n 1 --trace
@@ -110,12 +156,14 @@ services:
     <<: *integration-test
     command: -t rest -n 3 --trace
     depends_on:
-      - mockserver
+      mockserver:
+        condition: service_healthy
   integration-tests-postgres:
     <<: *integration-test
     command: -t postgres -n 1 --trace
     depends_on:
-      - postgres-server
+      postgres-server:
+        condition: service_healthy
   integration-tests-file:
     <<: *integration-test
     command: -t file -n 1 --trace
@@ -129,34 +177,41 @@ services:
     <<: *integration-test
     command: -t protobuf -n 2 --trace
     depends_on:
-      - mockserver
+      mockserver:
+        condition: service_healthy
   integration-tests-grpc:
     <<: *integration-test
     command: -t grpc -n 1 --trace
     depends_on:
-      - grpc-test-server
+      grpc-test-server:
+        condition: service_healthy
   integration-tests-graphql:
     <<: *integration-test
     command: -t graphql -n 1 --trace
     depends_on:
-      - graphql-test-server
+      graphql-test-server:
+        condition: service_healthy
   integration-tests-pubsub:
     <<: *integration-test
     command: -t pubsub -n 1 --trace
     depends_on:
-      - gcp-pubsub-emulator
+      gcp-pubsub-emulator:
+        condition: service_healthy
   integration-tests-kafka:
     <<: *integration-test
     command: -t kafka -n 1 --trace
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
   integration-tests-zookeeper:
     <<: *integration-test
     command: -t zookeeper -n 4 --trace
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
   integration-tests-rabbitmq:
     <<: *integration-test
     command: -t rabbitmq -n 4 --trace
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy

@@ -10,6 +10,12 @@
       ],
       "automerge": true,
       "automergeType": "pr"
+    },
+    {
+      "matchDatasources": [
+        "docker"
+      ],
+      "pinDigests": true
     }
   ]
 }

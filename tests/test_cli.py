@@ -4,6 +4,7 @@ import pytest
 from click.testing import CliRunner
 
 import folker.cli
+from folker.model.error import InvalidProfileSelectionException
 
 CWD_MODULE = 'folker_cwd_import_probe'
 
@@ -70,3 +71,76 @@ class TestWorkingDirectoryImports:
 #         generated_logs = output_file.read()
 #         assert 'SETUP : start' in generated_logs
 #         assert 'SETUP : completed' in generated_logs
+
+
+PASSING_TEST = ('name: Profile selection\n'
+                'stages:\n'
+                '  - name: print\n'
+                '    action:\n'
+                '      type: PRINT\n'
+                '      message: hello\n')
+
+
+@pytest.mark.cli
+class TestProfileSelectionOnTheCommandLine:
+    @pytest.fixture
+    def suite(self, tmp_path, monkeypatch, isolated_import_state):
+        (tmp_path / 'test_profile_selection.yaml').write_text(PASSING_TEST)
+        for name in ('base', 'staging'):
+            (tmp_path / f'profile_{name}.yaml').write_text(f'name: {name}\ncontext:\n  env: {name}\n')
+        monkeypatch.chdir(tmp_path)
+
+    def run(self, *args):
+        return CliRunner().invoke(folker.cli.run, ['--logger-type', 'PLAIN', *args])
+
+    def test_known_profile(self, suite):
+        result = self.run('-p', 'staging', '-n', '1')
+
+        assert result.exit_code == 0, result.output
+        assert 'Stage: print' in result.output
+
+    def test_unknown_profile_fails_before_running_any_test(self, suite):
+        result = self.run('-p', 'stagin', '-n', '1')
+
+        assert result.exit_code != 0
+        assert isinstance(result.exception, InvalidProfileSelectionException)
+        assert 'Stage: print' not in result.output
+
+    def test_several_profiles_are_merged_and_the_last_one_wins(self, suite, tmp_path):
+        (tmp_path / 'test_profile_selection.yaml').write_text(
+            'name: Merged profiles\n'
+            'stages:\n'
+            '  - name: check\n'
+            '    action:\n'
+            '      type: PRINT\n'
+            '      message: ${env} ${only_in_base}\n'
+            '    assert:\n'
+            '      - ${env} == "staging"\n'
+            '      - ${only_in_base} == "kept"\n')
+        (tmp_path / 'profile_base.yaml').write_text(
+            'name: base\ncontext:\n  env: base\n  only_in_base: kept\n')
+
+        result = self.run('-p', 'base', '-p', 'staging', '-n', '1')
+
+        assert result.exit_code == 0, result.output
+
+    def test_the_command_line_order_decides_the_winner(self, suite, tmp_path):
+        (tmp_path / 'test_profile_selection.yaml').write_text(
+            'name: Merged profiles\n'
+            'stages:\n'
+            '  - name: check\n'
+            '    action:\n'
+            '      type: PRINT\n'
+            '      message: ${env}\n'
+            '    assert:\n'
+            '      - ${env} == "base"\n')
+
+        result = self.run('-p', 'staging,base', '-n', '1')
+
+        assert result.exit_code == 0, result.output
+
+    def test_an_unknown_profile_among_several_fails(self, suite):
+        result = self.run('-p', 'base', '-p', 'stagin', '-n', '1')
+
+        assert result.exit_code != 0
+        assert isinstance(result.exception, InvalidProfileSelectionException)
