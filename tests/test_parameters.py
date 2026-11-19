@@ -139,43 +139,61 @@ class TestProfileParameter:
     def test_no_flag(self):
         config: Configuration = load_command_arguments(standalone_mode=False)
 
-        assert config.profiles == set()
+        assert config.profiles == []
 
     @patch('sys.argv', ['method', '-p', 'a_profile', ])
     def test_one_profile_flag(self):
         config: Configuration = load_command_arguments(standalone_mode=False)
 
-        assert config.profiles == {'a_profile'}
+        assert config.profiles == ['a_profile']
 
     @patch('sys.argv', ['method', '-p', 'a_profile', '-p', 'another_profile', ])
     def test_multiple_profile_flags(self):
         config: Configuration = load_command_arguments(standalone_mode=False)
 
-        assert config.profiles == {'a_profile', 'another_profile'}
+        assert config.profiles == ['a_profile', 'another_profile']
 
     @patch('sys.argv', ['method', '-p', 'a_profile,another_profile', ])
     def test_multiple_profiles_flag(self):
         config: Configuration = load_command_arguments(standalone_mode=False)
 
-        assert config.profiles == {'a_profile', 'another_profile'}
+        assert config.profiles == ['a_profile', 'another_profile']
 
     @patch('sys.argv', ['method', '--profile=a_profile', ])
     def test_one_profile_long_flag(self):
         config: Configuration = load_command_arguments(standalone_mode=False)
 
-        assert config.profiles == {'a_profile'}
+        assert config.profiles == ['a_profile']
 
     @patch('sys.argv', ['method', '--profile=a_profile', '--profile=another_profile', ])
     def test_multiple_profile_long_flags(self):
         config: Configuration = load_command_arguments(standalone_mode=False)
 
-        assert config.profiles == {'a_profile', 'another_profile'}
+        assert config.profiles == ['a_profile', 'another_profile']
 
     @patch('sys.argv', ['method', '--profile=a_profile,another_profile', ])
     def test_multiple_profiles_long_flag(self):
         config: Configuration = load_command_arguments(standalone_mode=False)
 
-        assert config.profiles == {'a_profile', 'another_profile'}
+        assert config.profiles == ['a_profile', 'another_profile']
+
+    @patch('sys.argv', ['method', '-p', 'another_profile', '-p', 'a_profile', ])
+    def test_profile_flags_keep_the_command_line_order(self):
+        config: Configuration = load_command_arguments(standalone_mode=False)
+
+        assert config.profiles == ['another_profile', 'a_profile']
+
+    @patch('sys.argv', ['method', '-p', 'c,a', '-p', 'b', ])
+    def test_comma_separated_and_repeated_flags_are_combined_in_order(self):
+        config: Configuration = load_command_arguments(standalone_mode=False)
+
+        assert config.profiles == ['c', 'a', 'b']
+
+    @patch('sys.argv', ['method', '-p', 'a,,b', ])
+    def test_empty_profile_names_are_ignored(self):
+        config: Configuration = load_command_arguments(standalone_mode=False)
+
+        assert config.profiles == ['a', 'b']
 
 
 @pytest.mark.cli

@@ -8,6 +8,7 @@ from folker.logger import TestLogger
 from folker.model import Context
 from folker.model import StageAction
 from folker.model.error import InvalidSchemaDefinitionException
+from folker.module.timeout import effective_timeout
 from folker.module.void.action import VoidStageAction
 
 
@@ -26,6 +27,7 @@ class ZookeeperStageAction(StageAction):
     data = str
     ephemeral = bool
     version: int
+    timeout: float = None
 
     def __init__(
         self,
@@ -35,6 +37,7 @@ class ZookeeperStageAction(StageAction):
         data: str = None,
         ephemeral: bool = False,
         version: int = -1,
+        timeout: float = None,
         **kargs
     ) -> None:
         super().__init__()
@@ -50,6 +53,7 @@ class ZookeeperStageAction(StageAction):
         self.data = data
         self.ephemeral = ephemeral
         self.version = version
+        self.timeout = timeout
 
     def __add__(self, enrichment: "ZookeeperStageAction"):
         result = self.__copy__()
@@ -66,8 +70,20 @@ class ZookeeperStageAction(StageAction):
             result.ephemeral = enrichment.ephemeral
         if enrichment.version:
             result.version = enrichment.version
+        if enrichment.timeout is not None:
+            result.timeout = enrichment.timeout
 
         return result
+
+    def _connect(self) -> KazooClient:
+        zookeeper = KazooClient(hosts=self.host)
+        try:
+            zookeeper.start(timeout=effective_timeout(self.timeout))
+        except BaseException:
+            # A failed start leaves the client's connection thread running
+            zookeeper.stop()
+            raise
+        return zookeeper
 
     def mandatory_fields(self) -> List[str]:
         return ["method", "host", "node"]
@@ -93,8 +109,7 @@ class ZookeeperStageExistsAction(ZookeeperStageAction):
     @resolvable_variables
     @timed_action
     def execute(self, logger: TestLogger, context: Context) -> Context:
-        zookeeper = KazooClient(hosts=self.host)
-        zookeeper.start()
+        zookeeper = self._connect()
 
         context.save_on_stage(
             "path", self.node if zookeeper.exists(self.node) else None
@@ -116,8 +131,7 @@ class ZookeeperStageCreateAction(ZookeeperStageAction):
     @resolvable_variables
     @timed_action
     def execute(self, logger: TestLogger, context: Context) -> Context:
-        zookeeper = KazooClient(hosts=self.host)
-        zookeeper.start()
+        zookeeper = self._connect()
 
         self._create(logger, context, zookeeper)
 
@@ -154,8 +168,7 @@ class ZookeeperStageDeleteAction(ZookeeperStageAction):
     @resolvable_variables
     @timed_action
     def execute(self, logger: TestLogger, context: Context) -> Context:
-        zookeeper = KazooClient(hosts=self.host)
-        zookeeper.start()
+        zookeeper = self._connect()
 
         zookeeper.delete(self.node)
 
@@ -175,8 +188,7 @@ class ZookeeperStageGetAction(ZookeeperStageAction):
     @resolvable_variables
     @timed_action
     def execute(self, logger: TestLogger, context: Context) -> Context:
-        zookeeper = KazooClient(hosts=self.host)
-        zookeeper.start()
+        zookeeper = self._connect()
 
         data, stats = zookeeper.get(self.node)
         context.save_on_stage("data", data.decode())
@@ -199,8 +211,7 @@ class ZookeeperStageSetAction(ZookeeperStageAction):
     @resolvable_variables
     @timed_action
     def execute(self, logger: TestLogger, context: Context) -> Context:
-        zookeeper = KazooClient(hosts=self.host)
-        zookeeper.start()
+        zookeeper = self._connect()
 
         stats = zookeeper.set(
             path=self.node,

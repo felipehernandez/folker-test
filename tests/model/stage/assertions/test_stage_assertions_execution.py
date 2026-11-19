@@ -79,3 +79,24 @@ class TestStageAssertions:
         assert test_fail_exception.value.error == 'Malformed assertion'
         assert test_fail_exception.value.cause == 'Assertion does not compile'
         assert '1 + == 2' in test_fail_exception.value.details['assertion']
+
+
+# BUG-09: `success is not executed` compared ints by identity. CPython only caches the ints
+# -5..256, so with more assertions than that two equal counts were reported as different.
+class TestStageAssertionsWithManyAssertions:
+    logger: TestLogger = PlainConsoleParallelTestLogger(Configuration())
+
+    def test_given_more_than_256_passing_assertions_then_success(self):
+        stage = StageAssertions(assertions=['1 == 1'] * 300)
+
+        context = stage.execute(self.logger, Context())
+
+        assert {} == context.test_variables
+
+    def test_given_more_than_256_assertions_and_one_failing_then_only_it_fails(self):
+        stage = StageAssertions(assertions=['1 == 1'] * 299 + ['1 == 2'])
+
+        with pytest.raises(TestFailException) as test_fail_exception:
+            stage.execute(self.logger, Context())
+
+        assert test_fail_exception.value.details['errors'] == ['1 == 2']

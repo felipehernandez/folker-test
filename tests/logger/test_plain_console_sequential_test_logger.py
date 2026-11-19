@@ -107,3 +107,24 @@ class TestNormalTestPlainConsoleSequentialTestLogger:
             f'TEST: {test_name}\n'
         )
         assert captured.out == expected_output
+
+
+# BUG-09: `success is not total` compared ints by identity, so with more than 256 assertions
+# a fully passing run was logged as a failure.
+@pytest.mark.logger
+class TestAssertTestResultCounts:
+    def test_all_passing_is_not_logged_as_failure(self, normal_configuration, capsys):
+        logger = PlainConsoleSequentialTestLogger(config=normal_configuration)
+        # Built at runtime: two literals in one function would be the same int object
+        success, total = int('300'), int('300')
+
+        logger.assert_test_result(total, success, 0)
+
+        assert capsys.readouterr().out == ''
+
+    def test_one_failing_is_logged_as_failure(self, normal_configuration, capsys):
+        logger = PlainConsoleSequentialTestLogger(config=normal_configuration)
+
+        logger.assert_test_result(300, 299, 1)
+
+        assert 'Success[ 299 ] Fail[ 1 ] Total[ 300 ]' in capsys.readouterr().out

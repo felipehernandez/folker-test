@@ -12,6 +12,7 @@ from folker.logger import TestLogger
 from folker.model import Context
 from folker.model import StageAction
 from folker.model.error import InvalidSchemaDefinitionException
+from folker.module.timeout import effective_timeout
 from folker.module.void.action import VoidStageAction
 
 
@@ -34,6 +35,7 @@ class PubSubStageAction(StageAction):
     message: str
     subscription: str
     ack: bool = None
+    timeout: float = None
 
     def __init__(
         self,
@@ -46,6 +48,7 @@ class PubSubStageAction(StageAction):
         attributes: dict = None,
         message=None,
         ack: bool = None,
+        timeout: float = None,
         **kargs,
     ) -> None:
         super().__init__()
@@ -67,6 +70,7 @@ class PubSubStageAction(StageAction):
 
         self.subscription = subscription
         self.ack = ack
+        self.timeout = timeout
 
     def __copy__(self):
         return deepcopy(self)
@@ -90,6 +94,8 @@ class PubSubStageAction(StageAction):
             result.subscription = enrichment.subscription
         if enrichment.ack:
             result.ack = enrichment.ack
+        if enrichment.timeout is not None:
+            result.timeout = enrichment.timeout
         result.attributes = {**self.attributes, **enrichment.attributes}
 
         return result
@@ -165,7 +171,9 @@ class PubSubStagePublishAction(PubSubStageAction):
         )
         future = self.publisher.publish(topic=topic_path, data=message, **attributes)
 
-        context.save_on_stage("message_id", future.result())
+        context.save_on_stage(
+            "message_id", future.result(timeout=effective_timeout(self.timeout))
+        )
 
         return context
 
@@ -207,7 +215,11 @@ class PubSubStageSubscribeAction(PubSubStageAction):
         )
 
         self._log_debug(logger, subscription=subscription_path, ack=bool(self.ack))
-        response = self.subscriber.pull(subscription=subscription_path, max_messages=1)
+        response = self.subscriber.pull(
+            subscription=subscription_path,
+            max_messages=1,
+            timeout=effective_timeout(self.timeout),
+        )
 
         for message in response.received_messages:
             context.save_on_stage("ack_id", message.ack_id)
@@ -220,7 +232,9 @@ class PubSubStageSubscribeAction(PubSubStageAction):
 
             if self.ack:
                 self.subscriber.acknowledge(
-                    subscription=subscription_path, ack_ids=[message.ack_id]
+                    subscription=subscription_path,
+                    ack_ids=[message.ack_id],
+                    timeout=effective_timeout(self.timeout),
                 )
 
         return context
@@ -258,7 +272,9 @@ class PubSubStageTopicsAction(PubSubStageAction):
         )
 
         project_path = f"projects/{self.project}"
-        topics = self.publisher.list_topics(project=project_path)
+        topics = self.publisher.list_topics(
+            project=project_path, timeout=effective_timeout(self.timeout)
+        )
 
         topic_prefix = project_path + "/topics/"
         prefix_len = len(topic_prefix)
@@ -299,7 +315,9 @@ class PubSubStageSubscriptionsAction(PubSubStageAction):
         )
 
         project_path = f"projects/{self.project}"
-        subscriptions = self.subscriber.list_subscriptions(project=project_path)
+        subscriptions = self.subscriber.list_subscriptions(
+            project=project_path, timeout=effective_timeout(self.timeout)
+        )
 
         subscription_prefix = project_path + "/subscriptions/"
         context.save_on_stage(

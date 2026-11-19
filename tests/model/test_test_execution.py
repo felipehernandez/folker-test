@@ -250,3 +250,63 @@ def test_test_execution_foreach_with_failure(mocker):
     assert mocked_stage.execute.mock_calls == [
         call(mocked_logger, Context({'key': 'initial', 'element': 'a', 'element_index': 0})),
         call(mocked_logger, Context({'key': 'initial', 'element': 'b', 'element_index': 1}))]
+
+
+# BUG-03: `executions_result and self._execute(...)` short-circuited after the first failing
+# iteration, so the remaining iterations never ran and never reported.
+def test_test_execution_foreach_failure_in_first_iteration_runs_the_rest(mocker):
+    mocked_stage = mocker.patch('folker.model.stage.Stage')
+    mocked_logger = mocker.patch('folker.logger.TestLogger')
+
+    test = Test()
+    test.stages = [mocked_stage]
+    test.foreach = {'element': ['a', 'b', 'c']}
+
+    mocked_stage.execute.side_effect = [SourceException(),
+                                        Context({'key': 'stage_completed'}),
+                                        Context({'key': 'stage_completed'})]
+
+    result = test.execute(mocked_logger, Context({'key': 'initial'}))
+
+    assert not result
+    assert mocked_stage.execute.mock_calls == [
+        call(mocked_logger, Context({'key': 'initial', 'element': 'a', 'element_index': 0})),
+        call(mocked_logger, Context({'key': 'initial', 'element': 'b', 'element_index': 1})),
+        call(mocked_logger, Context({'key': 'initial', 'element': 'c', 'element_index': 2}))]
+
+
+def test_test_execution_foreach_reports_every_iteration(mocker):
+    mocked_stage = mocker.patch('folker.model.stage.Stage')
+    mocked_logger = mocker.patch('folker.logger.TestLogger')
+
+    test = Test()
+    test.stages = [mocked_stage]
+    test.foreach = {'element': ['a', 'b', 'c']}
+
+    mocked_stage.execute.side_effect = [Exception('first'),
+                                        Context({'key': 'stage_completed'}),
+                                        SourceException()]
+
+    result = test.execute(mocked_logger, Context({'key': 'initial'}))
+
+    assert not result
+    assert mocked_logger.test_start.call_count == 3
+    assert mocked_logger.test_finish_error.call_count == 2
+    assert mocked_logger.test_finish.call_count == 1
+
+
+def test_test_execution_foreach_all_iterations_succeed(mocker):
+    mocked_stage = mocker.patch('folker.model.stage.Stage')
+    mocked_logger = mocker.patch('folker.logger.TestLogger')
+
+    test = Test()
+    test.stages = [mocked_stage]
+    test.foreach = {'element': ['a', 'b', 'c']}
+
+    mocked_stage.execute.return_value = Context({'key': 'stage_completed'})
+
+    result = test.execute(mocked_logger, Context({'key': 'initial'}))
+
+    assert result
+    assert mocked_stage.execute.call_count == 3
+    assert mocked_logger.test_finish_error.call_count == 0

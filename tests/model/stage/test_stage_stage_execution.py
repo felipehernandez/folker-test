@@ -4,6 +4,7 @@ from folker.model import Stage, Context
 from folker.model.error import TestFailException, \
     MalformedAssertionException, \
     UnresolvableAssertionException, \
+    UnresolvableConditionException, \
     SourceException
 
 
@@ -161,33 +162,24 @@ def test_stage_conditional_execution_false(mocker):
     assert result.stage_variables == initial_context.stage_variables
 
 
-def test_stage_conditional_execution_error(mocker):
+@pytest.mark.parametrize('condition', [True, 'undefined_name == 1', '1 +', '1 / 0'])
+def test_stage_conditional_execution_error(mocker, condition):
     mocked_action = mocker.patch('folker.model.stage.StageAction')
-    mocked_save = mocker.patch('folker.model.stage.StageSave')
-    mocked_log = mocker.patch('folker.model.stage.StageLog')
-    mocked_assertions = mocker.patch('folker.model.stage.StageAssertions')
 
     stage = Stage()
     stage.action = mocked_action
-    stage.save = mocked_save
-    stage.log = mocked_log
-    stage.assertions = mocked_assertions
-    stage.condition = True
+    stage.condition = condition
 
     mocked_logger = mocker.patch('folker.logger.TestLogger')
-    initial_context = Context({'key': 'initial'})
-    asserted_context = Context({'key': 'asserted'})
 
-    mocked_action.execute.side_effect = mock_response('initial', Context({'key': 'actioned'}))
-    mocked_save.execute.side_effect = mock_response('actioned', Context({'key': 'saved'}))
-    mocked_log.execute.side_effect = mock_response('saved', Context({'key': 'logged'}))
-    mocked_assertions.execute.side_effect = mock_response('logged', asserted_context)
+    with pytest.raises(UnresolvableConditionException) as raised_exception:
+        stage.execute(logger=mocked_logger, context=Context({'key': 'initial'}))
 
-    result = stage.execute(logger=mocked_logger, context=initial_context)
-
-    assert result.secrets == initial_context.secrets
-    assert result.test_variables == initial_context.test_variables
-    assert result.stage_variables == initial_context.stage_variables
+    assert raised_exception.value.details['condition'] == condition
+    assert raised_exception.value.details['error']
+    assert raised_exception.value.details['stage'] == stage
+    mocked_action.execute.assert_not_called()
+    mocked_logger.stage_skip.assert_not_called()
 
 
 def test_stage_error_from_action(mocker):

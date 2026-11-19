@@ -32,3 +32,15 @@ class MalformedAssertionException(SourceException):
                              'assertion': assertion
                          },
                          *args)
+
+
+class UnresolvableConditionException(SourceException):
+    def __init__(self, condition=None, error=None, *args: object) -> None:
+        super().__init__(source='Stage',
+                         error='Malformed stage condition',
+                         cause='Condition could not be evaluated',
+                         details={
+                             'condition': condition,
+                             'error': error
+                         },
+                         *args)

@@ -12,6 +12,7 @@ class StageAction(StageStep, ABC):
             if not hasattr(self, attribute) or not self.__getattribute__(attribute):
                 self.validation_report.missing_fields.add('action.' + attribute)
 
+        self._validate_timeout()
         self._validate_specific()
 
         return bool(self.validation_report)
@@ -21,6 +22,14 @@ class StageAction(StageStep, ABC):
 
     def _validate_specific(self):
         pass
+
+    def _validate_timeout(self):
+        timeout = getattr(self, 'timeout', None)
+        if timeout is None:
+            return
+        # bool is an int, but `timeout: true` is a mistake, not one second
+        if isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or timeout <= 0:
+            self.validation_report.wrong_fields.add('action.timeout')
 
     def _set_attribute_if_missing(self, template, attribute: str):
         if self.__getattribute__(attribute) is None \

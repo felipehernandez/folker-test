@@ -52,12 +52,19 @@ jobs:
           name: Test
           command: |
             coverage run -m pytest --junitxml codecoverage/unittests.xml
-            coverage report -m
-            coverage xml --omit='*/venv/*','tests/*' -o codecoverage/coverage.xml
-            coverage html --omit='*/venv/*','tests/*' -d codecoverage
+      - run:
+          name: Coverage reports
+          command: |
+            coverage xml --fail-under=0 -o codecoverage/coverage.xml
+            coverage html --fail-under=0 -d codecoverage
+      - run:
+          name: Coverage gate
+          command: coverage report
       - store_test_results:
+          when: always
           path: codecoverage
       - store_artifacts:
+          when: always
           path: codecoverage
 
   lint:
@@ -113,17 +120,13 @@ jobs:
             # compose must run the loaded image, never rebuild one
             docker image inspect folkertest/folkertest-integration:ci > /dev/null
       - run:
+          name: Docker Compose version
+          command: docker-compose version
+      - run:
+          # Runs once: dependencies are started by compose and waited for via their healthchecks
+          # (depends_on: condition: service_healthy), so there is no retry to hide failures.
           name: Run integration tests
-          command: |
-            for i in $(seq 1 3); do
-              eval docker-compose run integration-tests-<<parameters.tests>> && s=0 && break || s=$? && sleep 10;
-            done;
-            (exit $s)
-
-  validate-integration-tests:
-    executor: integration-test-runner
-    steps:
-      - run: echo "Integration tests validated"
+          command: docker-compose run integration-tests-<<parameters.tests>>
 
   publish-docker-image:
     executor: docker-publisher
@@ -198,14 +201,11 @@ workflows:
             - build-docker-image
             - unit-tests
             - lint
-      - validate-integration-tests:
-          requires:
-            - run-integration-tests
       - publish-docker-image:
           name: publish-beta
           image-label: beta
           requires:
-            - validate-integration-tests
+            - run-integration-tests
           filters:
             branches:
               only: beta
@@ -213,7 +213,7 @@ workflows:
           name: publish-latest
           image-label: latest
           requires:
-            - validate-integration-tests
+            - run-integration-tests
           filters:
             branches:
               only: main

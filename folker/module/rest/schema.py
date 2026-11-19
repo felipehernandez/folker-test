@@ -15,6 +15,7 @@ class RestActionSchema(Schema):
     body = fields.String()
     json = fields.Dict()
     data = fields.Dict()
+    timeout = fields.Float()
 
     @post_load
     def make_action(self, data, **kwargs):

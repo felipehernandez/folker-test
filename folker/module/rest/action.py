@@ -10,6 +10,7 @@ from folker.logger import TestLogger
 from folker.model import Context
 from folker.model import StageAction
 from folker.model.error import InvalidSchemaDefinitionException
+from folker.module.timeout import effective_timeout
 from folker.module.void.action import VoidStageAction
 
 
@@ -31,6 +32,7 @@ class RestStageAction(StageAction):
     body = str
     body_json = str
     data = dict()
+    timeout: float = None
 
     def __init__(
         self,
@@ -43,6 +45,7 @@ class RestStageAction(StageAction):
         body=None,
         data=None,
         json=None,
+        timeout: float = None,
         **kargs
     ) -> None:
         super().__init__()
@@ -61,6 +64,7 @@ class RestStageAction(StageAction):
         self.body = body
         self.body_json = json
         self.data = data
+        self.timeout = timeout
 
     def __add__(self, enrichment: "RestStageAction"):
         result = self.__copy__()
@@ -78,6 +82,8 @@ class RestStageAction(StageAction):
             result.body = enrichment.body
         if enrichment.data:
             result.data = enrichment.data
+        if enrichment.timeout is not None:
+            result.timeout = enrichment.timeout
         if enrichment.body_json or enrichment.body_json:
             self_json = self.body_json if self.body_json else {}
             template_json = enrichment.body_json if enrichment.body_json else {}
@@ -102,7 +108,7 @@ class RestStageAction(StageAction):
                 RestMethod.PUT: requests.put,
                 RestMethod.DELETE: requests.delete,
                 RestMethod.PATCH: requests.patch,
-            }[self.method](**call_parameters)
+            }[self.method](**call_parameters, timeout=effective_timeout(self.timeout))
 
             context.save_on_stage("status_code", response.status_code)
             context.save_on_stage("headers", response.headers)
@@ -166,4 +172,6 @@ class RestStageAction(StageAction):
         return (self.host + "/" + self.uri) if self.uri else self.host
 
     def _log_debug(self, logger: TestLogger, **parameters):
-        logger.action_debug(json.dumps(parameters))
+        # Logging must never change what is sent: values YAML can produce (dates, bytes)
+        # or that a template carries are not JSON-serialisable, so fall back to `str`
+        logger.action_debug(json.dumps(parameters, default=str))
