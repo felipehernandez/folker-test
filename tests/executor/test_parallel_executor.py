@@ -175,7 +175,7 @@ class TestParallelExecutorWorkers:
         assert pools == [] 
 
 
-    def test_an_unknown_profile_is_still_rejected_without_tests(self, pools)
+    def test_an_unknown_profile_is_still_rejected_without_tests(self, pools):
         from folker.model.error import InvalidProfileSelectionError
 
         with pytest.raises(InvalidProfileSelectionError):
