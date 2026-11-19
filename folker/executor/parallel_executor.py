@@ -31,7 +31,10 @@ class ParallelExecutor:
         # don't inherit the global `folker.profiles` registry (BUG-02).
         profile = select_profile(config)
 
-        pool = Pool(cpu_count())
+        if not tests:
+            return [], []
+        
+        pool = Pool(min(cpu_count() or 1, len(tests)))
         results = pool.starmap(_test_execution, zip(repeat(config), tests, repeat(profile)))
         pool.close()
         return [name for (result, name) in results if result], \
