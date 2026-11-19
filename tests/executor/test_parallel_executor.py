@@ -1,4 +1,5 @@
 import multiprocessing
+from unittest.mock import Mock, call
 
 import pytest
 
@@ -140,47 +141,41 @@ class TestParallelExecutorWorkers:
     exhausted the memory of the CI executor (cpu_count() is the host's, not the container's)"""
 
     @pytest.fixture
-    def pools(self, monkeypatch):
-        sizes = []
-        real_pool = multiprocessing.get_context('fork').Pool
-
-        def recording_pool(processes=None):
-            sizes.append(processes)
-            return real_pool(processes)
-
-            monkeypatch.setattr('folker.executor.parallel_executor.Pool', recording_pool)
-            return sizes
+    def pool(self, monkeypatch):
+        """The real (fork) pool, recording how it was created"""
+        pool = Mock(side_effect=multiprocessing.get_context('fork').Pool)
+        monkeypatch.setattr('folker.executor.parallel_executor.Pool', pool)
+        return pool
 
     @pytest.mark.parametrize('cpus, tests, expected_pool_size', [
         (36, 1, 1),
         (36, 3, 3),
         (2, 8, 2),
         (4, 4, 4),
-        ])
+    ])
     def test_the_pool_is_never_bigger_than_the_work_or_the_cpus(
-            self, pools, monkeypatch, cpus, tests, expected_pool_size):
+            self, pool, monkeypatch, cpus, tests, expected_pool_size):
         monkeypatch.setattr('folker.executor.parallel_executor.cpu_count', lambda: cpus)
-        
+
         ParallelExecutor().execute(Configuration(), [a_test(f'test_{i}') for i in range(tests)])
 
-        assert pools == [expected_pool_size]
+        assert pool.call_args_list == [call(expected_pool_size)]
 
-    def test_an_unknown_cpu_count_still_gets_a_worker(self, pools, monkeypatch):
+    def test_an_unknown_cpu_count_still_gets_a_worker(self, pool, monkeypatch):
         monkeypatch.setattr('folker.executor.parallel_executor.cpu_count', lambda: None)
 
         success, _ = ParallelExecutor().execute(Configuration(), [a_test('test')])
 
-        assert pools == [1] and success == ['test']
+        assert pool.call_args_list == [call(1)]
+        assert success == ['test']
 
-    def test_no_tests_start_no_pool(self, pools):
+    def test_no_tests_start_no_pool(self, pool):
         assert ParallelExecutor().execute(Configuration(), []) == ([], [])
 
-        assert pools == []
+        pool.assert_not_called()
 
-
-    def test_an_unknown_profile_is_still_rejected_without_tests(self, pools):
-
+    def test_an_unknown_profile_is_still_rejected_without_tests(self, pool):
         with pytest.raises(InvalidProfileSelectionException):
             ParallelExecutor().execute(Configuration(profiles=['unknown']), [])
-        
-        assert pools == []
+
+        pool.assert_not_called()
