@@ -15,7 +15,7 @@ from folker.module.void.action import VoidStageAction
 from folker.parameters import Configuration
 
 
-def test_yaml(name='A test', stage='A stage'):
+def valid_test_yaml(name='A test', stage='A stage'):
     return (f'name: {name}\n'
             'stages:\n'
             f'  - name: {stage}\n'
@@ -69,23 +69,23 @@ def load_tests(logger, **options):
 
 class TestTestFileDiscovery:
     def test_files_are_found_in_nested_directories(self, workdir, logger):
-        write(workdir, 'test_root.yaml', test_yaml('root'))
-        write(workdir, 'a/b/c/test_deep.yaml', test_yaml('deep'))
+        write(workdir, 'test_root.yaml', valid_test_yaml('root'))
+        write(workdir, 'a/b/c/test_deep.yaml', valid_test_yaml('deep'))
 
         assert sorted(t.name for t in load_tests(logger)) == ['deep', 'root']
 
     def test_only_files_matching_the_default_pattern_are_loaded(self, workdir, logger):
-        write(workdir, 'test_ok.yaml', test_yaml('ok'))
-        write(workdir, 'ok_test.yaml', test_yaml('suffix'))
-        write(workdir, 'test_other.yml', test_yaml('yml extension'))
+        write(workdir, 'test_ok.yaml', valid_test_yaml('ok'))
+        write(workdir, 'ok_test.yaml', valid_test_yaml('suffix'))
+        write(workdir, 'test_other.yml', valid_test_yaml('yml extension'))
         write(workdir, 'template_x.yaml', TEMPLATE)
         write(workdir, 'notes.txt', 'not yaml')
 
         assert [t.name for t in load_tests(logger)] == ['ok']
 
     def test_a_custom_pattern_replaces_the_default(self, workdir, logger):
-        write(workdir, 'test_default.yaml', test_yaml('default'))
-        write(workdir, 'check_one.yaml', test_yaml('custom'))
+        write(workdir, 'test_default.yaml', valid_test_yaml('default'))
+        write(workdir, 'check_one.yaml', valid_test_yaml('custom'))
 
         tests = load_tests(logger, test_files_re='check*.yaml')
 
@@ -96,8 +96,8 @@ class TestTestFileDiscovery:
         logger.loading_files_completed.assert_called_once_with([])
 
     def test_each_loaded_file_is_reported(self, workdir, logger):
-        first = write(workdir, 'test_a.yaml', test_yaml('a'))
-        write(workdir, 'test_b.yaml', test_yaml('b'))
+        first = write(workdir, 'test_a.yaml', valid_test_yaml('a'))
+        write(workdir, 'test_b.yaml', valid_test_yaml('b'))
 
         load_tests(logger)
 
@@ -108,8 +108,8 @@ class TestTestFileDiscovery:
 
     def test_only_the_working_directory_is_searched(self, workdir, logger, tmp_path_factory):
         outside = tmp_path_factory.mktemp('outside')
-        write(outside, 'test_outside.yaml', test_yaml('outside'))
-        write(workdir, 'test_inside.yaml', test_yaml('inside'))
+        write(outside, 'test_outside.yaml', valid_test_yaml('outside'))
+        write(workdir, 'test_inside.yaml', valid_test_yaml('inside'))
 
         assert [t.name for t in load_tests(logger)] == ['inside']
 
@@ -120,7 +120,7 @@ class TestBrokenFiles:
 
     def test_malformed_yaml_is_logged_and_skipped(self, workdir, logger):
         write(workdir, 'test_broken.yaml', 'name: [unclosed\nstages: {')
-        write(workdir, 'test_ok.yaml', test_yaml('ok'))
+        write(workdir, 'test_ok.yaml', valid_test_yaml('ok'))
 
         tests = load_tests(logger)
 
@@ -132,21 +132,21 @@ class TestBrokenFiles:
     def test_a_definition_that_does_not_match_the_schema_is_logged_and_skipped(self, workdir, logger):
         write(workdir, 'test_wrong.yaml',
               'name: Wrong\nstages:\n  - name: s\n    action:\n      type: NO_SUCH_ACTION\n')
-        write(workdir, 'test_ok.yaml', test_yaml('ok'))
+        write(workdir, 'test_ok.yaml', valid_test_yaml('ok'))
 
         assert [t.name for t in load_tests(logger)] == ['ok']
         assert logger.loading_file_error.call_count == 1
 
     def test_an_empty_file_is_logged_and_skipped(self, workdir, logger):
         write(workdir, 'test_empty.yaml', '')
-        write(workdir, 'test_ok.yaml', test_yaml('ok'))
+        write(workdir, 'test_ok.yaml', valid_test_yaml('ok'))
 
         assert [t.name for t in load_tests(logger)] == ['ok']
         assert logger.loading_file_error.call_count == 1
 
     def test_broken_files_are_not_in_the_list_of_valid_files(self, workdir, logger):
         write(workdir, 'test_broken.yaml', 'name: [unclosed')
-        ok = write(workdir, 'test_ok.yaml', test_yaml('ok'))
+        ok = write(workdir, 'test_ok.yaml', valid_test_yaml('ok'))
 
         load_tests(logger)
 
@@ -179,7 +179,7 @@ class TestTemplates:
 
     def test_only_files_matching_the_template_pattern_are_loaded(self, workdir, logger):
         write(workdir, 'template_a.yaml', TEMPLATE)
-        write(workdir, 'test_a.yaml', test_yaml('a'))
+        write(workdir, 'test_a.yaml', valid_test_yaml('a'))
         write(workdir, 'users_template.yaml', TEMPLATE.replace('user_templates', 'ignored'))
 
         templates, _ = load_template_files(Configuration(), logger)
@@ -355,7 +355,7 @@ class TestProfiles:
     def test_only_files_matching_the_profile_pattern_are_loaded(self, workdir, logger):
         write(workdir, 'profile_dev.yaml', 'name: dev\n')
         write(workdir, 'dev_profile.yaml', 'name: ignored\n')
-        write(workdir, 'test_a.yaml', test_yaml('a'))
+        write(workdir, 'test_a.yaml', valid_test_yaml('a'))
 
         assert list(load_profile_files(Configuration(), logger)) == ['dev']
 
