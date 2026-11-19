@@ -269,7 +269,7 @@ class TestMergeContract:
         template, stage = self.full(factory)
         template_before, stage_before = snapshot(template), snapshot(stage)
 
-        template + stage
+        _merged = template + stage
 
         assert snapshot(template) == template_before
         assert snapshot(stage) == stage_before

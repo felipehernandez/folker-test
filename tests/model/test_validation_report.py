@@ -15,7 +15,7 @@ class OnlyWrongFieldAction(StageAction):
     def mandatory_fields(self) -> [str]:
         return []
 
-    def execute(self, logger, context):
+    def execute(self, logger, context, extra=None):
         return context
 
 
