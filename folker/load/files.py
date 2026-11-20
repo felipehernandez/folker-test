@@ -79,7 +79,8 @@ def _should_load_file(filename: str, template: bool, selected_test_files: [str])
 
 
 def load_schema(filename: str, schema, valid_test_files, logger: SystemLogger):
-    file_path = filename.resolve().as_uri()[7:]
+    # Not as_uri()[7:]: a URI is percent-encoded, which is not a valid file system path
+    file_path = str(filename.resolve())
     try:
         test_definition = load_definition(file_path, schema)
         logger.loading_file_ok(filename)

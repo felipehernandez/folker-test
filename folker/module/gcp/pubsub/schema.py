@@ -23,6 +23,7 @@ class PubSubActionSchema(Schema):
     message = fields.String()
     subscription = fields.String()
     ack = fields.Boolean()
+    timeout = fields.Float()
 
     @post_load
     def make_action(self, data, **kwargs):

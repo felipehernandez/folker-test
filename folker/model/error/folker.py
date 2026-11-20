@@ -26,3 +26,19 @@ class TestSuiteNumberExecutionsException(SourceException):
                              'executed': executed
                          },
                          *args)
+
+
+class InvalidProfileSelectionException(SourceException):
+    def __init__(self,
+                 selected: [str] = None,
+                 available: [str] = None,
+                 cause: str = 'Profile not found',
+                 *args: object) -> None:
+        super().__init__(source='Folker-tesT',
+                         error='Invalid profile selection',
+                         cause=cause,
+                         details={
+                             'selected': selected,
+                             'available': available
+                         },
+                         *args)

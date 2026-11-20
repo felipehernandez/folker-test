@@ -1,4 +1,4 @@
-# Pytest config only. Dependencies stay in setup.py / requirements.txt until DEP-01.
+# Pytest and coverage config only. Dependencies stay in setup.py / requirements.txt until DEP-01.
 
 [tool.pytest.ini_options]
 addopts = ["--strict-markers"]
@@ -32,3 +32,16 @@ filterwarnings = [
     "ignore:pkg_resources.declare_namespace:DeprecationWarning",
     "ignore::DeprecationWarning:httplib2",
 ]
+
+[tool.coverage.run]
+# source_pkgs, not source: same numbers, but report paths stay repo-relative
+# (folker/cli.py), so a future Sonar/Codecov upload maps files correctly.
+source_pkgs = ["folker"]
+branch = true
+
+[tool.coverage.report]
+# Ratchet (CI-03): line+branch coverage of folker/. Raise this when coverage
+# goes up; never lower it to make a PR pass. Baseline 86.42% on 2026-11-10.
+fail_under = 86.4
+precision = 2
+show_missing = true

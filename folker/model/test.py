@@ -21,7 +21,7 @@ class Test(Validatable):
                  name: str = None,
                  description: str = None,
                  parallel: bool = False,
-                 foreach: dict = {},
+                 foreach: dict = None,
                  tags: [str] = None,
                  stages: [Stage] = None
                  ) -> None:
@@ -30,7 +30,7 @@ class Test(Validatable):
         self.name = name
         self.description = description
         self.parallel = parallel
-        self.foreach = foreach
+        self.foreach = foreach if foreach else {}
         self.tags = tags if tags else []
         self.stages = stages if stages else []
 
@@ -52,7 +52,9 @@ class Test(Validatable):
         executions_result = True
 
         for execution_context in execution_contexts:
-            executions_result = executions_result and self._execute(logger, execution_context)
+            # Run first, combine after: `and` would skip the remaining iterations once one failed
+            iteration_result = self._execute(logger, execution_context)
+            executions_result = executions_result and iteration_result
 
         return executions_result
 

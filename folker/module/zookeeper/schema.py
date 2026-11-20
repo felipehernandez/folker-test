@@ -19,6 +19,7 @@ class ZookeeperActionSchema(Schema):
     node = fields.String()
     data = fields.String()
     ephemeral = fields.Boolean()
+    timeout = fields.Float()
 
     @post_load
     def make_action(self, data, **kwargs):

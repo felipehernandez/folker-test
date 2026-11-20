@@ -1,3 +1,4 @@
+import math
 from enum import Enum, auto
 
 import psycopg2
@@ -6,6 +7,7 @@ from folker.decorator import timed_action, resolvable_variables, loggable_action
 from folker.logger import TestLogger
 from folker.model import Context
 from folker.model import StageAction
+from folker.module.timeout import effective_timeout
 from folker.module.void.action import VoidStageAction
 
 
@@ -26,6 +28,7 @@ class PostgresStageAction(StageAction):
     password: str
     database: str
     sql: str
+    timeout: float = None
 
     def __init__(
         self,
@@ -36,6 +39,7 @@ class PostgresStageAction(StageAction):
         password: str = None,
         database: str = None,
         sql: str = None,
+        timeout: float = None,
         **kargs,
     ) -> None:
         super().__init__()
@@ -51,6 +55,7 @@ class PostgresStageAction(StageAction):
         self.password = password
         self.database = database
         self.sql = sql
+        self.timeout = timeout
 
     def __add__(self, enrichment: "PostgresStageAction"):
         result = self.__copy__()
@@ -69,6 +74,8 @@ class PostgresStageAction(StageAction):
             result.database = enrichment.database
         if enrichment.sql:
             result.sql = enrichment.sql
+        if enrichment.timeout is not None:
+            result.timeout = enrichment.timeout
 
         return result
 
@@ -79,6 +86,10 @@ class PostgresStageAction(StageAction):
     @resolvable_variables
     @timed_action
     def execute(self, logger: TestLogger, context: Context) -> Context:
+        # Defined up front: `finally` runs even when connecting fails
+        connection = None
+        cursor = None
+        timeout = effective_timeout(self.timeout)
         try:
             connection = psycopg2.connect(
                 user=self.user,
@@ -86,6 +97,9 @@ class PostgresStageAction(StageAction):
                 host=self.host,
                 port=self.port,
                 database=self.database,
+                # connect_timeout is whole seconds; the statement timeout is in milliseconds
+                connect_timeout=math.ceil(timeout),
+                options=f"-c statement_timeout={int(timeout * 1000)}",
             )
             logger.action_debug(
                 f"Connected to {self.host}:{self.port}/{self.database} as {self.user}"
@@ -108,8 +122,9 @@ class PostgresStageAction(StageAction):
             context.save_on_stage("error", error)
         finally:
             # closing database connection.
-            if connection:
+            if cursor:
                 cursor.close()
+            if connection:
                 connection.close()
                 logger.action_debug(
                     f"Disconnected from {self.host}:{self.port}/{self.database} as {self.user}"

@@ -2,7 +2,7 @@ import os
 import sys
 from typing import List
 
-from folker.executor import ParallelExecutor, SequentialExecutor
+from folker.executor import ParallelExecutor, SequentialExecutor, select_profile
 from folker.load.files import load_profile_files, load_template_files, \
     load_test_files
 from folker.load.protos import generate_protos
@@ -21,6 +21,8 @@ def run(config: Configuration):
     run_system_setup(system_logger)
 
     tests = run_execution_setup(config=config, system_logger=system_logger)
+    # Fail before running anything, also when no test would reach an executor
+    select_profile(config)
 
     # Execution
     executed, success, failures = 0, [], []

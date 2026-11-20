@@ -6,6 +6,7 @@ from folker.decorator import timed_action, resolvable_variables, loggable_action
 from folker.logger import TestLogger
 from folker.model import Context
 from folker.model import StageAction
+from folker.module.timeout import effective_timeout
 from folker.module.void.action import VoidStageAction
 
 
@@ -17,12 +18,15 @@ class GraphQLStageAction(StageAction):
 
     mutation: str
 
+    timeout: float = None
+
     def __init__(
         self,
         host: str = None,
         uri: str = None,
         query: str = None,
         mutation: str = None,
+        timeout: float = None,
         **kargs,
     ) -> None:
         super().__init__()
@@ -32,6 +36,7 @@ class GraphQLStageAction(StageAction):
 
         self.query = query
         self.mutation = mutation
+        self.timeout = timeout
 
     def __add__(self, enrichment: "GraphQLStageAction"):
         result = self.__copy__()
@@ -46,6 +51,8 @@ class GraphQLStageAction(StageAction):
             result.query = enrichment.query
         if enrichment.mutation:
             result.mutation = enrichment.mutation
+        if enrichment.timeout is not None:
+            result.timeout = enrichment.timeout
 
         return result
 
@@ -80,6 +87,7 @@ class GraphQLStageAction(StageAction):
                 "Content-type": "application/json",
             },
             verify=False,
+            timeout=effective_timeout(self.timeout),
         )
         client = Client(
             transport=transport,
