@@ -6,6 +6,8 @@ from typing import List
 
 import grpc
 from google.cloud.pubsub import PublisherClient, SubscriberClient
+from google.pubsub_v1.services.publisher.transports import PublisherGrpcTransport
+from google.pubsub_v1.services.subscriber.transports import SubscriberGrpcTransport
 
 from folker.decorator import timed_action, resolvable_variables, loggable_action
 from folker.logger import TestLogger
@@ -14,6 +16,24 @@ from folker.model import StageAction
 from folker.model.error import InvalidSchemaDefinitionException
 from folker.module.timeout import effective_timeout
 from folker.module.void.action import VoidStageAction
+
+
+def _publisher_client(host: str = None) -> PublisherClient:
+    # google-cloud-pubsub 2.x dropped the `channel` argument: a custom channel (the emulator)
+    # goes in through a transport.
+    if not host:
+        return PublisherClient()
+    return PublisherClient(
+        transport=PublisherGrpcTransport(channel=grpc.insecure_channel(target=host))
+    )
+
+
+def _subscriber_client(host: str = None) -> SubscriberClient:
+    if not host:
+        return SubscriberClient()
+    return SubscriberClient(
+        transport=SubscriberGrpcTransport(channel=grpc.insecure_channel(target=host))
+    )
 
 
 class PubSubMethod(Enum):
@@ -151,11 +171,7 @@ class PubSubStagePublishAction(PubSubStageAction):
     def execute(self, logger: TestLogger, context: Context) -> Context:
         self._authenticate()
 
-        self.publisher = (
-            PublisherClient(channel=grpc.insecure_channel(target=self.host))
-            if self.host
-            else PublisherClient()
-        )
+        self.publisher = _publisher_client(self.host)
 
         topic_path = self.publisher.topic_path(self.project, self.topic)
         attributes = self.attributes if self.attributes else {}
@@ -204,11 +220,7 @@ class PubSubStageSubscribeAction(PubSubStageAction):
     def execute(self, logger: TestLogger, context: Context) -> Context:
         self._authenticate()
 
-        self.subscriber = (
-            SubscriberClient(channel=grpc.insecure_channel(target=self.host))
-            if self.host
-            else SubscriberClient()
-        )
+        self.subscriber = _subscriber_client(self.host)
 
         subscription_path = self.subscriber.subscription_path(
             self.project, self.subscription
@@ -265,11 +277,7 @@ class PubSubStageTopicsAction(PubSubStageAction):
     def execute(self, logger: TestLogger, context: Context) -> Context:
         self._authenticate()
 
-        self.publisher = (
-            PublisherClient(channel=grpc.insecure_channel(target=self.host))
-            if self.host
-            else PublisherClient()
-        )
+        self.publisher = _publisher_client(self.host)
 
         project_path = f"projects/{self.project}"
         topics = self.publisher.list_topics(
@@ -308,11 +316,7 @@ class PubSubStageSubscriptionsAction(PubSubStageAction):
     def execute(self, logger: TestLogger, context: Context) -> Context:
         self._authenticate()
 
-        self.subscriber = (
-            SubscriberClient(channel=grpc.insecure_channel(target=self.host))
-            if self.host
-            else SubscriberClient()
-        )
+        self.subscriber = _subscriber_client(self.host)
 
         project_path = f"projects/{self.project}"
         subscriptions = self.subscriber.list_subscriptions(
