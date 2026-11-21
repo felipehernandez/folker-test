@@ -39,7 +39,7 @@ setup(
         'protobuf==5.29.6',
         'pylint==3.2.7',
         'pyOpenSSL==23.3.0',
-        'PyYAML==6.0.2',
+        'PyYAML==6.0.4',
         'requests==2.32.4',
     ],
 
