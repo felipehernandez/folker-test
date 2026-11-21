@@ -67,7 +67,7 @@ services:
       retries: 20
 
   zookeeper:
-    image: zookeeper:3.9.7@sha256:1554cb1e26e648ced8ec6f65100be140d4897b515d47720616dbae812a3caf54
+    image: zookeeper:3.9.7@sha256:23f7fe549a6be53e39f9bf90cfa82542b4c7df8e8a19374ce4f3625cd11fa86b
     ports:
       - 2181:2181
     # Proves ZooKeeper answers the `srvr` four-letter command. Tool: nc.
