@@ -36,7 +36,7 @@ setup(
         'oauth2client==4.1.3',
         'pika==1.5.0',
         'psycopg2-binary==2.9.10',
-        'protobuf==5.29.6',
+        'protobuf==7.36.2',
         'pylint==3.2.7',
         'pyOpenSSL==23.3.0',
         'PyYAML==6.0.4',
