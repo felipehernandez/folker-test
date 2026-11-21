@@ -24,7 +24,7 @@ pytest==7.4.4
 pytest-cov==7.1.0
 pytest-html==4.2.0
 pytest-mock==3.17.0
-PyYAML==6.0.2
+PyYAML==6.0.4
 requests==2.32.4
 kafka-python==2.2.15
 kazoo==2.10.0
