@@ -22,7 +22,7 @@ setup(
         'google-api-python-client==2.202.0',
         'google-auth-httplib2',
         'google-auth-oauthlib',
-        'google-cloud-pubsub==2.39.0',
+        'google-cloud-pubsub==2.44.0',
         'gql==2.0.0',
         'grpcio==1.85.4',
         'grpcio-tools==1.70.0',
