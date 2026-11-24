@@ -25,7 +25,7 @@ setup(
         'google-cloud-pubsub==2.39.0',
         'gql==2.0.0',
         'grpcio==1.85.4',
-        'grpcio-tools==1.70.0',
+        'grpcio-tools==1.85.4',
         'httplib2==0.22.0',
         'idna==3.10',
         'kafka-python==2.2.15',
