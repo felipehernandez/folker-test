@@ -8,16 +8,27 @@ FROM python:${PYTHON_VERSION}-slim-bookworm AS builder
 
 WORKDIR /build
 
+# DEP-01: uv installs exactly what uv.lock says (--frozen never re-resolves). The uv version is
+# pinned in requirements-uv.txt, shared with CI and the dev container.
+ENV UV_PYTHON_DOWNLOADS=never \
+    UV_PROJECT_ENVIRONMENT=/opt/venv \
+    UV_COMPILE_BYTECODE=1
+
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         build-essential \
-    && pip install --no-cache-dir --upgrade pip \
     && rm -rf /var/lib/apt/lists/*
 
-COPY setup.py .
-COPY folker/ folker/
+COPY requirements-uv.txt .
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements-uv.txt
 
-RUN pip install --no-cache-dir --prefix=/install .
+# Dependencies first: this layer is rebuilt only when pyproject.toml or uv.lock change.
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev --no-install-project --no-editable
+
+COPY folker/ folker/
+RUN uv sync --frozen --no-dev --no-editable
 
 
 # Published image.
@@ -25,7 +36,9 @@ FROM python:${PYTHON_VERSION}-slim-bookworm AS runtime
 
 WORKDIR /app
 
-COPY --from=builder /install /usr/local
+COPY --from=builder /opt/venv /opt/venv
+
+ENV PATH="/opt/venv/bin:$PATH"
 
 ENTRYPOINT ["folker-test"]
 

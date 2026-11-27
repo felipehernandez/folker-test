@@ -17,4 +17,4 @@ class ProtobufActionSchema(Schema):
         return {
             ProtobufMethod.LOAD.name: ProtobufStageLoadAction,
             ProtobufMethod.CREATE.name: ProtobufStageCreateAction,
-        }.get(data["method"], ProtobufStageAction)(**data)
+        }.get(data.get("method"), ProtobufStageAction)(**data)

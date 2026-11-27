@@ -25,4 +25,4 @@ class KafkaActionSchema(Schema):
         return {
             KafkaMethod.PUBLISH.name: KafkaStagePublishAction,
             KafkaMethod.SUBSCRIBE.name: KafkaStageSubscribeAction,
-        }.get(data["method"], KafkaStageAction)(**data)
+        }.get(data.get("method"), KafkaStageAction)(**data)

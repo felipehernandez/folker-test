@@ -35,5 +35,5 @@ class RabbitMQActionSchema(Schema):
             RabbitMQMethod.SUBSCRIBE.name: RabbitMQStageSubscribeAction,
             RabbitMQMethod.COUNT.name: RabbitMQStageCountAction,
             RabbitMQMethod.CLEAR.name: RabbitMQStageClearAction,
-        }.get(data["method"], RabbitMQStageAction)(**data)
+        }.get(data.get("method"), RabbitMQStageAction)(**data)
         return RabbitMQStageAction(**data)

@@ -29,14 +29,19 @@ class StageSchema(Schema):
             if str(id_str_value).isdigit():
                 in_data['id'] = str(id_str_value)
 
-        if 'action' not in in_data:
-            in_data['action'] = {'type': 'VOID'}
-
         return in_data
 
     @post_load
     def make_stage(self, data, **kwargs):
+        # A stage that writes no action gets a VOID one; it is then either a reference to a
+        # template stage or a stage that only saves, logs or asserts (BUG-22 tells them apart)
+        declares_action = 'action' in data
+        if not declares_action:
+            # Imported here: every module package imports this file to register its schema
+            from folker.module.void.action import VoidStageAction
+            data['action'] = VoidStageAction()
         stage = Stage(**data)
+        stage.declares_action = declares_action
         return stage
 
 

@@ -46,9 +46,13 @@ class SchemaReferenceNotFoundException(SourceException):
 
     def __init__(self,
                  reference_id,
+                 test_name: str = None,
                  *args: object) -> None:
+        details = {'reference_id': reference_id}
+        if test_name is not None:
+            details['test'] = test_name
         super().__init__(source='Schema loader',
                          error='Reference not found error',
                          cause='Stage reference not found in the preloaded ones',
-                         details={'reference_id': reference_id},
+                         details=details,
                          *args)

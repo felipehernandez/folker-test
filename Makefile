@@ -1,23 +1,29 @@
 setup:
 	python3 -m venv ~/.folker-venv
 
+# DEP-01: dependencies live in pyproject.toml and are pinned in uv.lock. uv: pip install -r requirements-uv.txt
 install:
-	pip install --upgrade pip &&\
-		pip install -r requirements.txt
+	uv sync --frozen
+
+lock:
+	uv lock
+
+lock-check:
+	uv lock --check
 
 test:
-	coverage run -m pytest -vv
-	coverage report
+	uv run --frozen coverage run -m pytest -vv
+	uv run --frozen coverage report
 
 test-report:
-	coverage run -m pytest -vv
-	coverage html -d reports/coverage --title=report
+	uv run --frozen coverage run -m pytest -vv
+	uv run --frozen coverage html -d reports/coverage --title=report
 
 lint:
-	ruff cehck .
+	uv run --frozen ruff check .
 
 lint-fix:
-	ruff check --fix .
+	uv run --frozen ruff check --fix .
 
 integration-all:
 	make integration-code

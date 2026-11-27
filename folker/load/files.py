@@ -6,6 +6,7 @@ from folker import templates, stage_templates, profiles
 from folker.load.schemas import TestSchema, ProfileSchema
 from folker.logger import SystemLogger
 from folker.model import Test
+from folker.model.error import SchemaReferenceNotFoundException
 from folker.parameters import Configuration
 
 
@@ -41,6 +42,12 @@ def load_test_files(config: Configuration, logger: SystemLogger) -> [Test]:
 
 
 def _enrich_stages(schema_definition: Test):
+    # BUG-22: a stage with an id and no action of its own can only mean a template stage; without
+    # one (a typo, or a template file that failed to load) it would be a VOID stage that passes
+    for stage in schema_definition.stages:
+        if stage.id is not None and stage.id not in stage_templates and not stage.declares_action:
+            raise SchemaReferenceNotFoundException(stage.id, test_name=schema_definition.name)
+
     schema_definition.stages = [stage_templates.get(stage.id) + stage
                                 if stage.id is not None and stage.id in stage_templates
                                 else stage

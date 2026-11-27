@@ -21,6 +21,28 @@ executors:
   docker-publisher:
     docker:
       - image: circleci/buildpack-deps:stretch
+commands:
+  install-dependencies:
+    # DEP-01: exactly what uv.lock pins, nothing re-resolved (--frozen). The project is installed too
+    # unless `only` is set. The environment's bin directory goes on PATH for the following steps.
+    parameters:
+      group:
+        type: string
+      only:
+        type: boolean
+        default: false
+    steps:
+      - run:
+          name: Install uv
+          command: pip install --quiet --no-input -r requirements-uv.txt
+      - run:
+          name: Install dependencies (<< parameters.group >>)
+          environment:
+            UV_PYTHON_DOWNLOADS: never
+          command: |
+            uv sync --frozen --no-default-groups <<# parameters.only >>--only-group<</ parameters.only >><<^ parameters.only >>--group<</ parameters.only >> << parameters.group >>
+            echo 'export PATH="$PWD/.venv/bin:$PATH"' >> "$BASH_ENV"
+
 jobs:
   build:
     executor:
@@ -45,9 +67,8 @@ jobs:
       - run:
           name: Python version
           command: python --version
-      - python/install-packages:
-          pkg-manager: pip
-          pip-dependency-file: requirements.txt
+      - install-dependencies:
+          group: test
       - run:
           name: Test
           command: |
@@ -73,9 +94,12 @@ jobs:
       tag: << pipeline.parameters.python-version >>
     steps:
       - checkout
-      - python/install-packages:
-          pkg-manager: pip
-          pip-dependency-file: requirements-lint.txt
+      - install-dependencies:
+          group: lint
+          only: true
+      - run:
+          name: Lock file is up to date
+          command: uv lock --check
       - run:
           name: Ruff
           command: ruff check .

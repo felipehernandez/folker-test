@@ -32,4 +32,4 @@ class PubSubActionSchema(Schema):
             PubSubMethod.SUBSCRIBE.name: PubSubStageSubscribeAction,
             PubSubMethod.TOPICS.name: PubSubStageTopicsAction,
             PubSubMethod.SUBSCRIPTIONS.name: PubSubStageSubscriptionsAction,
-        }.get(data["method"], PubSubStageAction)(**data)
+        }.get(data.get("method"), PubSubStageAction)(**data)

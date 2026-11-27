@@ -40,4 +40,4 @@ class PostgresActionSchema(Schema):
             PostgresMethod.INSERT.name: PostgresStageInsertAction,
             PostgresMethod.SELECT.name: PostgresStageSelectAction,
             PostgresMethod.UPDATE.name: PostgresStageUpdateAction,
-        }.get(data["method"], PostgresStageAction)(**data)
+        }.get(data.get("method"), PostgresStageAction)(**data)

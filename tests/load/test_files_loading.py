@@ -9,9 +9,10 @@ import pytest
 from folker.load import files
 from folker.load.files import load_profile_files, load_template_files, load_test_files
 from folker.logger import SystemLogger
-from folker.model.error import InvalidSchemaDefinitionException
+from folker.model.error import InvalidSchemaDefinitionException, SchemaReferenceNotFoundException
 from folker.module.rest.action import RestStageAction
 from folker.module.void.action import VoidStageAction
+from folker.module.wait.action import WaitStageAction
 from folker.parameters import Configuration
 
 
@@ -320,18 +321,38 @@ class TestStageEnrichment:
 
         assert test.stages[0].name == 'Mine'
 
-    @pytest.mark.xfail(strict=True, reason='BUG-22: an id that matches no template is silently '
-                                           'a no-op VOID stage, so a typo gives a green test')
+    # BUG-22: an id-only stage whose template does not exist used to be a silent VOID stage
     def test_a_reference_to_a_template_that_does_not_exist_is_reported(self, workdir, logger,
                                                                      templates):
         write(workdir, 'test_typo.yaml', 'name: Typo\nstages:\n  - id: get_usr\n')
 
-        try:
-            tests = load_tests(logger)
-        except InvalidSchemaDefinitionException:
-            return
+        with pytest.raises(SchemaReferenceNotFoundException) as error:
+            load_tests(logger)
 
-        assert logger.loading_file_error.called or tests == []
+        assert error.value.details == {'reference_id': 'get_usr', 'test': 'Typo'}
+
+    def test_a_reference_with_only_save_or_log_and_no_template_is_reported(self, workdir, logger,
+                                                                          templates):
+        write(workdir, 'test_typo.yaml',
+              'name: Typo\nstages:\n  - id: get_usr\n    log:\n      - hello\n')
+
+        with pytest.raises(SchemaReferenceNotFoundException):
+            load_tests(logger)
+
+    def test_a_reference_is_reported_when_no_template_was_loaded_at_all(self, workdir, logger):
+        write(workdir, 'test_typo.yaml', 'name: Typo\nstages:\n  - id: get_user\n')
+
+        with pytest.raises(SchemaReferenceNotFoundException):
+            load_tests(logger)
+
+    def test_an_id_with_its_own_action_and_no_template_is_valid(self, workdir, logger):
+        write(workdir, 'test_own.yaml',
+              'name: Own\nstages:\n  - id: not_a_template\n'
+              '    action:\n      type: WAIT\n      time: 0\n')
+
+        (test,) = load_tests(logger)
+
+        assert isinstance(test.stages[0].action, WaitStageAction)
 
 
 class TestProfiles:

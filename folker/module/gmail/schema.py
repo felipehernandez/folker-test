@@ -19,4 +19,4 @@ class GmailActionSchema(Schema):
     def make_action(self, data, **kwargs):
         return {
             GmailMethod.SEND.name: GmailStageSendAction,
-        }.get(data["method"], GmailStageAction)(**data)
+        }.get(data.get("method"), GmailStageAction)(**data)

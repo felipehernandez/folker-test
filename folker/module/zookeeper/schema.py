@@ -29,4 +29,4 @@ class ZookeeperActionSchema(Schema):
             ZookeeperMethod.DELETE.name: ZookeeperStageDeleteAction,
             ZookeeperMethod.GET.name: ZookeeperStageGetAction,
             ZookeeperMethod.SET.name: ZookeeperStageSetAction,
-        }.get(data["method"], ZookeeperStageAction)(**data)
+        }.get(data.get("method"), ZookeeperStageAction)(**data)

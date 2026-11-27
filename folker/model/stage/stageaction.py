@@ -31,6 +31,16 @@ class StageAction(StageStep, ABC):
         if isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or timeout <= 0:
             self.validation_report.wrong_fields.add('action.timeout')
 
+    def _merge_method(self, result: 'StageAction', enrichment: 'StageAction') -> None:
+        """The stage's method wins, like any other scalar field. Where the schema picks a
+        subclass from the method, that subclass holds the behaviour, so the result takes the
+        stage's class too, unless the stage is a less specific class than the template."""
+        if getattr(enrichment, 'method', None) is None:
+            return
+        result.method = enrichment.method
+        if not isinstance(self, type(enrichment)):
+            result.__class__ = type(enrichment)
+
     def _set_attribute_if_missing(self, template, attribute: str):
         if self.__getattribute__(attribute) is None \
                 and hasattr(template, attribute):

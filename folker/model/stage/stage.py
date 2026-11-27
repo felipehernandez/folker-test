@@ -20,6 +20,8 @@ class Stage(Validatable):
     foreach: dict
 
     action: StageAction
+    # False when the stage wrote no `action` and the loader gave it a VOID one
+    declares_action: bool = True
 
     save: StageSave
     log: StageLog

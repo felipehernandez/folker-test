@@ -5,12 +5,12 @@
 
 ## Rule
 
-The versions the unit tests run against (`requirements.txt`) must be the ones the image installs (`setup.py`). For every third-party client the code constructs, at least one unit test builds the real class, with no mock in between.
+The versions the unit tests run against must be the ones the image installs. Since DEP-01 both come from `uv.lock`; if that ever splits again, this rule applies. For every third-party client the code constructs, at least one unit test builds the real class, with no mock in between.
 
 ## Context
 
 Applies whenever:
-- a dependency is bumped in `setup.py` or `requirements.txt` (including Renovate PRs),
+- a dependency is bumped in `pyproject.toml` / `uv.lock` (including Renovate PRs),
 - code calls a third-party constructor or factory with keyword arguments,
 - a test patches the client class (`@patch('...PublisherClient')`).
 
@@ -21,6 +21,6 @@ Applies whenever:
 
 ## How to apply
 
-- When bumping a pin, change it in both files in the same commit. `google-cloud-pubsub`, `grpcio`, `grpcio-tools` and `protobuf` move together.
+- (Before DEP-01 the pins lived in `setup.py` and `requirements.txt` and had to be changed together.) `google-cloud-pubsub`, `grpcio`, `grpcio-tools` and `protobuf` move together.
 - Keep the mocked tests for behaviour, and add a test like `tests/module/gcp/pubsub/test_pubsub_clients.py` that calls the real constructor (the connection is lazy, so no server is needed).
 - To reproduce an integration failure, build the image (`docker build --target integration`) and run `docker-compose run integration-tests-<name>`; it takes about two minutes and prints the same traceback as CI.

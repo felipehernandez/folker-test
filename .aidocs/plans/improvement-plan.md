@@ -38,7 +38,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 | **2 · Testability** |||||
 | TST-02 | Regression-test policy for bug fixes | High | — | ☐ |
 | **3 · Dependencies** |||||
-| DEP-01 | Single dependency source: `pyproject.toml` + lock 📐 | High | M | ☐ |
 | DEP-02 | Move dev tools out of runtime dependencies | Med | XS | ☐ |
 | DEP-03 | Remove unused / stale transitive pins | Med | XS | ☐ |
 | DEP-04 | Python 3.10 (EOL) → 3.12/3.13 | High | S | ☐ |
@@ -60,11 +59,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 | DEP-21 | Vuln: certifi: GLOBALTRUST root certificate removed | Low | XS | ☐ |
 | DEP-22 | Vuln: pyOpenSSL: TLS connection bypass through an unhandled SNI callback exception | Low | XS | ☐ |
 | **4 · Bugs** |||||
-| BUG-19 | A stage cannot switch a template flag off (`ack`, `ephemeral`) | Med | XS | ☐ |
-| BUG-20 | `ZookeeperStageAction`: a stage without `version` overrides the template version | Med | XS | ☐ |
-| BUG-21 | `method` of a template is silently kept when the stage names another | Low | S | ☐ |
-| BUG-22 | A stage that references a template id that does not exist is a silent no-op 🔍 | Med | XS | ☐ |
-| BUG-23 | ZooKeeper client is not stopped when an operation fails | Low | XS | ☐ |
 | **5 · Improvements** |||||
 | IMP-01 | Strict loading: broken YAML fails the run | High | S | ☐ |
 | IMP-02 | Narrow broad `except Exception` handling | Med | M | ☐ |
@@ -142,20 +136,13 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 
 ## 3 · Dependencies
 
-### DEP-01 — Single dependency source: `pyproject.toml` + lock 📐
-- **What / why:** `setup.py` and `requirements.txt` duplicate each other and have drifted (pytest only in one, a different order). Move to `pyproject.toml` (PEP 621) with a lock file (`uv` or `pip-tools`) and dependency groups (`dev`, `test`).
-- **Impact:** High. Reproducible installs, and the basis for all the other DEP tasks.
-- **Cost:** M. Packaging, Makefile, Dockerfiles, CI.
-- **Benefit:** One source of truth. Deterministic Docker builds.
-- **ADR:** yes (packaging / tooling change).
-
 ### DEP-02 — Move dev tools out of runtime dependencies
 - **What / why:** `pylint` and `coverage` are in `install_requires`, so they ship to every user and into the image.
 - **Impact:** Med. Smaller image, smaller attack surface.
 - **Cost:** XS.
 - **Benefit:** Leaner runtime.
 - **Security:** DEP-18 (pylint advisory) builds on this.
-- **Depends on:** can be done now, or as part of DEP-01.
+- **Depends on:** DEP-01 (done): the `test` / `lint` dependency groups in `pyproject.toml` exist. Move `pylint` into the `lint` group and `coverage` out of `[project].dependencies` (the `test` group already has it), then run `uv lock`.
 
 ### DEP-03 — Remove unused / stale transitive pins
 - **What / why:** `google==3.0.0` (an unrelated Google-search scraper), `certifi==2023.11.17` (stale CA bundle), `chardet`, `idna` and `pyOpenSSL` are never imported directly. Pinning them freezes transitive dependencies at old, vulnerable versions.
@@ -211,7 +198,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 ### DEP-11 — Vuln: certifi: compromised emSign root CAs
 - **What / why:** Dependabot (critical, [GHSA-6q48-6c7w-9gw2](https://github.com/advisories/GHSA-6q48-6c7w-9gw2)), alerts #30, #31 on `beta` (one per manifest: `requirements.txt` and `setup.py`). Pin: `certifi==2023.11.17` → `>= 2026.10.18`. The bundle trusts emSign root CAs whose intermediate CA keys are compromised, so a certificate issued with them would be accepted by every `requests`, `google-*` and `gql` call. Folker never imports `certifi`; it arrives through `requests` and the Google clients, and the pin freezes it.
 - **Impact:** High.
-- **Cost:** XS. Delete the pin (preferred, see DEP-03) or raise it to `2026.10.18` or later in `requirements.txt` and `setup.py`. Run the suite and one REST/GraphQL example against HTTPS.
+- **Cost:** XS. Delete the pin (preferred, see DEP-03) or raise it to `2026.10.18` or later in `pyproject.toml`, then run `uv lock`. Run the suite and one REST/GraphQL example against HTTPS.
 - **Benefit:** The alerts close.
 - **Supersedes:** DEP-21 is closed by the same bump.
 - **Related:** DEP-03.
@@ -261,7 +248,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 ### DEP-18 — Vuln: pylint: code execution through the pickled stats cache
 - **What / why:** Dependabot (moderate, [GHSA-22qq-2fwx-7p67](https://github.com/advisories/GHSA-22qq-2fwx-7p67), CVE-2026-114608), alerts #32, #33 on `beta` (one per manifest: `requirements.txt` and `setup.py`). Pin: `pylint==3.2.7` → `>= 4.0.9`. Pylint unpickles its stats cache from `PYLINT_HOME`, so a poisoned cache runs code on a developer or CI machine. Pylint is a development tool, yet `setup.py` lists it in `install_requires`, so it also ships to users and into the image. It is a major bump (3.x → 4.x), so new checks may fire.
 - **Impact:** Med.
-- **Cost:** S. First move it out of the runtime dependencies (DEP-02), then pin `>= 4.0.9` in the lint requirements (`requirements-lint.txt`) and fix or disable the new messages.
+- **Cost:** S. First move it out of the runtime dependencies (DEP-02), then pin `>= 4.0.9` in the `lint` dependency group of `pyproject.toml` and fix or disable the new messages.
 - **Benefit:** The alerts close.
 - **Depends on:** DEP-02 recommended first.
 - **Related:** DEP-01.
@@ -269,7 +256,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 ### DEP-19 — Vuln: pytest: insecure `tmpdir` handling
 - **What / why:** Dependabot (moderate, [GHSA-6w46-j5rx-g56g](https://github.com/advisories/GHSA-6w46-j5rx-g56g), CVE-2025-71176), alert #19 on `beta` (`requirements.txt` only; `setup.py` does not list pytest). Pin: `pytest==7.4.4` → `>= 9.0.3`. Predictable temporary directories allow another local user to interfere with a test run. Only `requirements.txt` has it (it is missing from `setup.py`). It is two major versions ahead, so check `pytest-mock`, `pytest-cov` and `pytest-html` support it and that the `DeprecationWarning`-as-error filter in `pyproject.toml` does not trip on new pytest warnings.
 - **Impact:** Med.
-- **Cost:** S. Raise the pin, run the suite on the runtime Python (see the lesson on testing on the runtime version) and fix what breaks. Move it to a dev-only group when DEP-01/DEP-02 land.
+- **Cost:** S. Raise the pin, run the suite on the runtime Python (see the lesson on testing on the runtime version) and fix what breaks. It lives in the `test` dependency group of `pyproject.toml` (DEP-01); change the pin there and run `uv lock`.
 - **Benefit:** The alerts close.
 - **Related:** DEP-02, DEP-01.
 
@@ -297,41 +284,6 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 ---
 
 ## 4 · Bugs
-
-### BUG-19 — A stage cannot switch a template flag off (`ack`, `ephemeral`)
-- **What / why:** `__add__` uses `if enrichment.ack:` / `if enrichment.ephemeral:`, so `ack: false` in a stage cannot override `ack: true` from the template. Affects `RabbitMQStageAction.ack`, `PubSubStageAction.ack` and `ZookeeperStageAction.ephemeral`. Compare with `is not None`, as the `timeout` fields already do (BUG-14); `ephemeral` defaults to `False`, so it needs a `None` default too.
-- **Impact:** Med.
-- **Cost:** XS.
-- **Benefit:** A stage can disable what its template enables.
-- **Found by:** TST-08. Regression tests: the three `TestFlags::test_the_stage_can_switch_it_off` cases in `tests/model/stage/test_action_merge_matrix.py` (strict `xfail` today; remove them from `KNOWN_DEFECTS` with the fix). IMP-05 would fix this generically.
-
-### BUG-20 — `ZookeeperStageAction`: a stage without `version` overrides the template version
-- **What / why:** `version` defaults to `-1`, which is truthy, so in `template + stage` an unset stage `version` replaces the template's (`version: 3` becomes `-1`, i.e. "any version"). Default it to `None` and apply `-1` when executing, and merge with `is not None`.
-- **Impact:** Med.
-- **Cost:** XS.
-- **Benefit:** A template's optimistic-locking version is honoured.
-- **Found by:** TST-08. Regression test: `TestScalarFields::test_only_the_template_defines_it[zookeeper.version]` (strict `xfail` today).
-
-### BUG-21 — `method` of a template is silently kept when the stage names another
-- **What / why:** `code` and `grpc` take the stage's `method` when merging; REST, Kafka, Postgres, RabbitMQ, ZooKeeper, Pub/Sub, File and Protobuf keep the template's, so a stage overriding it runs the template's operation with no warning. For the actions whose class depends on `method` (Postgres, RabbitMQ, ZooKeeper, Pub/Sub, Kafka) the merged object is also the template's subclass, so honouring the override needs a decision: merge `method` and re-pick the class, or reject the override with a clear error at load time.
-- **Impact:** Low.
-- **Cost:** S.
-- **Benefit:** One documented rule for every action.
-- **Found by:** TST-08. `TestMethod` in `tests/model/stage/test_action_merge_matrix.py` pins today's behaviour; update it with the decision. IMP-05 should settle it for all modules at once. 🔍 Decide the intended behaviour first.
-
-### BUG-22 — A stage that references a template id that does not exist is a silent no-op 🔍
-- **What / why:** `_enrich_stages` (`folker/load/files.py`) only enriches a stage whose id is in `stage_templates`. A stage with just an `id` and no `action` gets a `VOID` action by default, so a typo (`id: get_usr`) or a template file that failed to load (see IMP-01) produces a stage that does nothing, and a test that passes without checking anything. A stage that has an id and its own definition is fine; the problem is the id-only stage with no template.
-- **Impact:** Med. False greens.
-- **Cost:** XS. Report it as a load error when a stage has an id, no `action` of its own and no matching template (verify first that no existing example relies on it).
-- **Benefit:** Typos in template references fail at load time.
-- **Found by:** TST-04. `TestStageEnrichment::test_a_reference_to_a_template_that_does_not_exist_is_reported` is a strict `xfail` today; remove the mark with the fix.
-
-### BUG-23 — ZooKeeper client is not stopped when an operation fails
-- **What / why:** `exists`, `get`, `set` and `delete` in `folker/module/zookeeper/action.py` call `zookeeper.stop()` after the operation, not in a `finally`. When the operation raises (for example `NoNodeError` for `get` on a missing node, which is not caught), the exception fails the test and the client keeps its connection thread and session open until the process ends. In a long suite or in parallel workers this accumulates connections, and ephemeral nodes of that session stay alive. `create` is not affected (it catches its errors).
-- **Impact:** Low.
-- **Cost:** XS. `try` / `finally` around the operation in each action, ideally in one helper, since BUG-14 already put the connection in `_connect`.
-- **Benefit:** No leaked sessions after a failed stage.
-- **Found by:** TST-06. `TestZookeeperFailures::test_the_client_is_stopped_when_the_operation_raises` is a strict `xfail` today (four cases); remove the mark with the fix. Whether those operations should also catch the error and save it as `error`, as `create` does, is part of IMP-02.
 
 ---
 
@@ -371,7 +323,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 - **Impact:** Med. Large maintainability gain.
 - **Cost:** L. Do it incrementally, one module per PR.
 - **Benefit:** Adding a module means declaring fields, not writing merge code.
-- **Depends on:** TST-08 (done: `tests/model/stage/test_action_merge_matrix.py`; its `KNOWN_DEFECTS` table and the `TestMethod` cases show what the generic merge must decide: BUG-19, BUG-20, BUG-21).
+- **Depends on:** TST-08 (done: `tests/model/stage/test_action_merge_matrix.py`; its `KNOWN_DEFECTS` table and the `TestMethod` / `TestMethodDispatch` cases pin what the generic merge must keep: BUG-19, BUG-20 and BUG-21 are done, and BUG-21 set the rule that the stage's `method` wins and selects the subclass).
 
 ### IMP-06 — Logger composition
 - **What / why:** Seven logger classes cover plain/colour × console/file × sequential/parallel. Split into a formatter (plain, colour) and a sink (console, file, buffered for parallel runs).
@@ -512,7 +464,7 @@ Completed tasks (☑) live in [completed-tasks.md](completed-tasks.md), with the
 
 1. **Safety net:** done (TST-03, BUG-10)
 1b. **Security advisories (≈½ day, do first):** DEP-11, DEP-21, DEP-13, DEP-14, DEP-12, DEP-15, DEP-22, DEP-16, DEP-17, DEP-20, DEP-19, DEP-18 (DEP-03 and DEP-02 close several of them for free)
-2. **Remaining bugs (≈2 days):** BUG-19, BUG-20, BUG-21, BUG-22, BUG-23, IMP-01, IMP-12
+2. **Remaining bugs (≈2 days):** IMP-01, IMP-12
 3. **Pipeline hardening (≈2–3 days):** CI-08, CI-13
 4. **Dependency overhaul (≈1 week, ADRs first):** DEP-02, DEP-03, DEP-01, DEP-05, DEP-06, DEP-04, DEP-07, DEP-08, CI-11
 5. **Structural (incremental):** IMP-07, IMP-10, IMP-03, IMP-04, DEP-10, IMP-05, IMP-02, IMP-06, IMP-09, IMP-11

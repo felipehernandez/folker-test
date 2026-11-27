@@ -64,6 +64,7 @@ class GmailStageAction(StageAction):
         result = self.__copy__()
         if isinstance(enrichment, VoidStageAction):
             return result
+        self._merge_method(result, enrichment)
 
         if enrichment.credentials_path:
             result.credentials_path = enrichment.credentials_path

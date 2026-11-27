@@ -9,8 +9,9 @@ ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 RUN if [ "$USER_GID" != "1000" ] || [ "$USER_UID" != "1000" ]; then groupmod --gid $USER_GID vscode && usermod --uid $USER_UID --gid $USER_GID vscode; fi
 
-COPY requirements.txt /tmp/pip-tmp/
-RUN pip3 --disable-pip-version-check --no-cache-dir install -r /tmp/pip-tmp/requirements.txt \
+# uv, pinned (DEP-01); the project itself is installed by postCreateCommand
+COPY requirements-uv.txt /tmp/pip-tmp/
+RUN pip3 --disable-pip-version-check --no-cache-dir install -r /tmp/pip-tmp/requirements-uv.txt \
    && rm -rf /tmp/pip-tmp
 
 COPY .devcontainer/.zshrc /root/.zshrc

@@ -78,6 +78,7 @@ class RabbitMQStageAction(StageAction):
         result = self.__copy__()
         if isinstance(enrichment, VoidStageAction):
             return result
+        self._merge_method(result, enrichment)
 
         if enrichment.host:
             result.host = enrichment.host
@@ -95,7 +96,7 @@ class RabbitMQStageAction(StageAction):
             result.message = enrichment.message
         if enrichment.queue:
             result.queue = enrichment.queue
-        if enrichment.ack:
+        if enrichment.ack is not None:
             result.ack = enrichment.ack
         if enrichment.timeout is not None:
             result.timeout = enrichment.timeout

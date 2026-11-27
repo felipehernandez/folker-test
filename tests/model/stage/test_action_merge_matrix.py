@@ -28,7 +28,22 @@ from folker.module.rabbitmq.action import RabbitMQMethod, RabbitMQStageAction
 from folker.module.rest.action import RestMethod, RestStageAction
 from folker.module.void.action import VoidStageAction
 from folker.module.wait.action import WaitStageAction
-from folker.module.zookeeper.action import ZookeeperMethod, ZookeeperStageAction
+from folker.module.file.schema import FileActionSchema
+from folker.module.gmail.schema import GmailActionSchema
+from folker.module.file.action import FileStageWriteAction
+from folker.module.gcp.pubsub.action import PubSubStageSubscribeAction
+from folker.module.gcp.pubsub.schema import PubSubActionSchema
+from folker.module.kafka.action import KafkaStageSubscribeAction
+from folker.module.kafka.schema import KafkaActionSchema
+from folker.module.postgres.action import PostgresStageInsertAction
+from folker.module.postgres.schema import PostgresActionSchema
+from folker.module.protobuf.action import ProtobufStageCreateAction
+from folker.module.protobuf.schema import ProtobufActionSchema
+from folker.module.rabbitmq.action import RabbitMQStageCountAction
+from folker.module.rabbitmq.schema import RabbitMQActionSchema
+from folker.module.zookeeper.action import (ZookeeperMethod, ZookeeperStageAction,
+                                            ZookeeperStageSetAction)
+from folker.module.zookeeper.schema import ZookeeperActionSchema
 
 # kwarg: constructor argument; attr: attribute it ends up in; the values are what the template and
 # the stage define (and `merged` what a conflict-free merge of both holds, for mappings and sequences).
@@ -107,16 +122,7 @@ FLAG_ACTIONS = [
 
 # Known defects, tracked in the improvement plan: (class, test, case id) -> reason. The xfail is
 # `strict`, so fixing one makes its test fail until the entry is removed from this table.
-KNOWN_DEFECTS = {
-    ('TestScalarFields', 'test_only_the_template_defines_it', 'zookeeper.version'):
-        'BUG-20: the stage default version -1 is truthy and overrides the template version',
-    ('TestFlags', 'test_the_stage_can_switch_it_off', 'rabbitmq.ack'):
-        'BUG-19: a falsy value in the stage cannot override the template',
-    ('TestFlags', 'test_the_stage_can_switch_it_off', 'pubsub.ack'):
-        'BUG-19: a falsy value in the stage cannot override the template',
-    ('TestFlags', 'test_the_stage_can_switch_it_off', 'zookeeper.ephemeral'):
-        'BUG-19: a falsy value in the stage cannot override the template',
-}
+KNOWN_DEFECTS = {}
 
 
 @pytest.fixture(autouse=True)
@@ -319,14 +325,15 @@ METHOD_ENUMS = [
 
 
 class TestMethod:
+    # BUG-21: the stage's method wins, like any other scalar field
     @pytest.mark.parametrize('name, factory, methods', METHOD_ENUMS,
                              ids=[name for name, _, _ in METHOD_ENUMS])
-    def test_the_template_method_is_kept_when_the_stage_names_another(self, name, factory, methods):
+    def test_the_stage_method_wins_when_it_names_another(self, name, factory, methods):
         first, second = list(methods)[:2]
 
         merged = factory(method=first.name) + factory(method=second.name)
 
-        assert merged.method is first
+        assert merged.method is second
 
     @pytest.mark.parametrize('name, factory, methods', METHOD_ENUMS,
                              ids=[name for name, _, _ in METHOD_ENUMS])
@@ -336,5 +343,98 @@ class TestMethod:
         assert (factory(method=first.name) + factory()).method is first
 
     @pytest.mark.parametrize('factory', [CodeStageAction, GrpcStageAction], ids=['code', 'grpc'])
-    def test_the_stage_method_wins_for_actions_that_merge_it(self, factory):
+    def test_the_stage_method_wins_for_string_methods(self, factory):
         assert (factory(method='template') + factory(method='stage')).method == 'stage'
+
+
+# Actions whose schema picks a subclass from `method`: (schema, template method, stage method,
+# class the stage method selects). The subclass carries the behaviour, so it must follow the method.
+DISPATCHED = [
+    pytest.param(PostgresActionSchema, 'SELECT', 'INSERT', PostgresStageInsertAction, id='postgres'),
+    pytest.param(KafkaActionSchema, 'PUBLISH', 'SUBSCRIBE', KafkaStageSubscribeAction, id='kafka'),
+    pytest.param(RabbitMQActionSchema, 'PUBLISH', 'COUNT', RabbitMQStageCountAction, id='rabbitmq'),
+    pytest.param(ZookeeperActionSchema, 'GET', 'SET', ZookeeperStageSetAction, id='zookeeper'),
+    pytest.param(PubSubActionSchema, 'PUBLISH', 'SUBSCRIBE', PubSubStageSubscribeAction, id='pubsub'),
+    pytest.param(FileActionSchema, 'READ', 'WRITE', FileStageWriteAction, id='file'),
+    pytest.param(ProtobufActionSchema, 'LOAD', 'CREATE', ProtobufStageCreateAction, id='protobuf'),
+]
+
+
+@pytest.mark.parametrize('schema, template_method, stage_method, stage_class', DISPATCHED)
+class TestMethodDispatch:
+    def test_the_merged_action_runs_the_stage_operation(self, schema, template_method,
+                                                        stage_method, stage_class):
+        template = schema().load({'method': template_method})
+        stage = schema().load({'method': stage_method})
+
+        merged = template + stage
+
+        assert type(merged) is stage_class
+        assert merged.method.name == stage_method
+
+    def test_the_same_method_keeps_the_class(self, schema, template_method,
+                                             stage_method, stage_class):
+        template = schema().load({'method': template_method})
+
+        merged = template + schema().load({'method': template_method})
+
+        assert type(merged) is type(template)
+
+    def test_a_stage_of_the_base_class_keeps_the_template_class(self, schema, template_method,
+                                                                stage_method, stage_class):
+        template = schema().load({'method': template_method})
+        base = type(template).__mro__[1]
+
+        assert type(template + base()) is type(template)
+
+
+class TestZookeeperVersion:
+    # 0 is a real ZooKeeper version (a node that was never modified), so it must not be read as unset
+    def test_the_stage_can_require_version_zero(self):
+        merged = ZookeeperStageAction(version=3) + ZookeeperStageAction(version=0)
+
+        assert merged.version == 0
+
+    def test_neither_defines_it_and_it_stays_unset(self):
+        assert (ZookeeperStageAction() + ZookeeperStageAction()).version is None
+
+
+# BUG-24: every method-dispatched schema, with the base class an action without `method` gets
+WITHOUT_METHOD = [
+    pytest.param(PostgresActionSchema, PostgresStageAction, 'SELECT', id='postgres'),
+    pytest.param(KafkaActionSchema, KafkaStageAction, 'PUBLISH', id='kafka'),
+    pytest.param(RabbitMQActionSchema, RabbitMQStageAction, 'PUBLISH', id='rabbitmq'),
+    pytest.param(ZookeeperActionSchema, ZookeeperStageAction, 'GET', id='zookeeper'),
+    pytest.param(PubSubActionSchema, PubSubStageAction, 'PUBLISH', id='pubsub'),
+    pytest.param(FileActionSchema, FileStageAction, 'READ', id='file'),
+    pytest.param(ProtobufActionSchema, ProtobufStageAction, 'LOAD', id='protobuf'),
+    pytest.param(GmailActionSchema, GmailStageAction, 'SEND', id='gmail'),
+]
+
+
+@pytest.mark.parametrize('schema, base, method', WITHOUT_METHOD)
+class TestActionWithoutMethod:
+    def test_it_loads_as_the_base_class(self, schema, base, method):
+        assert type(schema().load({})) is base
+
+    def test_a_stage_without_method_takes_the_template_operation(self, schema, base, method):
+        template = schema().load({'method': method})
+
+        merged = template + schema().load({})
+
+        assert type(merged) is type(template)
+        assert merged.method.name == method
+
+    def test_a_template_without_method_takes_the_stage_operation(self, schema, base, method):
+        stage = schema().load({'method': method})
+
+        merged = schema().load({}) + stage
+
+        assert type(merged) is type(stage)
+        assert merged.method.name == method
+
+    def test_without_method_on_either_side_it_is_reported_as_missing(self, schema, base, method):
+        action = schema().load({}) + schema().load({})
+
+        assert not action
+        assert 'action.method' in action.validation_report.missing_fields

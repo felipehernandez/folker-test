@@ -16,7 +16,8 @@ DECLARATIONS = [
     ('.circleci/config.yml', r'^  python-version:\n(?:    .*\n)*?    default: "([^"]+)"', 'dotted'),
     ('.devcontainer/docker-compose.yml', r'^\s+VARIANT: "?([0-9.]+)"?\s*$', 'dotted'),
     ('.devcontainer/Dockerfile', r'^ARG VARIANT=(\S+)$', 'dotted'),
-    ('ruff.toml', r'^target-version = "py(\d+)"', 'compact'),
+    ('pyproject.toml', r'^target-version = "py(\d+)"', 'compact'),
+    ('pyproject.toml', r'^requires-python = ">=([0-9.]+)"', 'dotted'),
 ]
 
 # Hard-coded versions that would bypass the single source.

@@ -40,7 +40,7 @@
 		"ms-python.pylint"
 	],
 
-	"postCreateCommand": "pip install --user -r requirements.txt ; pip install -e .",
+	"postCreateCommand": "uv sync --frozen",
 
 	"remoteUser": "vscode"
 }

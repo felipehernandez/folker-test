@@ -36,6 +36,7 @@ class FileStageAction(StageAction):
         result = self.__copy__()
         if isinstance(enrichment, VoidStageAction):
             return result
+        self._merge_method(result, enrichment)
 
         if enrichment.file:
             result.file = enrichment.file

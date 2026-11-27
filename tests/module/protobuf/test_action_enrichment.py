@@ -34,7 +34,7 @@ class TestProtobufActionEnrichment:
         assert enriched.clazz == 'AClass'
         assert enriched.data == {'attribute_1': 'value_1'}
 
-    def test_enrich_load_override_data(self):
+    def test_enrich_the_stage_method_wins(self):
         original = ProtobufStageAction(method=ProtobufMethod.LOAD.name,
                                        package='a_protobuf_package',
                                        clazz='AClass', )
@@ -43,7 +43,7 @@ class TestProtobufActionEnrichment:
 
         enriched = original + enrichment
 
-        assert enriched.method == ProtobufMethod.LOAD
+        assert enriched.method == ProtobufMethod.CREATE  # BUG-21: the stage's method wins
         assert enriched.package == 'a_protobuf_package'
         assert enriched.clazz == 'AClass'
         assert enriched.message == 'a_message'

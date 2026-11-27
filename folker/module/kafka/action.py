@@ -58,6 +58,7 @@ class KafkaStageAction(StageAction):
         result = self.__copy__()
         if isinstance(enrichment, VoidStageAction):
             return result
+        self._merge_method(result, enrichment)
 
         if enrichment.host:
             result.host = enrichment.host

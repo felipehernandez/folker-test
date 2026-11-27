@@ -176,6 +176,7 @@ class TestZookeeperTimeout:
             action.execute(logger=plain_console_test_logger_on_trace, context=Context())
 
         kazoo.return_value.stop.assert_called_once()
+        kazoo.return_value.close.assert_called_once()
 
 
 @pytest.mark.action_graphql

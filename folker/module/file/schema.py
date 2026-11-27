@@ -22,4 +22,4 @@ class FileActionSchema(Schema):
             FileMethod.READ.name: FileStageReadAction,
             FileMethod.WRITE.name: FileStageWriteAction,
             FileMethod.DELETE.name: FileStageDeleteAction,
-        }.get(data["method"], FileStageAction)(**data)
+        }.get(data.get("method"), FileStageAction)(**data)

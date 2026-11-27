@@ -51,6 +51,7 @@ class ProtobufStageAction(StageAction):
         result = self.__copy__()
         if isinstance(enrichment, VoidStageAction):
             return result
+        self._merge_method(result, enrichment)
 
         if enrichment.package:
             result.package = enrichment.package

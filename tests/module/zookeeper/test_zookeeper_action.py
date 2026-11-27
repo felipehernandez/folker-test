@@ -139,6 +139,11 @@ class TestZookeeperSet:
 
         assert client.set.call_args.kwargs['version'] == 3
 
+    def test_version_zero_makes_the_write_conditional(self, client, logger):
+        run(ZookeeperStageSetAction, logger, data='x', version=0)
+
+        assert client.set.call_args.kwargs['version'] == 0
+
 
 @pytest.mark.action_zookeeper
 class TestZookeeperDelete:
@@ -151,8 +156,8 @@ class TestZookeeperDelete:
 
 @pytest.mark.action_zookeeper
 class TestZookeeperFailures:
-    """Only `create` catches errors. The others raise, which fails the test through the stage:
-    that is today's behaviour, and the client is left open when they do (BUG-23)"""
+    """Only `create` catches errors. The others raise, which fails the test through the stage;
+    the client is still stopped and closed when they do (BUG-23)"""
 
     @pytest.mark.parametrize('cls, operation, fields', [
         (ZookeeperStageGetAction, 'get', {}),
@@ -166,8 +171,6 @@ class TestZookeeperFailures:
         with pytest.raises(NoNodeError):
             run(cls, logger, **fields)
 
-    @pytest.mark.xfail(strict=True, reason='BUG-23: the client is not stopped when the operation '
-                                           'raises, so its connection thread is left running')
     @pytest.mark.parametrize('cls, operation, fields', [
         (ZookeeperStageGetAction, 'get', {}),
         (ZookeeperStageDeleteAction, 'delete', {}),
@@ -182,3 +185,37 @@ class TestZookeeperFailures:
             run(cls, logger, **fields)
 
         client.stop.assert_called_once()
+        client.close.assert_called_once()
+
+
+ALL_OPERATIONS = [
+    (ZookeeperStageExistsAction, {}),
+    (ZookeeperStageCreateAction, {}),
+    (ZookeeperStageDeleteAction, {}),
+    (ZookeeperStageGetAction, {}),
+    (ZookeeperStageSetAction, {'data': 'x'}),
+]
+
+
+@pytest.mark.action_zookeeper
+class TestZookeeperSession:
+    """kazoo: `close()` frees the client's resources and must follow `stop()` (BUG-23)"""
+
+    @pytest.mark.parametrize('cls, fields', ALL_OPERATIONS,
+                             ids=['exists', 'create', 'delete', 'get', 'set'])
+    def test_the_client_is_stopped_then_closed_after_the_operation(self, client, logger,
+                                                                   cls, fields):
+        client.get.return_value = (b'data', 'stats')
+
+        run(cls, logger, **fields)
+
+        assert [name for name, _, _ in client.mock_calls if name in ('stop', 'close')] \
+            == ['stop', 'close']
+
+    def test_the_client_is_closed_even_if_stop_raises(self, client, logger):
+        client.stop.side_effect = RuntimeError('stop failed')
+
+        with pytest.raises(RuntimeError):
+            run(ZookeeperStageExistsAction, logger)
+
+        client.close.assert_called_once()

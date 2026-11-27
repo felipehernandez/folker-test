@@ -180,7 +180,18 @@ Tasks only partly done (◐) stay in the plan.
 
 | ID | Title | Impact | Cost | Completed |
 |---|---|---|---|---|
+| DEP-01 | Single dependency source: `pyproject.toml` + lock 📐 | High | M | 2026-11-20 |
 | DEP-09 | marshmallow deprecations (prepare for 4.x) | Low | XS | 2026-11-09 |
+
+### DEP-01 — Single dependency source: `pyproject.toml` + lock 📐
+- **Completed:** 2026-11-20
+- **What / why:** `setup.py` and `requirements.txt` duplicated each other and had drifted (pytest only in one, a different order; on 2026-11-19 the image shipped pubsub 2.39.0 while the tests ran against 2.18.0). Move to `pyproject.toml` (PEP 621) with a lock file (`uv` or `pip-tools`) and dependency groups (`dev`, `test`).
+- **Impact:** High. Reproducible installs, and the basis for all the other DEP tasks.
+- **Cost:** M. Packaging, Makefile, Dockerfiles, CI.
+- **Benefit:** One source of truth. Deterministic Docker builds.
+- **ADR:** [20261120-single-dependency-source-pyproject-and-uv-lock](../adrs/20261120-single-dependency-source-pyproject-and-uv-lock.md).
+- **Done:** `pyproject.toml` now has `[project]` (the runtime pins from `setup.py`, `folker-test` script, `requires-python >= 3.10`), `[dependency-groups]` `test` / `lint` / `dev`, and `[tool.ruff]` (moved from `ruff.toml`). `uv.lock` pins all 80 packages, transitive ones included. Removed: `setup.py`, `requirements.txt`, `requirements-lint.txt`, `ruff.toml` and `Dockerfile-integration` (unused since CI-04). The `uv` version is pinned once in `requirements-uv.txt`. Everything installs with `uv sync --frozen`: the Docker builder stage (venv in `/opt/venv`, `--no-dev`, dependency layer cached on `pyproject.toml` + `uv.lock`), the `unit-tests` and `lint` jobs (new `install-dependencies` CircleCI command), `make install`, and the dev container. The `lint` job also runs `uv lock --check`, so a dependency change without `make lock` fails. `scripts/check_python_version.py` checks `requires-python` and ruff's `target-version`. The Makefile `lint` target had a typo (`ruff cehck`) and is fixed, with new `lock` / `lock-check` targets. `coverage` and `pylint` are still runtime dependencies (DEP-02). Verified in `cimg/python:3.10` (4 GB, 2 CPUs): 1378 passed, 9 xfailed, 96.96% coverage, ruff and `uv lock --check` clean; the image was built from the lock and all 21 integration jobs were run locally with `docker-compose`.
+- **Follow-ups:** open Renovate PRs against `requirements*.txt` / `setup.py` must be closed (Renovate recreates them against `pyproject.toml`); transitive security fixes need `uv lock --upgrade-package <name>`; consider Renovate `lockFileMaintenance`.
 
 ### DEP-09 — marshmallow deprecations
 - **Completed:** 2026-11-09
@@ -212,6 +223,12 @@ Tasks only partly done (◐) stay in the plan.
 | BUG-16 | REST debug logging can turn a request into an error | Low | XS | 2026-11-10 |
 | BUG-17 | Working-directory modules not importable from an installed CLI ✅ | High | XS | 2026-11-07 |
 | BUG-18 | `Configuration()` without `test_files` crashes the loader | Low | XS | 2026-11-10 |
+| BUG-19 | A stage cannot switch a template flag off (`ack`, `ephemeral`) | Med | XS | 2026-11-25 |
+| BUG-20 | `ZookeeperStageAction`: a stage without `version` overrides the template version | Med | XS | 2026-11-25 |
+| BUG-21 | `method` of a template is silently kept when the stage names another | Low | S | 2026-11-25 |
+| BUG-22 | A stage that references a template id that does not exist is a silent no-op | Med | XS | 2026-11-25 |
+| BUG-23 | ZooKeeper client is not stopped when an operation fails | Low | XS | 2026-11-27 |
+| BUG-24 | An action without `method` fails to load with a bare `KeyError` | Med | XS | 2026-11-25 |
 
 ### BUG-01 — `collections.Mapping` crash on Python ≥ 3.10 ✅
 - **Completed:** 2026-11-06
@@ -366,6 +383,56 @@ Tasks only partly done (◐) stay in the plan.
 - **Benefit:** `Configuration()` is usable as is, and tests don't need a workaround.
 - **Completed:** 2026-11-10
 - **Done:** `Configuration.__init__` stores `set(test_files) if test_files else set()`, like `execute_tags`, `skip_tags` and `profiles`, so `None`, a list and a set are all accepted and `Configuration().test_files == set()`. The type hint says so (`Collection[str]`). The two BUG-07 loader tests no longer pass `test_files=[]`. New tests in `tests/load/test_load_files.py`: no selection (`None`, `[]`, `set()`) loads every file, and a selection (list or set) loads only the named ones; eight failed before the fix with the `TypeError`. The CLI is unaffected: it always passed a set.
+
+### BUG-19 — A stage cannot switch a template flag off (`ack`, `ephemeral`)
+- **What / why:** `__add__` used `if enrichment.ack:` / `if enrichment.ephemeral:`, so `ack: false` in a stage could not override `ack: true` from the template. Affected `RabbitMQStageAction.ack`, `PubSubStageAction.ack` and `ZookeeperStageAction.ephemeral`.
+- **Impact:** Med.
+- **Cost:** XS.
+- **Benefit:** A stage can disable what its template enables.
+- **Completed:** 2026-11-25
+- **Done:** The three merges compare with `is not None`, like the `timeout` fields (BUG-14). `ZookeeperStageAction.ephemeral` now defaults to `None` (unset) instead of `False`, and `_create` passes `bool(self.ephemeral)` to kazoo, so a node is still non-ephemeral by default (`test_a_node_without_data` still sees `ephemeral=False`). RabbitMQ and Pub/Sub `ack` already defaulted to `None`. The three `TestFlags::test_the_stage_can_switch_it_off` cases in `tests/model/stage/test_action_merge_matrix.py` were removed from `KNOWN_DEFECTS` and now pass.
+
+### BUG-20 — `ZookeeperStageAction`: a stage without `version` overrides the template version
+- **What / why:** `version` defaulted to `-1`, which is truthy, so in `template + stage` an unset stage `version` replaced the template's (`version: 3` became `-1`, i.e. "any version"). Execution also used `self.version if self.version else -1`, so an explicit `version: 0` (a node never modified since creation) became `-1` as well.
+- **Impact:** Med.
+- **Cost:** XS.
+- **Benefit:** A template's optimistic-locking version is honoured, and so is version `0`.
+- **Completed:** 2026-11-25
+- **Done:** `version` defaults to `None`; `__add__` merges it with `is not None`, and `ZookeeperStageSetAction` sends `-1` to kazoo only when it is `None`. `TestScalarFields::test_only_the_template_defines_it[zookeeper.version]` was removed from `KNOWN_DEFECTS` (now empty) and passes. New tests: `TestZookeeperVersion` in `tests/model/stage/test_action_merge_matrix.py` (a stage can require version `0` over a template's `3`; unset stays `None`) and `TestZookeeperSet::test_version_zero_makes_the_write_conditional` in `tests/module/zookeeper/test_zookeeper_action.py`; all three failed before the fix.
+
+### BUG-21 — `method` of a template is silently kept when the stage names another
+- **What / why:** `code` and `grpc` took the stage's `method` when merging; REST, Kafka, Postgres, RabbitMQ, ZooKeeper, Pub/Sub, File and Protobuf kept the template's, so a stage overriding it ran the template's operation with no warning (`SELECT` template + `INSERT` stage ran a `PostgresStageSelectAction`). For the actions whose schema picks a subclass from `method`, the merged object was also the template's subclass.
+- **Impact:** Low.
+- **Cost:** S.
+- **Benefit:** One documented rule for every action.
+- **Completed:** 2026-11-25
+- **Decision:** the stage's `method` wins, like every other scalar field, and selects the class. A template can therefore act as a connection preset that stages reuse for different operations. (The alternative, rejecting a different `method` at load time, was not chosen.)
+- **Done:** `StageAction._merge_method` (`folker/model/stage/stageaction.py`) is called by the `__add__` of REST, Kafka, Postgres, RabbitMQ, ZooKeeper, Pub/Sub, File, Protobuf and Gmail: when the stage has a `method` it is copied, and the result takes the stage's class unless that class is an ancestor of the template's (a stage built as the base class keeps the template's subclass). Safe because the subclasses only add behaviour (`execute`, validation); their `__init__` just forwards the fields. `code` and `grpc` keep their own string merge. Tests: `TestMethod` now asserts the stage wins for every method enum; new `TestMethodDispatch` in `tests/model/stage/test_action_merge_matrix.py` loads template and stage through each module's schema and checks the merged class (stage operation, same method, base-class stage); `tests/load/test_stage_schema.py` checks a Postgres `SELECT` template + `INSERT` stage end to end through `StageSchema`. `test_enrich_load_override_data` in `tests/module/protobuf/test_action_enrichment.py` pinned the old rule and became `test_enrich_the_stage_method_wins`.
+- **Not covered:** the method-dispatched schemas read `data["method"]` directly, so a template or stage of those modules without `method` failed to load with a bare `KeyError('method')`; fixed by BUG-24. ADR: [stage method wins](../adrs/20261125-stage-method-overrides-template-and-selects-the-action.md).
+
+### BUG-24 — An action without `method` fails to load with a bare `KeyError`
+- **What / why:** The schemas of Postgres, Kafka, RabbitMQ, ZooKeeper, Pub/Sub, File, Protobuf and Gmail pick the subclass with `{...}.get(data["method"], Base)`, so an action with no `method` raised `KeyError('method')` inside `post_load` instead of a validation error. This hits templates that are only connection presets (`host`, `user`, ...) and stages that only override one field of a template (e.g. `sql`), which since BUG-21 is the intended way to reuse a template. `load_schema` (`folker/load/files.py`) caught the exception and logged it only in trace mode, so the file was dropped and the run reported `Total: 0` with exit 0 (reproduced with a `test_x.yaml` holding a POSTGRES action with only `sql`).
+- **Impact:** Med. Silent skip of a whole test file; partial overrides were impossible.
+- **Cost:** XS.
+- **Benefit:** Templates can be pure connection presets, and stages can override a single field.
+- **Completed:** 2026-11-25
+- **Done:** The eight schemas use `data.get("method")`, so an action without `method` builds the module's base class. When merging, the method and its subclass come from whichever side sets one (`StageAction._merge_method`, BUG-21); if neither does, the merged action is invalid with `action.method` in `missing_fields`, and the base class is never executed. Re-running the reproduction now fails at load time with `InvalidSchemaDefinitionException` listing `test[x].stage[s].action.method` (and the other missing connection fields), exit 1, instead of `Total: 0`, exit 0. Tests: `TestActionWithoutMethod` in `tests/model/stage/test_action_merge_matrix.py` (all eight schemas: loads as the base class, takes the template's operation, a method-less template takes the stage's, missing on both sides is reported; 32 cases, all failed with `KeyError` before the fix) and `test_a_stage_can_override_one_field_without_repeating_the_method` in `tests/load/test_stage_schema.py`.
+
+### BUG-22 — A stage that references a template id that does not exist is a silent no-op
+- **What / why:** `_enrich_stages` (`folker/load/files.py`) only enriched a stage whose id was in `stage_templates`. A stage with just an `id` and no `action` got a `VOID` action by default, so a typo (`id: get_usr`) or a template file that failed to load (see IMP-01) produced a stage that did nothing, and a test that passed without checking anything.
+- **Impact:** Med. False greens.
+- **Cost:** XS.
+- **Benefit:** Typos in template references fail at load time.
+- **Completed:** 2026-11-25
+- **Done:** `StageSchema.make_stage` (`folker/load/schemas.py`) now adds the default VOID action after loading instead of in `pre_load`, and records `Stage.declares_action` (False when the stage wrote no `action`), so an explicit `type: VOID` stays distinguishable from a stage that wrote none. `_enrich_stages` raises the existing, previously unused `SchemaReferenceNotFoundException` (details `reference_id` and, new, `test`) for a stage with an `id`, no action of its own and no template with that id. A stage with an id and its own action, explicit VOID included, is still valid as written. The rule is the one the plan proposed; no example relies on the old behaviour (all 4 id-only stages under `example/` have a template, and all 35 example tests still load). `VoidStageAction` is imported inside `make_stage` because every module package imports `folker/load/schemas.py` to register its schema, so a top-level import is circular. The CLI now stops at load time with `Reference not found error`, `reference_id: get_usr`, `test: Typo`, exit 1. Tests: the strict `xfail` `test_a_reference_to_a_template_that_does_not_exist_is_reported` now asserts the exception and its details; new in `tests/load/test_files_loading.py`: a reference with only `log` is reported, a reference is reported when no template was loaded at all, an id with its own action and no template is valid; `tests/load/test_stage_schema.py` checks `declares_action` for a stage without action and with an explicit VOID one (replacing a test of the old `pre_load` injection).
+
+### BUG-23 — ZooKeeper client is not stopped when an operation fails
+- **What / why:** `exists`, `get`, `set` and `delete` in `folker/module/zookeeper/action.py` called `zookeeper.stop()` after the operation, not in a `finally`. When the operation raised (for example `NoNodeError` for `get` on a missing node), the client kept its connection thread and session open until the process ended, and so did the session's ephemeral nodes. Also, no path ever called `close()`, which kazoo documents as required on a stopped client before it is discarded ("Not doing so may result in filehandles being leaked").
+- **Impact:** Low.
+- **Cost:** XS.
+- **Benefit:** No leaked sessions or file handles after a failed stage.
+- **Completed:** 2026-11-27
+- **Done:** `ZookeeperStageAction._session()` is a context manager around `_connect()`, and `_disconnect()` calls `stop()` and then, in a `finally`, `close()`. All five operations run inside `with self._session()`, and a failed `start` in `_connect` also goes through `_disconnect`. Results are saved after the session is closed. Errors still propagate as before; whether `exists`/`get`/`set`/`delete` should catch them and save `error` as `create` does stays in IMP-02. Tests: the four strict-`xfail` `TestZookeeperFailures::test_the_client_is_stopped_when_the_operation_raises` cases pass, now also asserting `close`; new `TestZookeeperSession` checks `stop` then `close` after every operation and `close` even when `stop` raises; `test_client_is_stopped_when_the_connection_times_out` (`tests/module/test_timeouts.py`) also asserts `close`. Checked with a real `KazooClient` against a closed port (five failed connections, no threads left behind) and with `docker compose run integration-tests-zookeeper` against the real server (4/4).
 
 ---
 
